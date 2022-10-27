@@ -2,6 +2,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -99,6 +100,7 @@ public class CommentsHandler extends DefaultHandler {
         final long start = System.currentTimeMillis();
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,false);
         SAXParser saxParser = factory.newSAXParser();
         CommentsHandler handler = new CommentsHandler();
         saxParser.parse(

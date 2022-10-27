@@ -2,6 +2,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -76,7 +77,7 @@ public class BadgesHandler extends DefaultHandler {
                     attr.getValue("Class"),
                     attr.getValue("TagBased")
             );
-            //System.out.println(badgeRow);
+            System.out.println(badgeRow);
 
         } else if (!qName.equals(BADGES)) {
             throw new SAXException(String.format("Unknown tag %s", qName));
@@ -88,6 +89,7 @@ public class BadgesHandler extends DefaultHandler {
         final long start = System.currentTimeMillis();
         System.out.println(start);
         SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,false);
         SAXParser saxParser = factory.newSAXParser();
         BadgesHandler handler = new BadgesHandler();
         saxParser.parse(

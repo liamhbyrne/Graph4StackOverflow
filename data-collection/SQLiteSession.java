@@ -33,7 +33,7 @@ public class SQLiteSession {
 
     public static void main(String[] args) {
         SQLiteSession s = new SQLiteSession(
-        "jdbc:sqlite:C:\\Users\\lhb1g20\\OneDrive - University of Southampton\\graph4stackoverflow\\data-collection\\stackoverflow.db"
+        "jdbc:sqlite:..\\stackoverflow.db"
         );
         s.endSession();
     }
