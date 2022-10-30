@@ -1,3 +1,7 @@
 .idea
 data/
 data-collection/out/
+*.iml
+*.db
+*.zip
+.vector_cache/
