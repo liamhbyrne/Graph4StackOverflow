@@ -76,3 +76,7 @@ CREATE TABLE IF NOT EXISTS Vote (
         CreationDate TEXT,
         FOREIGN KEY (PostId) REFERENCES Post (PostId)
 );
+
+
+CREATE INDEX owner_index ON Post (OwnerUserId);
+CREATE INDEX commenter ON Comment (UserId);
