@@ -86,7 +86,7 @@ class Main {
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,false);
         SAXParser saxParser = factory.newSAXParser();
 
-        // Tags
+        /*// Tags
         String[] tagAttributeNames = {"Id", "TagName", "Count"};
         StackOverflowHandler tagsHandler = new StackOverflowHandler(PATH_TO_DB, "INSERT INTO Tag VALUES (?, ?, ?)", tagAttributeNames);
         saxParser.parse("..\\data\\raw\\stackoverflow.com-Tags\\tags.xml", tagsHandler);
@@ -95,24 +95,24 @@ class Main {
         String[] userAttributeNames = {"Id", "Reputation", "CreationDate", "DisplayName", "LastAccessDate", "WebsiteUrl", "Location", "AboutMe", "Views", "UpVotes", "DownVotes", "ProfileImageUrl", "AccountId"};
         StackOverflowHandler usersHandler = new StackOverflowHandler(PATH_TO_DB, "INSERT INTO User VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", userAttributeNames);
         saxParser.parse("..\\data\\raw\\stackoverflow.com-Users\\users.xml", usersHandler);
-
+*/
         // Posts
-        String[] postAttributeNames = {"PostId", "PostTypeId", "AcceptedAnswerId", "CreationDate", "Score", "ViewCount", "Body", "OwnerUserId", "LastEditorUserId", "LastEditorDisplayName", "LastEditDate", "Title", "Tags", "AnswerCount", "CommentCount", "FavoriteCount", "CommunityOwnedDate", "ContentLicense", "ParentId"};
+        String[] postAttributeNames = {"Id", "PostTypeId", "AcceptedAnswerId", "CreationDate", "Score", "ViewCount", "Body", "OwnerUserId", "LastEditorUserId", "LastEditorDisplayName", "LastEditDate", "Title", "Tags", "AnswerCount", "CommentCount", "FavoriteCount", "CommunityOwnedDate", "ContentLicense", "ParentId"};
         StackOverflowHandler postsHandler = new StackOverflowHandler(PATH_TO_DB, "INSERT INTO Post VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", postAttributeNames);
         saxParser.parse("..\\data\\raw\\stackoverflow.com-Posts\\posts.xml", postsHandler);
 
         // Comments
-        String[] commentAttributeNames = {"CommentId", "PostId", "Score", "Text", "CreationDate", "UserId", "ContentLicense"};
+        String[] commentAttributeNames = {"Id", "PostId", "Score", "Text", "CreationDate", "UserId", "ContentLicense"};
         StackOverflowHandler commentsHandler = new StackOverflowHandler(PATH_TO_DB, "INSERT INTO Comment VALUES (?, ?, ?, ?, ?, ?, ?)", commentAttributeNames);
         saxParser.parse("..\\data\\raw\\stackoverflow.com-Comments\\comments.xml", commentsHandler);
 
         // Badges
-        String[] badgeAttributeNames = {"BadgeId", "UserId", "Name", "Date", "Class", "TagBased"};
+        String[] badgeAttributeNames = {"Id", "UserId", "Name", "Date", "Class", "TagBased"};
         StackOverflowHandler badgesHandler = new StackOverflowHandler(PATH_TO_DB, "INSERT INTO Badge VALUES (?, ?, ?, ?, ?, ?)", badgeAttributeNames);
         saxParser.parse("..\\data\\raw\\stackoverflow.com-Badges\\badges.xml", badgesHandler);
 
         // Votes
-        String[] voteAttributeNames = {"VoteId", "PostId", "VoteTypeId", "CreationDate"};
+        String[] voteAttributeNames = {"Id", "PostId", "VoteTypeId", "CreationDate"};
         StackOverflowHandler votesHandler = new StackOverflowHandler(PATH_TO_DB, "INSERT INTO Vote VALUES (?, ?, ?, ?)", voteAttributeNames);
         saxParser.parse("..\\data\\raw\\stackoverflow.com-Votes\\votes.xml", votesHandler);
 
