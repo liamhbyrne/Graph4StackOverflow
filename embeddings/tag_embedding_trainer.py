@@ -138,10 +138,10 @@ if __name__ == '__main__':
     assert len(tet.post_tags) == 84187510, "Incorrect number of post tags!"
     assert len(tet.tag_vocab) == 63653, "Incorrect vocab size!"
 
-    tet.train(25000000, 1)
-    tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
-
-    tet.save_model("25mil.pt")
-    # tet.load_model("10mil.pt", 63653, 20)
+    # tet.train(25000000, 1)
     # tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
+
+    #tet.save_model("25mil.pt")
+    tet.load_model("10mil_500d_embd.pt", 63653, 500)
+    tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
 
