@@ -7,4 +7,4 @@ data-collection/out/
 .vector_cache/
 runs/
 *.csv
-embeddings/tag_embedding_models
+embeddings/tag_embedding_models/*
