@@ -1,16 +1,20 @@
-import ast, astunparse
+import ast
 import io
-import time
+import logging
+import re
 import tokenize
 from collections import namedtuple
 from typing import List
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
+log = logging.getLogger(__name__)
+
 
 from bs4 import BeautifulSoup
 import spacy
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from torchtext.vocab import GloVe
 from transformers import BertTokenizer, BertModel, AutoTokenizer, AutoModel
 
@@ -25,7 +29,8 @@ class PostEmbedding(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self._global_vectors = GloVe(name='840B', dim=300)
+        log.info("PostEmbedding instantiated!")
+        #self._global_vectors = GloVe(name='840B', dim=300)
         self._en = spacy.load('en_core_web_sm')
         self._stopwords = self._en.Defaults.stop_words
         self._bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -33,7 +38,7 @@ class PostEmbedding(nn.Module):
         self._code_bert_tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
         self._code_bert_model = AutoModel.from_pretrained("microsoft/codebert-base")
 
-    def forward(self, html: str, title: str=None, flatten=True) -> torch.tensor:
+    def forward(self, html: str, use_bert: bool, title: str=None, flatten=True) -> torch.tensor:
         """
         @param html: HTML string of the body of a StackOverflow post.
         @param title: Title of a question post.
@@ -43,12 +48,16 @@ class PostEmbedding(nn.Module):
 
         soup = BeautifulSoup(html, 'lxml')
         ps = self.get_paragraphs(soup, title)
+        if use_bert:
+            para_emb = self.to_bert_embedding(" ".join(ps))
+        else:
+            para_emb = self.to_glove_paragraph_embedding(ps)
 
-        para_emb = self.to_glove_paragraph_embedding(ps)
+        modules, funcs = self.get_code(soup, get_imports_with_regex=True)
 
-        code = self.get_code(soup)
+        code_bert = self.to_code_bert_embedding("\n".join([x.get_text() for x in soup.find_all('code')]))
 
-        return para_emb, code
+        return para_emb, code_bert, modules
 
     def preprocess(self, text: str) -> List[str]:
         """
@@ -72,7 +81,7 @@ class PostEmbedding(nn.Module):
             paras.append(self.preprocess(title))
         return [token for para in paras for token in para]
 
-    def get_code(self, soup: BeautifulSoup) -> (List[Import], List[Function]):
+    def get_code(self, soup: BeautifulSoup, get_imports_with_regex=False, get_functions_with_regex=False) -> (List[Import], List[Function]):
         """
         @param soup: Post body HTML wrapped in a BeautifulSoup object.
         @return: Combined string of code snippets
@@ -82,8 +91,15 @@ class PostEmbedding(nn.Module):
             syntax_tree = ast.parse(code_snippet)
         except SyntaxError:
             return ([],[])
-        modules = list(self.get_imports(syntax_tree))
-        function_defs = list(self.get_function(syntax_tree))
+        if get_imports_with_regex:
+            modules = list(self.get_imports_via_regex(soup))
+        else:
+            modules = list(self.get_imports_via_ast(syntax_tree))
+
+        if get_functions_with_regex:
+            raise NotImplementedError("RegEx implementation for function names not implemented yet . .")
+        else:
+            function_defs = list(self.get_function_via_ast(syntax_tree))
         return modules, function_defs
 
     def to_glove_paragraph_embedding(self, tokens: List[str]) -> torch.tensor:
@@ -98,10 +114,13 @@ class PostEmbedding(nn.Module):
 
     def to_bert_embedding(self, text: str) -> torch.tensor:
         sentences = [i.text for i in self._en(text).sents]
-        encodings = self._tokenizer(sentences, padding=True, return_tensors='pt')
+        if not len(sentences):
+            return torch.zeros(768)
+        encodings = self._bert_tokenizer(sentences, padding=True, truncation=True, return_tensors='pt', max_length=512)
         with torch.no_grad():
-            embeds = self._bert_model(**encodings)
-        return embeds.mean(dim=1).mean(dim=0)
+            outputs = self._bert_model(**encodings, output_hidden_states=True)
+            cls = outputs.hidden_states[-1][0,0,:]
+        return cls
 
 
     def to_code_bert_embedding(self, code):
@@ -112,30 +131,61 @@ class PostEmbedding(nn.Module):
         """
         # First, get the comments from the Python code (NL)
         buf = io.StringIO(code)
-        comments = [line.string for line in tokenize.generate_tokens(buf.readline) if line.type == tokenize.COMMENT]
-        comments = " ".join(comments)
-        print(comments)
+        source = []
+        comments = []
 
-        nl_tokens = self._code_bert_tokenizer.tokenize(comments)
+        token_gen = tokenize.generate_tokens(buf.readline)
 
-        syntax_tree = ast.parse(code)
-        uncommented = astunparse.unparse(syntax_tree)
-        code_tokens = self._code_bert_tokenizer.tokenize(uncommented)
+        while True:
+            try:
+                token = next(token_gen)
+                if token.type == tokenize.COMMENT:
+                    comments.append(token.string)
+                else:
+                    source.append(token.string)
+            except tokenize.TokenError:
+                continue
+            except StopIteration:
+                break
+            except IndentationError:
+                continue
+
+        nl_tokens = self._code_bert_tokenizer.tokenize(" ".join(comments))
+
+        code_tokens = self._code_bert_tokenizer.tokenize("".join(source))
+
+        # CodeBERT has a max token length of 512
+        while len(nl_tokens) + len(code_tokens) > 509:
+            if len(nl_tokens) > len(code_tokens):
+                nl_tokens = nl_tokens[:-1]
+            else:
+                code_tokens = code_tokens[:-1]
 
         tokens = [self._code_bert_tokenizer.cls_token] + nl_tokens + [self._code_bert_tokenizer.sep_token] + code_tokens + [self._code_bert_tokenizer.eos_token]
         tokens_ids = self._code_bert_tokenizer.convert_tokens_to_ids(tokens)
-        print(len(tokens))
-        return self._code_bert_model(torch.tensor(tokens_ids)[None,:])[0]
+
+        emb = self._code_bert_model(torch.tensor(tokens_ids)[None,:])[0]
+        return emb.mean(dim=1).mean(dim=0)
 
 
+    """
+    Python RegEx methods
+    """
 
+    def get_imports_via_regex(self, soup) -> Import:
+        code_snippet = "\n".join([x.get_text() for x in soup.find_all('code')])
+
+        PATTERN = r'^\s*(?:from|import)\s+(\w+(?:\s*,\s*\w+)*)'
+
+        for module in list(set(re.findall(PATTERN, code_snippet, flags=re.MULTILINE))):
+            yield Import(module, None, None)
 
 
     """
     Python Abstract Syntax Tree methods
     """
 
-    def get_imports(self, syntax_tree) -> Import:
+    def get_imports_via_ast(self, syntax_tree) -> Import:
         """
         @param code_snippet:
         @return:
@@ -151,7 +201,7 @@ class PostEmbedding(nn.Module):
             for n in node.names:
                 yield Import(module, n.name.split('.'), n.asname)
 
-    def get_function(self, syntax_tree) -> Function:
+    def get_function_via_ast(self, syntax_tree) -> Function:
         """
         @param code_snippet:
         @return:
@@ -164,4 +214,6 @@ class PostEmbedding(nn.Module):
 
 if __name__ == '__main__':
     pe = PostEmbedding()
-    print(pe.to_code_bert_embedding("def a(self: int) -> Function: #hello\n    a+2\n    return a").shape)
+    #print(pe.to_code_bert_embedding("\n".join(["for i in range(32):\n    #return 6 or something\n"])).shape)
+    print(pe.to_bert_embedding("This is a test sentence."))
+    #print([x.module for x in pe.get_imports_via_regex(BeautifulSoup("<code>import ast<\code>", 'lxml'))])

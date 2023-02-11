@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 class NextTagEmbeddingTrainer:
 
-    def __init__(self, context_length: int, emb_size: int, database_path: str = None):
+    def __init__(self, context_length: int, emb_size: int, excluded_tags=None, database_path: str = None):
         logger = logging.getLogger(self.__class__.__name__)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         logger.info(f"Proceeding with {self.device} . .")
@@ -27,14 +27,20 @@ class NextTagEmbeddingTrainer:
         self.post_tags: List[Tuple]
         self.context_length = context_length
         self.emb_size = emb_size
+        self.excluded_tags = excluded_tags
+
 
     def build_cbow(self, tags: List[str], context_len: int) -> List[Tuple]:
-        pairs = []
-        if len(tags) <= 1:
+
+        filtered_tags = [t for t in tags if t not in self.excluded_tags]
+
+        if len(filtered_tags) <= 1:
             return []
 
-        for target in tags:
-            context = [t for t in tags if t != target]
+        pairs = []
+
+        for target in filtered_tags:
+            context = [t for t in filtered_tags if t != target]
             # Pad or cut depending on the context length
             while len(context) < context_len:
                 context.append('PAD')
@@ -58,17 +64,16 @@ class NextTagEmbeddingTrainer:
         self.post_tags = tag_pairs
 
     def from_db(self):
-        tag_df = pd.read_sql_query("SELECT * FROM Tag", self.db)
-        tag_df.set_index('TagId', inplace=True)
-        self.tag_vocab = list(set(tag_df["TagName"]))
-
-        post_tags = pd.read_sql_query(f"SELECT Tags FROM Post WHERE PostTypeId=1", self.db)
+        post_tags = pd.read_sql_query(f"SELECT Tags FROM Post WHERE PostTypeId=1 AND Tags LIKE '%python%' LIMIT 100000", self.db)
         tag_list_df = post_tags['Tags'].map(self.parse_tag_list)
-        combinations = tag_list_df.apply(lambda row: list(itertools.combinations(row, 2)))
-        combinations = combinations[combinations.astype(str) != '[]']
+
+        self.tag_vocab = list(set(tag_list_df.sum() + ["PAD"]))
+
+        context_and_target = tag_list_df.apply(lambda row: self.build_cbow(row, self.context_length))
+        context_and_target = context_and_target[context_and_target.astype(str) != '[]']
         # Now concatenate all the lists together
         tag_pairs = []
-        for i in combinations:
+        for i in context_and_target:
             tag_pairs += i
         self.post_tags = tag_pairs
 
@@ -143,15 +148,19 @@ class NextTagEmbedding(nn.Module):
 
 
 if __name__ == '__main__':
-    # tet = TagEmbeddingTrainer("../stackoverflow.db")
-    # tet.from_db()
-    tet = NextTagEmbeddingTrainer(context_length=3, emb_size=30)
+    tet = NextTagEmbeddingTrainer(context_length=2, emb_size=30, excluded_tags=['python'], database_path="../stackoverflow.db")
+    tet.from_db()
+    print(len(tet.post_tags))
+    print(len(tet.tag_vocab))
 
-    tet.from_files("../data/raw/all_tags.csv", "../data/raw/tag_vocab.csv")
+
+    #tet = NextTagEmbeddingTrainer(context_length=3, emb_size=50)
+
+    #tet.from_files("../data/raw/all_tags.csv", "../data/raw/tag_vocab.csv")
     # assert len(tet.post_tags) == 84187510, "Incorrect number of post tags!"
     # assert len(tet.tag_vocab) == 63653, "Incorrect vocab size!"
 
-    tet.train(100, 1)
+    tet.train(1000, 1)
     # tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
 
     # tet.save_model("25mil.pt")
