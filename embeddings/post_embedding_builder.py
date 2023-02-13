@@ -113,14 +113,14 @@ class PostEmbedding(nn.Module):
         return torch.sum(word_embeddings, dim=0) / len(tokens)
 
     def to_bert_embedding(self, text: str) -> torch.tensor:
-        sentences = [i.text for i in self._en(text).sents]
-        if not len(sentences):
-            return torch.zeros(768)
-        encodings = self._bert_tokenizer(sentences, padding=True, truncation=True, return_tensors='pt', max_length=512)
+        # if not len(text):
+        #     return torch.zeros(768)
+        encodings = self._bert_tokenizer(text, padding=True, truncation=True, return_tensors='pt', max_length=512)
         with torch.no_grad():
-            outputs = self._bert_model(**encodings, output_hidden_states=True)
-            cls = outputs.hidden_states[-1][0,0,:]
-        return cls
+            outputs = self._bert_model(**encodings)
+            last_layer = outputs.last_hidden_state
+            cls = last_layer[:, 0, :]
+            return torch.squeeze(cls) # Converts from dim [1, 768] to [768]
 
 
     def to_code_bert_embedding(self, code):
@@ -215,5 +215,5 @@ class PostEmbedding(nn.Module):
 if __name__ == '__main__':
     pe = PostEmbedding()
     #print(pe.to_code_bert_embedding("\n".join(["for i in range(32):\n    #return 6 or something\n"])).shape)
-    print(pe.to_bert_embedding("This is a test sentence."))
+    print(pe.to_bert_embedding("This is a test sentence.").shape)
     #print([x.module for x in pe.get_imports_via_regex(BeautifulSoup("<code>import ast<\code>", 'lxml'))])

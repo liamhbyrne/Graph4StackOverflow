@@ -9,6 +9,7 @@ import torch
 from torch_geometric.data import HeteroData
 
 from post_embedding_builder import Import, PostEmbedding
+import torch_geometric.transforms as T
 
 
 class StaticGraphConstruction:
@@ -75,7 +76,7 @@ class StaticGraphConstruction:
             for module in modules:
                 self._module_to_comment_edges.append((self._known_modules[module], i))
 
-            yield torch.concat((word_embedding, code_embedding))
+            yield word_embedding
 
     def process_tags(self):
         if not len(self._known_tags):
@@ -121,21 +122,27 @@ class StaticGraphConstruction:
         tag_nodes = list(self.process_tags())
         module_nodes = list(self.process_modules())
 
-        if len(question_nodes):
-            self._data['question'].x = torch.stack(question_nodes)
-        if len(answer_nodes):
-            self._data['answer'].x = torch.stack(answer_nodes)
-        if len(comment_nodes):
-            self._data['comment'].x = torch.stack(comment_nodes)
-        if len(tag_nodes):
-            self._data['tag'].x = torch.stack(tag_nodes)
-        if len(module_nodes):
-            self._data['module'].x = torch.stack(module_nodes)
+        # Assign node features
+        self._data['question'].x = torch.stack(question_nodes) if len(question_nodes) else torch.empty(0, 1536)
 
-        self._data['tag', 'describes', 'question'].edge_index = torch.tensor(self._tag_to_question_edges).t().contiguous()
-        self._data['tag', 'describes', 'answer'].edge_index = torch.tensor(self._tag_to_answer_edges).t().contiguous()
-        self._data['tag', 'describes', 'comment'].edge_index = torch.tensor(self._tag_to_comment_edges).t().contiguous()
-        self._data['module', 'imported_in', 'question'].edge_index = torch.tensor(self._module_to_question_edges).t().contiguous()
-        self._data['module', 'imported_in', 'answer'].edge_index = torch.tensor(self._module_to_answer_edges).t().contiguous()
+        self._data['answer'].x = torch.stack(answer_nodes) if len(answer_nodes) else torch.empty(0, 1536)
 
-        return self._data
+        self._data['comment'].x = torch.stack(comment_nodes) if len(comment_nodes) else torch.empty(0, 768)
+
+        self._data['tag'].x = torch.stack(tag_nodes) if len(tag_nodes) else torch.empty(0, 90)
+
+        self._data['module'].x = torch.stack(module_nodes) if len(module_nodes) else torch.empty(0, 110)
+
+        # Assign edge indexes
+        self._data['tag', 'describes', 'question'].edge_index = torch.tensor(self._tag_to_question_edges).t().contiguous() if len(self._tag_to_question_edges) else torch.empty(2,0, dtype=torch.long)
+        self._data['tag', 'describes', 'answer'].edge_index = torch.tensor(self._tag_to_answer_edges).t().contiguous() if len(self._tag_to_answer_edges) else torch.empty(2,0, dtype=torch.long)
+        self._data['tag', 'describes', 'comment'].edge_index = torch.tensor(self._tag_to_comment_edges).t().contiguous() if len(self._tag_to_comment_edges) else torch.empty(2,0, dtype=torch.long)
+        self._data['module', 'imported_in', 'question'].edge_index = torch.tensor(self._module_to_question_edges).t().contiguous() if len(self._module_to_question_edges) else torch.empty(2,0, dtype=torch.long)
+        self._data['module', 'imported_in', 'answer'].edge_index = torch.tensor(self._module_to_answer_edges).t().contiguous() if len(self._module_to_answer_edges) else torch.empty(2,0, dtype=torch.long)
+
+        # Remove isolated nodes, and convert to undirected graph
+        graph_out = T.remove_isolated_nodes.RemoveIsolatedNodes()(self._data)
+        graph_out = T.ToUndirected()(graph_out)
+        graph_out.metadata()
+
+        return graph_out

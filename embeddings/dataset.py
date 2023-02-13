@@ -1,12 +1,14 @@
 import logging
 import os.path
 import pickle
+import re
 import sqlite3
+from typing import List
 
 import pandas as pd
 import torch
 from bs4 import MarkupResemblesLocatorWarning
-from torch_geometric.data import Dataset, download_url, Data
+from torch_geometric.data import Dataset, download_url, Data, HeteroData
 from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore', category=MarkupResemblesLocatorWarning)
@@ -20,12 +22,14 @@ log = logging.getLogger("dataset")
 
 
 class UserGraphDataset(Dataset):
-    def __init__(self, root, transform=None, pre_transform=None, pre_filter=None, db_address:str=None, question_count=70000):
-        self._question_count = question_count
+    def __init__(self, root, transform=None, pre_transform=None, pre_filter=None, db_address:str=None, skip_processing=False):
+        self._skip_processing = skip_processing
+
         # Connect to database.
         if db_address is not None:
             self._db = sqlite3.connect(db_address)
             self._post_embedding_builder = PostEmbedding()
+        # Call init last, as it may trigger the process function.
         super().__init__(root, transform, pre_transform, pre_filter)
 
     @property
@@ -34,63 +38,94 @@ class UserGraphDataset(Dataset):
 
     @property
     def processed_file_names(self):
-        return os.listdir("data/processed")
+        if self._skip_processing:
+            return os.listdir("../data/processed")
+        return []
 
     def download(self):
         pass
 
+    def get_unprocessed_ids(self):
+        # Load IDs of questions to use.
+        with open("../data/raw/valid_questions.pkl", 'rb') as f:
+            question_ids = pickle.load(f)
+
+        processed = []
+        max_idx = -1
+        for f in os.listdir("../data/processed"):
+            question_id_search = re.search(r"id_(\d+)", f)
+            if question_id_search:
+                processed.append(int(question_id_search.group(1)))
+
+            idx_search = re.search(r"data_(\d+)", f)
+            if idx_search:
+                next_idx = int(idx_search.group(1))
+                if next_idx > max_idx:
+                    max_idx = int(idx_search.group(1))
+
+        # Fetch question ids that have not been processed yet.
+        unprocessed = [q_id for q_id in question_ids if q_id not in processed]
+        return unprocessed, max_idx+1
+
     def process(self):
-        idx = 0
-        valid_questions = self.fetch_valid_questions()
+        """
+        """
+        log.info("Processing data...")
+        # Fetch the unprocessed questions and the next index to use.
+        unprocessed, idx = self.get_unprocessed_ids()
+        print(unprocessed, idx)
+        # Fetch questions from database.
+        valid_questions = self.fetch_questions_by_post_ids(unprocessed)
+
         for row in tqdm(valid_questions.itertuples(), total=len(valid_questions)):
             # Build Question embedding
-            question_emb = self._post_embedding_builder(
+            question_word_emb, question_code_emb, _ = self._post_embedding_builder(
                 row.question_body,
                 use_bert=True,
                 title=row.question_title
             )
+            question_emb = torch.concat((question_word_emb, question_code_emb))
+
+            # Fetch answers to question
             answers_to_question = self.fetch_answers_for_question(row.post_id)
             # Build Answer embeddings
             for _, answer_body, answer_user_id, score in answers_to_question.itertuples():
-                answer_emb = self._post_embedding_builder(
-                    answer_body,
-                    use_bert=True
+                label = torch.tensor([1 if score > 0 else 0], dtype=torch.long)
+                answer_word_emb, answer_code_emb, _ = self._post_embedding_builder(
+                    answer_body, use_bert=True
                 )
+                answer_emb = torch.concat((answer_word_emb, answer_code_emb))
                 # Build graph
-                graph = self.construct_graph(answer_user_id)
+                graph: HeteroData = self.construct_graph(answer_user_id)
                 # pytorch geometric data object
-                data = Data(
-                    x=graph.x_dict,
-                    edge_index=graph.edge_index_dict,
-                    y=torch.LongTensor(1 if score > 0 else 0),
-                    question_emb=question_emb,
-                    answer_emb=answer_emb
-                )
-                torch.save(data, os.path.join(self.processed_dir, f'data_{idx}.pt'))
+                graph.__setattr__('question_emb', question_emb)
+                graph.__setattr__('answer_emb', answer_emb)
+                graph.__setattr__('label', label)
+                torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{row.post_id}'))
                 idx += 1
 
     def len(self):
         return len(self.processed_file_names)
 
     def get(self, idx):
-        data = torch.load(os.path.join(self.processed_dir, f'data_{idx}.pt'))
-        return data
+        file_name = [filename for filename in os.listdir('../data/processed/') if filename.startswith(f"data_{idx}")]
+        if len(file_name):
+            data = torch.load(os.path.join(self.processed_dir, file_name[0]))
+            return data
+        else:
+            raise Exception(f"Data with index {idx} not found.")
 
     '''
     Database functions
     '''
 
-    def fetch_valid_questions(self):
-        valid_questions = pd.read_sql_query(f"""
-                SELECT Q.PostId, Q.Body, Q.Title, Q.OwnerUserId FROM Post Q
-                INNER JOIN Post A ON Q.PostId = A.ParentId
-                WHERE (Q.Tags LIKE '%<python>%')
-                GROUP BY A.ParentId
-                HAVING SUM(A.Score) > 15
-                LIMIT {self._question_count}
+    def fetch_questions_by_post_ids(self, post_ids: List[int]):
+        questions_df = pd.read_sql_query(f"""
+                SELECT PostId, Body, Title, OwnerUserId FROM Post
+                WHERE PostId IN ({','.join([str(x) for x in post_ids])})
         """, self._db)
-        valid_questions.columns = ['post_id', 'question_body', 'question_title', 'question_user_id']
-        return valid_questions
+        questions_df.columns = ['post_id', 'question_body', 'question_title', 'question_user_id']
+        return questions_df
 
     def fetch_questions_by_user(self, user_id: int):
         questions_df = pd.read_sql_query(f"""
@@ -150,5 +185,18 @@ class UserGraphDataset(Dataset):
 
 
 if __name__ == '__main__':
-    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', question_count=100)
-    print(ds.get(0))
+    '''
+    Build List of question post_ids.
+    This will be fed into the Dataset class to construct the graphs.
+    This setup allows us to have a fixed set of questions/answers
+    for each dataset (rather than selecting new questions each time).
+    '''
+
+
+    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', skip_processing=False)
+    data = ds.get(1)
+    print("Question ndim:", data.x_dict['question'].dim())
+    print("Answer ndim:", data.x_dict['answer'].dim())
+    print("Comment ndim:", data.x_dict['comment'].dim())
+    print("Tag ndim:", data.x_dict['tag'].dim())
+    print("Module ndim:", data.x_dict['module'].dim())

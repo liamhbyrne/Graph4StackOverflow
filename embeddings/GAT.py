@@ -12,7 +12,8 @@ class GAT(torch.nn.Module):
         self.conv1 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
         self.conv2 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
         self.conv3 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
-        self.lin = Linear(hidden_channels, 3)
+        self.lin = Linear(hidden_channels, 2)
+        self.softmax = torch.nn.Softmax(dim=1)
         self.pool = MeanAggregation()
 
     def forward(self, x, edge_index, batch, post_emb):
@@ -30,7 +31,7 @@ class GAT(torch.nn.Module):
         # 3. Apply a final classifier
         #x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
-
+        #x = self.softmax(x)
         return x
 
 
@@ -38,11 +39,14 @@ def train(model, train_loader):
     model.train()
 
     for data in train_loader:  # Iterate in batches over the training dataset.
-         out = model(data.x, data.edge_index, data.batch)  # Perform a single forward pass.
-         loss = criterion(out, data.y)  # Compute the loss.
-         loss.backward()  # Derive gradients.
-         optimizer.step()  # Update parameters based on gradients.
-         optimizer.zero_grad()  # Clear gradients.
+        print(data)
+
+        out = model(data.x_dict, data.edge_index_dict, data.batch_dict, torch.concat([data.question_emb, data.answer_emb]))  # Perform a single forward pass.
+        print(out, data.label)
+        loss = criterion(out, data.label)  # Compute the loss.
+        loss.backward()  # Derive gradients.
+        optimizer.step()  # Update parameters based on gradients.
+        optimizer.zero_grad()  # Clear gradients.
 
 
 def test(loader):
@@ -57,25 +61,25 @@ def test(loader):
 
 
 if __name__ == '__main__':
-    dataset = UserGraphDataset(root="data")
+    dataset = UserGraphDataset(root="../data", skip_processing=True)
     train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.6, 0.1, 0.3])
 
-    train_loader = DataLoader(train_dataset, batch_size=64)
+    print(dataset.num_node_features)
+
+    train_loader = DataLoader(train_dataset, batch_size=1)
     val_loader = DataLoader(val_dataset, batch_size=64)
     test_loader = DataLoader(test_dataset, batch_size=64)
 
-
     model = GAT(hidden_channels=64)
-
-    example_graph = train_loader[0]
-    print(example_graph)
-    model = to_hetero(model, example_graph.metadata())
+    sample = train_dataset[0]
+    metadata = (['question', 'answer', 'comment', 'tag', 'module'], [('tag', 'describes', 'question'), ('tag', 'describes', 'answer'), ('tag', 'describes', 'comment'), ('module', 'imported_in', 'question'), ('module', 'imported_in', 'answer'), ('question', 'rev_describes', 'tag'), ('answer', 'rev_describes', 'tag'), ('comment', 'rev_describes', 'tag'), ('question', 'rev_imported_in', 'module'), ('answer', 'rev_imported_in', 'module')])
+    model = to_hetero(model, metadata, aggr='sum')
+    #print(model(sample.x_dict, sample.edge_index_dict, sample.batch_dict))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, 10):
         train(model, train_loader)
-        train_acc = test(train_loader)
-        print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
-
+        #train_acc = test(train_loader)
+        #print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
