@@ -27,11 +27,11 @@ class GAT(torch.nn.Module):
         # 2. Readout layer
         x = self.pool(x, batch)  # [batch_size, hidden_channels]
 
-        x = torch.concat([x, post_emb])
-        # 3. Apply a final classifier
-        #x = F.dropout(x, p=0.5, training=self.training)
+        # 3. Concatenate with post embedding
+        #x = torch.cat((x, post_emb))
+        # 4. Apply a final classifier.
         x = self.lin(x)
-        #x = self.softmax(x)
+        x = self.softmax(x)
         return x
 
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     model = GAT(hidden_channels=64)
     sample = train_dataset[0]
     metadata = (['question', 'answer', 'comment', 'tag', 'module'], [('tag', 'describes', 'question'), ('tag', 'describes', 'answer'), ('tag', 'describes', 'comment'), ('module', 'imported_in', 'question'), ('module', 'imported_in', 'answer'), ('question', 'rev_describes', 'tag'), ('answer', 'rev_describes', 'tag'), ('comment', 'rev_describes', 'tag'), ('question', 'rev_imported_in', 'module'), ('answer', 'rev_imported_in', 'module')])
-    model = to_hetero(model, metadata, aggr='sum')
+    model = to_hetero(model, metadata)
     #print(model(sample.x_dict, sample.edge_index_dict, sample.batch_dict))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)

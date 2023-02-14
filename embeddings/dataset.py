@@ -73,7 +73,7 @@ class UserGraphDataset(Dataset):
         log.info("Processing data...")
         # Fetch the unprocessed questions and the next index to use.
         unprocessed, idx = self.get_unprocessed_ids()
-        print(unprocessed, idx)
+
         # Fetch questions from database.
         valid_questions = self.fetch_questions_by_post_ids(unprocessed)
 
@@ -105,7 +105,7 @@ class UserGraphDataset(Dataset):
                 idx += 1
 
     def len(self):
-        return len(self.processed_file_names)
+        return len(self.processed_file_names)-2
 
     def get(self, idx):
         file_name = [filename for filename in os.listdir('../data/processed/') if filename.startswith(f"data_{idx}")]
