@@ -1,5 +1,6 @@
 import itertools
 import logging
+import pickle
 import random
 import sqlite3
 from typing import *
@@ -123,12 +124,22 @@ class NextTagEmbeddingTrainer:
                              tag=f'Next-Tag embedding')
         writer.close()
 
-    def load_model(self, model_path: str, vocab_size: int, embedding_dim: int):
-        self.model = NextTagEmbedding(vocab_size, embedding_dim, self.context_length)
-        self.model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    @staticmethod
+    def load_model(model_path: str, vocab_size: int, embedding_dim: int, context_length: int):
+        model = NextTagEmbedding(vocab_size, embedding_dim, context_length)
+        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+
+        # unpickle the tag_to_ix
+        with open('tag_to_ix_' + model_path, 'rb') as f:
+            model.tag_to_ix = pickle.load(f)
+
+        return model
 
     def save_model(self, model_path: str):
         torch.save(self.model.state_dict(), model_path)
+        # pickle the tag_to_ix
+        with open('tag_to_ix_' + model_path, 'wb') as f:
+            pickle.dump(self.tag_to_ix, f)
 
 
 class NextTagEmbedding(nn.Module):

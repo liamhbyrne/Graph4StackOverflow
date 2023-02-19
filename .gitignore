@@ -8,3 +8,4 @@ data-collection/out/
 runs/
 *.csv
 embeddings/tag_embedding_models/*
+*.pt

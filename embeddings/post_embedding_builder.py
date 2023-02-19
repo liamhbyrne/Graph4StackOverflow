@@ -7,6 +7,8 @@ import tokenize
 from collections import namedtuple
 from typing import List
 
+from NextTagEmbedding import NextTagEmbedding, NextTagEmbeddingTrainer
+
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 log = logging.getLogger("PostEmbedding")

@@ -1,5 +1,8 @@
 from typing import List
 import logging
+
+from NextTagEmbedding import NextTagEmbeddingTrainer
+
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
@@ -14,8 +17,9 @@ import torch_geometric.transforms as T
 
 class StaticGraphConstruction:
 
-    # PostEmbedding is costly to put in constructor
+    # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
     post_embedding_builder = PostEmbedding()
+    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-1mil.pt", embedding_dim=30, vocab_size=63654, context_length=3)
 
     def __init__(self):
         self._known_tags = {}  # tag_name -> index
@@ -112,7 +116,7 @@ class StaticGraphConstruction:
         if not len(self._known_tags):
             return None
         for tag in self._known_tags:
-            yield torch.rand(90)  # TODO: Map tag name to its embedding
+            yield StaticGraphConstruction.tag_embedding_model.get_tag_embedding(tag)
 
     def process_modules(self):
         if not len(self._known_modules):
