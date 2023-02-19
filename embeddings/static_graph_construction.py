@@ -36,24 +36,42 @@ class StaticGraphConstruction:
 
 
     def process_questions(self, questions: pd.DataFrame) -> torch.Tensor:
-        for i, body, title, tags in questions[['Body', 'Title', 'Tags']].itertuples():
-            word_embedding, code_embedding, modules = StaticGraphConstruction.post_embedding_builder(body, self._use_bert, title)
-            modules = self.process_module_names(modules)
+        if not len(questions):
+            return None
+
+        word_emb_batches, code_emb_batches, module_name_batches = StaticGraphConstruction.post_embedding_builder(
+            questions['Body'], self._use_bert, questions['Title']
+        )
+
+        row_counter = 0
+        for post_id, body, title, tags in questions[['Body', 'Title', 'Tags']].itertuples():
+
+            modules = self.process_module_names(module_name_batches[row_counter])
             tag_list = self.parse_tag_list(tags)[:self._first_n_tags]
 
             for tag in tag_list:
-                self._tag_to_question_edges.append((self._known_tags[tag], i))
+                self._tag_to_question_edges.append((self._known_tags[tag], post_id))
 
             for module in modules:
-                self._module_to_question_edges.append((self._known_modules[module], i))
+                self._module_to_question_edges.append((self._known_modules[module], post_id))
 
-            yield torch.concat((word_embedding, code_embedding))
+            post_emb = torch.concat((word_emb_batches[row_counter], code_emb_batches[row_counter]))
+            row_counter += 1
+            yield post_emb
 
 
     def process_answers(self, answers: pd.DataFrame) -> torch.Tensor:
+        if not len(answers):
+            return None
+
+        word_emb_batches, code_emb_batches, module_name_batches = StaticGraphConstruction.post_embedding_builder(
+            answers['Body'], self._use_bert, title_batch=answers['Title']
+        )
+
+        row_counter = 0
         for i, body, title, tags in answers[['Body', 'Title', 'Tags']].itertuples():
-            word_embedding, code_embedding, modules = StaticGraphConstruction.post_embedding_builder(body, self._use_bert, title)
-            modules = self.process_module_names(modules)
+
+            modules = self.process_module_names(module_name_batches[row_counter])
             tag_list = self.parse_tag_list(tags)[:self._first_n_tags]
 
             for tag in tag_list:
@@ -62,12 +80,22 @@ class StaticGraphConstruction:
             for module in modules:
                 self._module_to_answer_edges.append((self._known_modules[module], i))
 
-            yield torch.concat((word_embedding, code_embedding))
+            post_emb = torch.concat((word_emb_batches[row_counter], code_emb_batches[row_counter]))
+            row_counter += 1
+            yield post_emb
 
     def process_comments(self, comments: pd.DataFrame) -> torch.Tensor:
+        if not len(comments):
+            return None
+
+        word_emb_batches, code_emb_batches, module_name_batches = StaticGraphConstruction.post_embedding_builder(
+            comments['Body'], self._use_bert, title_batch=[None for _ in range(len(comments))]
+        )
+
+        row_counter = 0
         for i, body, tags in comments[['Body', 'Tags']].itertuples():
-            word_embedding, code_embedding, modules = StaticGraphConstruction.post_embedding_builder(body, self._use_bert)
-            modules = self.process_module_names(modules)
+
+            modules = self.process_module_names(module_name_batches[row_counter])
             tag_list = self.parse_tag_list(tags)[:self._first_n_tags]
 
             for tag in tag_list:
@@ -76,7 +104,9 @@ class StaticGraphConstruction:
             for module in modules:
                 self._module_to_comment_edges.append((self._known_modules[module], i))
 
-            yield word_embedding
+            post_emb = word_emb_batches[row_counter]
+            row_counter += 1
+            yield post_emb
 
     def process_tags(self):
         if not len(self._known_tags):

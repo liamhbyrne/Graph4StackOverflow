@@ -59,6 +59,7 @@ def train(model, train_loader):
     model.train()
 
     for data in train_loader:  # Iterate in batches over the training dataset.
+        print(data)
         data = data.to(device)
         out = model(data.x_dict, data.edge_index_dict, data.batch_dict, torch.concat([data.question_emb, data.answer_emb]))  # Perform a single forward pass.
         loss = criterion(torch.unsqueeze(out,0), data.label)  # Compute the loss.

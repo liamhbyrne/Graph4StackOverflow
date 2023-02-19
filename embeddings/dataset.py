@@ -4,6 +4,7 @@ import pickle
 import re
 import sqlite3
 from typing import List
+import time
 
 import pandas as pd
 import torch
@@ -17,7 +18,7 @@ from post_embedding_builder import PostEmbedding
 from static_graph_construction import StaticGraphConstruction
 
 logging.basicConfig()
-#logging.getLogger().setLevel(logging.ERROR)
+logging.getLogger().setLevel(logging.DEBUG)
 log = logging.getLogger("dataset")
 
 
@@ -71,32 +72,68 @@ class UserGraphDataset(Dataset):
         """
         """
         log.info("Processing data...")
+        '''TIME START'''
+        t1 = time.time()
+
         # Fetch the unprocessed questions and the next index to use.
         unprocessed, idx = self.get_unprocessed_ids()
+
+        '''TIME END'''
+        t2 = time.time()
+        log.debug("Function=%s, Time=%s" % (self.get_unprocessed_ids.__name__, t2 - t1))
+
+        '''TIME START'''
+        t1 = time.time()
 
         # Fetch questions from database.
         valid_questions = self.fetch_questions_by_post_ids(unprocessed)
 
-        for row in tqdm(valid_questions.itertuples(), total=len(valid_questions)):
-            # Build Question embedding
-            question_word_emb, question_code_emb, _ = self._post_embedding_builder(
-                row.question_body,
-                use_bert=True,
-                title=row.question_title
-            )
-            question_emb = torch.concat((question_word_emb, question_code_emb))
+        '''TIME END'''
+        t2 = time.time()
+        log.debug("Function=%s, Time=%s" % (self.fetch_questions_by_post_ids.__name__, t2 - t1))
 
+
+        for row in tqdm(valid_questions.itertuples(), total=len(valid_questions)):
+            '''TIME START'''
+            t1 = time.time()
+
+            # Build Question embedding
+            question_word_embs, question_code_embs, _ = self._post_embedding_builder(
+                [row.question_body],
+                use_bert=True,
+                title_batch=[row.question_title]
+            )
+            question_emb = torch.concat((question_word_embs[0], question_code_embs[0]))
+            '''TIME END'''
+            t2 = time.time()
+            log.debug("Function=%s, Time=%s" % ("Post embedding builder (question)", t2 - t1))
+
+
+            '''TIME START'''
+            t1 = time.time()
             # Fetch answers to question
             answers_to_question = self.fetch_answers_for_question(row.post_id)
+            '''TIME END'''
+            t2 = time.time()
+            log.debug("Function=%s, Time=%s" % (self.fetch_answers_for_question.__name__, t2 - t1))
+
             # Build Answer embeddings
             for _, answer_body, answer_user_id, score in answers_to_question.itertuples():
                 label = torch.tensor([1 if score > 0 else 0], dtype=torch.long)
-                answer_word_emb, answer_code_emb, _ = self._post_embedding_builder(
-                    answer_body, use_bert=True
+                answer_word_embs, answer_code_embs, _ = self._post_embedding_builder(
+                    [answer_body], use_bert=True, title_batch=[None]
                 )
-                answer_emb = torch.concat((answer_word_emb, answer_code_emb))
+                answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
+
+
+                '''TIME START'''
+                t1 = time.time()
                 # Build graph
                 graph: HeteroData = self.construct_graph(answer_user_id)
+                '''TIME END'''
+                t2 = time.time()
+                log.debug("Function=%s, Time=%s" % (self.construct_graph.__name__, t2 - t1))
+
                 # pytorch geometric data object
                 graph.__setattr__('question_emb', question_emb)
                 graph.__setattr__('answer_emb', answer_emb)
