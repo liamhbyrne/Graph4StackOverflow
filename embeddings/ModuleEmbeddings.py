@@ -33,6 +33,7 @@ class ModuleEmbeddingTrainer:
     def from_files(self, module_pairs_pkl: str):
         with open(module_pairs_pkl, 'rb') as f:
             self.training_pairs = pickle.load(f)
+        self.module_vocab = list(set([x for y in met.training_pairs for x in y]))
 
     def from_db(self, row_limit=100000, save_path: str = None):
         post_body_series = pd.read_sql_query(f"SELECT Body FROM Post WHERE (Tags LIKE '%python%') AND (Body LIKE '%import%')  LIMIT {row_limit}", self.db)
@@ -138,7 +139,6 @@ if __name__ == '__main__':
     #met.from_db(save_path='../data/raw/module_pairs_1mil.pkl', row_limit=1000000)
     met.from_files('../data/raw/module_pairs_1mil.pkl')
     print(len(met.training_pairs))
-    met.module_vocab = list(set([x for y in met.training_pairs for x in y]))
     print(len(met.module_vocab))
 
 
