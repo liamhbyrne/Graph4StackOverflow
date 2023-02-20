@@ -230,10 +230,10 @@ if __name__ == '__main__':
     '''
 
 
-    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', skip_processing=False)
-    data = ds.get(1)
-    print("Question ndim:", data.x_dict['question'].dim())
-    print("Answer ndim:", data.x_dict['answer'].dim())
-    print("Comment ndim:", data.x_dict['comment'].dim())
-    print("Tag ndim:", data.x_dict['tag'].dim())
-    print("Module ndim:", data.x_dict['module'].dim())
+    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', skip_processing=True)
+    data = ds.get(1078)
+    print("Question ndim:", data.x_dict['question'].shape)
+    print("Answer ndim:", data.x_dict['answer'].shape)
+    print("Comment ndim:", data.x_dict['comment'].shape)
+    print("Tag ndim:", data.x_dict['tag'].shape)
+    print("Module ndim:", data.x_dict['module'].shape)
