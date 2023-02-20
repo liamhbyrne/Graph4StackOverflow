@@ -110,9 +110,6 @@ class NextTagEmbeddingTrainer:
                 total_loss += loss.item()
             losses.append(total_loss)
 
-    def get_tag_embedding(self, tag: str):
-        return self.model.embedding.weight[self.tag_to_ix[tag]]
-
     def to_tensorboard(self, run_name: str):
         """
         Write embedding to Tensorboard projector
@@ -130,7 +127,7 @@ class NextTagEmbeddingTrainer:
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
         # unpickle the tag_to_ix
-        with open('tag_to_ix_' + model_path, 'rb') as f:
+        with open(model_path.replace('tag-emb', f'tag_to_ix_tag-emb'), 'rb') as f:
             model.tag_to_ix = pickle.load(f)
 
         return model
@@ -156,6 +153,11 @@ class NextTagEmbedding(nn.Module):
         out = self.linear2(out)
         log_probs = F.log_softmax(out, dim=1)
         return log_probs
+
+    def get_tag_embedding(self, tag: str):
+        assert tag in self.tag_to_ix, "Tag not in vocabulary!"
+        assert self.tag_to_ix is not None, "Tag to index mapping not set!"
+        return self.embedding.weight[self.tag_to_ix[tag]]
 
 
 if __name__ == '__main__':

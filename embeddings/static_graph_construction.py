@@ -19,7 +19,7 @@ class StaticGraphConstruction:
 
     # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
     post_embedding_builder = PostEmbedding()
-    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-1mil.pt", embedding_dim=30, vocab_size=63654, context_length=3)
+    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
 
     def __init__(self):
         self._known_tags = {}  # tag_name -> index
@@ -116,7 +116,7 @@ class StaticGraphConstruction:
         if not len(self._known_tags):
             return None
         for tag in self._known_tags:
-            yield StaticGraphConstruction.tag_embedding_model.get_tag_embedding(tag)
+            yield self.tag_embedding_model.get_tag_embedding(tag)
 
     def process_modules(self):
         if not len(self._known_modules):
