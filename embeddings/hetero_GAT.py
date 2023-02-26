@@ -117,9 +117,9 @@ def test(loader):
         true_labels += list([x.item() for x in data.label])
 
         if use_wandb:
-            print("PRED", pred, data.label)
+            graph_html = wandb.Html(plotly.io.to_html(create_graph_vis(data)))
             for pred, label in zip(pred, torch.squeeze(data.label, -1)):
-                table.add_data(wandb.Html(plotly.io.to_html(create_graph_vis(data))), label, pred)
+                table.add_data(graph_html, label, pred)
 
     #print("PRED", predictions, true_labels)
     return accuracy_score(true_labels, predictions), f1_score(true_labels, predictions), loss_ / len(loader), table
@@ -133,8 +133,8 @@ def create_graph_vis(graph):
     fig = vis.create_figure()
     return fig
 
-def init_wandb(project_name: str, run_name: str, dataset):
-    wandb.init(project=project_name, name=run_name)
+def init_wandb(project_name: str, dataset):
+    wandb.init(project=project_name, name="setup")
     # Log all the details about the data to W&B.
     wandb.log(data_details)
 
