@@ -1,0 +1,8 @@
+
+INFO:heterogeneous-GAT-model:[1] Loss: 0.000350596010684967
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 206, in <module>
+    train_acc, train_f1, train_loss, train_table = test(train_loader)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 120, in test
+    table.add_data(wandb.Html(create_graph_vis(data).to_html(full_html=False)), data.label.item(), pred.item())
+ValueError: only one element tensors can be converted to Python scalars

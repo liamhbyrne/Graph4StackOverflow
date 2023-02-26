@@ -1,0 +1,39 @@
+
+INFO:heterogeneous-GAT-model:[1] Loss: 0.0003322700262069702
+INFO:heterogeneous-GAT-model:[6] Loss: 0.0012158751487731934
+INFO:heterogeneous-GAT-model:[11] Loss: 0.0012265268117189407
+INFO:heterogeneous-GAT-model:[16] Loss: 0.0012196238040924072
+INFO:heterogeneous-GAT-model:[21] Loss: 0.0011583716422319413
+INFO:heterogeneous-GAT-model:[26] Loss: 0.0010334079563617707
+INFO:heterogeneous-GAT-model:[31] Loss: 0.0009083672314882279
+INFO:heterogeneous-GAT-model:[36] Loss: 0.0011269666999578476
+INFO:heterogeneous-GAT-model:[41] Loss: 0.001064434990286827
+INFO:heterogeneous-GAT-model:[46] Loss: 0.0010646058320999145
+INFO:heterogeneous-GAT-model:[51] Loss: 0.001189259484410286
+INFO:heterogeneous-GAT-model:[56] Loss: 0.0011581224948167801
+INFO:heterogeneous-GAT-model:[61] Loss: 0.0014081674367189408
+INFO:heterogeneous-GAT-model:[66] Loss: 0.0012205281704664231
+INFO:heterogeneous-GAT-model:[71] Loss: 0.0010644963532686234
+INFO:heterogeneous-GAT-model:[76] Loss: 0.001126927450299263
+PRED tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]) tensor([[1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1]])
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 210, in <module>
+    train_acc, train_f1, train_loss, train_table = test(train_loader)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 122, in test
+    table.add_data(wandb.Html(plotly.io.to_html(create_graph_vis(data))), data.label.item(), pred.item())
+ValueError: only one element tensors can be converted to Python scalars

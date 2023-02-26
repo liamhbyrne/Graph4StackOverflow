@@ -1,0 +1,96 @@
+BatchedHeteroDataBatch(
+  question_emb=[16, 1536],
+  answer_emb=[16, 1536],
+  label=[16, 1],
+  [1mquestion[22m={
+    x=[53, 1536],
+    batch=[53],
+    ptr=[17]
+  },
+  [1manswer[22m={
+    x=[87, 1536],
+    batch=[87],
+    ptr=[17]
+  },
+  [1mcomment[22m={
+    x=[69, 768],
+    batch=[69],
+    ptr=[17]
+  },
+  [1mtag[22m={
+    x=[294, 50],
+    batch=[294],
+    ptr=[17]
+  },
+  [1mmodule[22m={
+    x=[13, 30],
+    batch=[13],
+    ptr=[17]
+  },
+  [1m(tag, describes, question)[22m={ edge_index=[2, 114] },
+  [1m(tag, describes, answer)[22m={ edge_index=[2, 175] },
+  [1m(tag, describes, comment)[22m={ edge_index=[2, 119] },
+  [1m(module, imported_in, question)[22m={ edge_index=[2, 1] },
+  [1m(module, imported_in, answer)[22m={ edge_index=[2, 13] },
+  [1m(question, rev_describes, tag)[22m={ edge_index=[2, 114] },
+  [1m(answer, rev_describes, tag)[22m={ edge_index=[2, 175] },
+  [1m(comment, rev_describes, tag)[22m={ edge_index=[2, 119] },
+  [1m(question, rev_imported_in, module)[22m={ edge_index=[2, 1] },
+  [1m(answer, rev_imported_in, module)[22m={ edge_index=[2, 13] }
+)
+DATA IN torch.Size([16, 1536]) torch.Size([16, 1536])
+IN torch.Size([16, 3072])
+B4 LINEAR torch.Size([16, 3392])
+BatchedHeteroDataBatch(
+  question_emb=[12, 1536],
+  answer_emb=[12, 1536],
+  label=[12, 1],
+  [1mquestion[22m={
+    x=[43, 1536],
+    batch=[43],
+    ptr=[13]
+  },
+  [1manswer[22m={
+    x=[82, 1536],
+    batch=[82],
+    ptr=[13]
+  },
+  [1mcomment[22m={
+    x=[68, 768],
+    batch=[68],
+    ptr=[13]
+  },
+  [1mtag[22m={
+    x=[273, 50],
+    batch=[273],
+    ptr=[13]
+  },
+  [1mmodule[22m={
+    x=[5, 30],
+    batch=[5],
+    ptr=[13]
+  },
+  [1m(tag, describes, question)[22m={ edge_index=[2, 93] },
+  [1m(tag, describes, answer)[22m={ edge_index=[2, 177] },
+  [1m(tag, describes, comment)[22m={ edge_index=[2, 137] },
+  [1m(module, imported_in, question)[22m={ edge_index=[2, 1] },
+  [1m(module, imported_in, answer)[22m={ edge_index=[2, 6] },
+  [1m(question, rev_describes, tag)[22m={ edge_index=[2, 93] },
+  [1m(answer, rev_describes, tag)[22m={ edge_index=[2, 177] },
+  [1m(comment, rev_describes, tag)[22m={ edge_index=[2, 137] },
+  [1m(question, rev_imported_in, module)[22m={ edge_index=[2, 1] },
+  [1m(answer, rev_imported_in, module)[22m={ edge_index=[2, 6] }
+)
+DATA IN torch.Size([12, 1536]) torch.Size([12, 1536])
+IN torch.Size([12, 3072])
+B4 LINEAR torch.Size([12, 3392])
+IN torch.Size([16, 3072])
+B4 LINEAR torch.Size([16, 3392])
+torch.Size([16, 2]) torch.Size([16, 1])
+INFO:heterogeneous-GAT-model:[1] Loss: 0.00034431135654449464
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 167, in <module>
+    train_acc, train_f1 = test(train_loader)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 107, in test
+    predictions.append(pred.item())
+ValueError: only one element tensors can be converted to Python scalars

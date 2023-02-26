@@ -1,0 +1,51 @@
+wandb: ERROR Attempted to fetch artifact without alias (e.g. "<artifact_name>:v3" or "<artifact_name>:latest")
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 5077, in _load
+    response = self.client.execute(
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\lib\retry.py", line 212, in wrapped_fn
+    return retrier(*args, **kargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 246, in execute
+    return self._client.execute(*args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 39, in execute
+    request.raise_for_status()
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\requests\models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://api.wandb.ai/graphql
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\normalize.py", line 26, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 955, in artifact
+    artifact = Artifact(self.client, entity, project, artifact_name)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 4368, in __init__
+    self._load()
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 5089, in _load
+    raise ValueError(
+ValueError: Attempted to fetch artifact without alias (e.g. "<artifact_name>:v3" or "<artifact_name>:latest")
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 182, in <module>
+    start_wandb_for_training(wandb_project_name)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 160, in start_wandb_for_training
+    wandb.use_artifact("static-graphs")
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 334, in wrapper
+    return func(self, *args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 2635, in use_artifact
+    artifact = public_api.artifact(type=type, name=name)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\normalize.py", line 64, in wrapper
+    raise CommError(message, err).with_traceback(sys.exc_info()[2])
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\normalize.py", line 26, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 955, in artifact
+    artifact = Artifact(self.client, entity, project, artifact_name)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 4368, in __init__
+    self._load()
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\apis\public.py", line 5089, in _load
+    raise ValueError(
+wandb.errors.CommError: Attempted to fetch artifact without alias (e.g. "<artifact_name>:v3" or "<artifact_name>:latest")

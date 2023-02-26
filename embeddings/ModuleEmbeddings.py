@@ -101,7 +101,7 @@ class ModuleEmbeddingTrainer:
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
         # unpickle the module_to_ix
-        with open(model_path.replace('mod-emb', 'mod_to_ix_mod-emb'), 'rb') as f:
+        with open(model_path.replace('module-emb', 'mod_to_ix_module-emb'), 'rb') as f:
             model.module_to_ix = pickle.load(f)
 
         return model
@@ -128,9 +128,10 @@ class ModuleEmbedding(nn.Module):
         log_probs = F.log_softmax(out, dim=1)
         return log_probs
 
-    def get_tag_embedding(self, module: str):
-        assert module in self.module_to_ix, "Tag not in vocabulary!"
-        assert self.module_to_ix is not None, "Tag to index mapping not set!"
+    def get_module_embedding(self, module: str):
+        assert self.module_to_ix is not None, "Module to index mapping not set!"
+        if module not in self.module_to_ix:
+            return torch.zeros(self.embedding.weight.shape[1])
         return self.embedding.weight[self.module_to_ix[module]]
 
 

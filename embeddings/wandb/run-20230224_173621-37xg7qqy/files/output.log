@@ -1,0 +1,12 @@
+
+INFO:heterogeneous-GAT-model:[1] Loss: 0.00034855717420578005
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 206, in <module>
+    train_acc, train_f1, train_loss, train_table = test(train_loader)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 120, in test
+    table.add_data(wandb.Html(create_graph_vis(data).to_html(full_html=False)), data.label.item(), pred.item())
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\data_types\html.py", line 55, in __init__
+    out.write(self.html)
+  File "C:\Users\liamb\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u25c4' in position 276441: character maps to <undefined>

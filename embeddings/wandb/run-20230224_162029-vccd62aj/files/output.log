@@ -1,0 +1,54 @@
+wandb: WARNING Serializing object of type str that is 7167192 bytes
+wandb: WARNING Serializing object of type str that is 7193074 bytes
+wandb: WARNING Serializing object of type str that is 7166332 bytes
+wandb: WARNING Serializing object of type str that is 7193014 bytes
+wandb: WARNING Serializing object of type str that is 7184570 bytes
+wandb: WARNING Serializing object of type str that is 7168810 bytes
+wandb: WARNING Serializing object of type str that is 7170722 bytes
+wandb: WARNING Serializing object of type str that is 7186894 bytes
+wandb: WARNING Serializing object of type str that is 7186296 bytes
+wandb: WARNING Serializing object of type str that is 7182036 bytes
+wandb: WARNING Serializing object of type str that is 7193014 bytes
+wandb: WARNING Serializing object of type str that is 7180782 bytes
+wandb: WARNING Serializing object of type str that is 7166880 bytes
+wandb: WARNING Serializing object of type str that is 7166790 bytes
+wandb: WARNING Serializing object of type str that is 7195332 bytes
+wandb: WARNING Serializing object of type str that is 7173532 bytes
+wandb: WARNING Serializing object of type str that is 7172372 bytes
+wandb: WARNING Serializing object of type str that is 7185368 bytes
+wandb: WARNING Serializing object of type str that is 7197418 bytes
+wandb: WARNING Serializing object of type str that is 7174376 bytes
+wandb: WARNING Serializing object of type str that is 7166324 bytes
+wandb: WARNING Serializing object of type str that is 7192582 bytes
+wandb: WARNING Serializing object of type str that is 7177106 bytes
+wandb: WARNING Serializing object of type str that is 7185132 bytes
+wandb: WARNING Serializing object of type str that is 7189810 bytes
+wandb: WARNING Serializing object of type str that is 7183714 bytes
+wandb: WARNING Serializing object of type str that is 7169090 bytes
+wandb: WARNING Serializing object of type str that is 7168212 bytes
+wandb: WARNING Serializing object of type str that is 7185824 bytes
+wandb: WARNING Serializing object of type str that is 7171744 bytes
+wandb: WARNING Serializing object of type str that is 7192858 bytes
+wandb: WARNING Serializing object of type str that is 7175106 bytes
+wandb: WARNING Serializing object of type str that is 7191694 bytes
+wandb: WARNING Serializing object of type str that is 7175566 bytes
+wandb: WARNING Serializing object of type str that is 7181202 bytes
+wandb: WARNING Serializing object of type str that is 7169486 bytes
+wandb: WARNING Serializing object of type str that is 7195820 bytes
+wandb: WARNING Serializing object of type str that is 7186730 bytes
+wandb: WARNING Serializing object of type str that is 7185806 bytes
+wandb: WARNING Serializing object of type str that is 7188832 bytes
+wandb: WARNING Serializing object of type str that is 7184894 bytes
+wandb: WARNING Serializing object of type str that is 7166812 bytes
+wandb: WARNING Serializing object of type str that is 7175956 bytes
+wandb: WARNING Serializing object of type str that is 7172754 bytes
+wandb: WARNING Serializing object of type str that is 7188010 bytes
+wandb: WARNING Serializing object of type str that is 7184168 bytes
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 180, in <module>
+    init_wandb(wandb_project_name, wandb_run_name, dataset)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 151, in init_wandb
+    dataset_artifact.add_dir("static-dataset/")
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_artifacts.py", line 438, in add_dir
+    raise ValueError("Path is not a directory: %s" % local_path)
+ValueError: Path is not a directory: static-dataset/

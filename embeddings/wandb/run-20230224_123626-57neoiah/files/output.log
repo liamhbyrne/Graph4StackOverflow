@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 159, in <module>
+    dataset_artifact.add_dir("dataset")
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_artifacts.py", line 438, in add_dir
+    raise ValueError("Path is not a directory: %s" % local_path)
+ValueError: Path is not a directory: dataset

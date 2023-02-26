@@ -1,0 +1,31 @@
+2023-02-24 16:45:32,666 INFO    MainThread:756 [wandb_setup.py:_flush():68] Configure stats pid to 756
+2023-02-24 16:45:32,666 INFO    MainThread:756 [wandb_setup.py:_flush():68] Loading settings from C:\Users\liamb\.config\wandb\settings
+2023-02-24 16:45:32,666 INFO    MainThread:756 [wandb_setup.py:_flush():68] Loading settings from C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\settings
+2023-02-24 16:45:32,666 INFO    MainThread:756 [wandb_setup.py:_flush():68] Loading settings from environment variables: {'_require_service': 'True'}
+2023-02-24 16:45:32,666 INFO    MainThread:756 [wandb_setup.py:_flush():68] Inferring run settings from compute environment: {'program_relpath': 'embeddings\\hetero_GAT.py', 'program': 'C:\\Users\\liamb\\Documents\\graph4stackoverflow\\embeddings\\hetero_GAT.py'}
+2023-02-24 16:45:32,667 INFO    MainThread:756 [wandb_init.py:_log_setup():492] Logging user logs to C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164532-4prg0lm3\logs\debug.log
+2023-02-24 16:45:32,667 INFO    MainThread:756 [wandb_init.py:_log_setup():493] Logging internal logs to C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164532-4prg0lm3\logs\debug-internal.log
+2023-02-24 16:45:32,667 INFO    MainThread:756 [wandb_init.py:init():532] calling init triggers
+2023-02-24 16:45:32,667 INFO    MainThread:756 [wandb_init.py:init():538] wandb.init called with sweep_config: {}
+config: {}
+2023-02-24 16:45:32,667 INFO    MainThread:756 [wandb_init.py:init():588] starting backend
+2023-02-24 16:45:32,667 INFO    MainThread:756 [wandb_init.py:init():592] setting up manager
+2023-02-24 16:45:32,670 INFO    MainThread:756 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=spawn, using: spawn
+2023-02-24 16:45:32,674 INFO    MainThread:756 [wandb_init.py:init():599] backend started and connected
+2023-02-24 16:45:32,676 INFO    MainThread:756 [wandb_init.py:init():687] updated telemetry
+2023-02-24 16:45:32,725 INFO    MainThread:756 [wandb_init.py:init():727] communicating run to backend with 60.0 second timeout
+2023-02-24 16:45:33,136 INFO    MainThread:756 [wandb_run.py:_on_init():2134] communicating current version
+2023-02-24 16:45:33,199 INFO    MainThread:756 [wandb_run.py:_on_init():2143] got version response 
+2023-02-24 16:45:33,199 INFO    MainThread:756 [wandb_init.py:init():775] starting run threads in backend
+2023-02-24 16:45:33,363 INFO    MainThread:756 [wandb_run.py:_console_start():2114] atexit reg
+2023-02-24 16:45:33,363 INFO    MainThread:756 [wandb_run.py:_redirect():1969] redirect: SettingsConsole.WRAP_RAW
+2023-02-24 16:45:33,363 INFO    MainThread:756 [wandb_run.py:_redirect():2034] Wrapping output streams.
+2023-02-24 16:45:33,363 INFO    MainThread:756 [wandb_run.py:_redirect():2059] Redirects installed.
+2023-02-24 16:45:33,364 INFO    MainThread:756 [wandb_init.py:init():817] run started, returning control to user process
+2023-02-24 16:45:49,029 INFO    MainThread:756 [wandb_run.py:_finish():1854] finishing run g4nlp/heterogeneous-GAT-model/4prg0lm3
+2023-02-24 16:45:49,029 INFO    MainThread:756 [wandb_run.py:_atexit_cleanup():2083] got exitcode: 0
+2023-02-24 16:45:49,029 INFO    MainThread:756 [wandb_run.py:_restore():2066] restore
+2023-02-24 16:45:49,030 INFO    MainThread:756 [wandb_run.py:_restore():2072] restore done
+2023-02-24 16:47:39,262 INFO    MainThread:756 [wandb_run.py:_footer_history_summary_info():3442] rendering history
+2023-02-24 16:47:39,263 INFO    MainThread:756 [wandb_run.py:_footer_history_summary_info():3474] rendering summary
+2023-02-24 16:47:39,269 INFO    MainThread:756 [wandb_run.py:_footer_sync_info():3398] logging synced files

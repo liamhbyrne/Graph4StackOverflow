@@ -3,13 +3,14 @@ import os.path
 import pickle
 import re
 import sqlite3
-from typing import List
+from typing import List, Any, Optional
 import time
 
 import pandas as pd
 import torch
 from bs4 import MarkupResemblesLocatorWarning
 from torch_geometric.data import Dataset, download_url, Data, HeteroData
+from torch_geometric.data.hetero_data import NodeOrEdgeStorage
 from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore', category=MarkupResemblesLocatorWarning)
@@ -18,7 +19,7 @@ from post_embedding_builder import PostEmbedding
 from static_graph_construction import StaticGraphConstruction
 
 logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger("dataset")
 
 
@@ -148,6 +149,7 @@ class UserGraphDataset(Dataset):
         file_name = [filename for filename in os.listdir('../data/processed/') if filename.startswith(f"data_{idx}")]
         if len(file_name):
             data = torch.load(os.path.join(self.processed_dir, file_name[0]))
+
             return data
         else:
             raise Exception(f"Data with index {idx} not found.")
@@ -230,10 +232,12 @@ if __name__ == '__main__':
     '''
 
 
-    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', skip_processing=True)
+    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', skip_processing=False)
     data = ds.get(1078)
     print("Question ndim:", data.x_dict['question'].shape)
     print("Answer ndim:", data.x_dict['answer'].shape)
     print("Comment ndim:", data.x_dict['comment'].shape)
     print("Tag ndim:", data.x_dict['tag'].shape)
     print("Module ndim:", data.x_dict['module'].shape)
+    print("Question:", data.question_emb.shape)
+    print("Answer:", data.answer_emb.shape)

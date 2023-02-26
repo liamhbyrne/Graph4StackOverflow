@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 143, in <module>
+    fig = create_graph(dataset[0])
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 113, in create_graph
+    g = to_networkx(graph)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\torch_geometric\utils\convert.py", line 133, in to_networkx
+    for key, value in data(*(node_attrs + edge_attrs + graph_attrs)):
+TypeError: 'BatchedHeteroData' object is not callable

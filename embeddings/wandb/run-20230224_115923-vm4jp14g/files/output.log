@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 140, in <module>
+    wandb.log(data_details)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 371, in wrapper
+    return func(self, *args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 334, in wrapper
+    return func(self, *args, **kwargs)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 1713, in log
+    self._log(data=data, step=step, commit=commit)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 1495, in _log
+    self._partial_history_callback(data, step, commit)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\wandb_run.py", line 1365, in _partial_history_callback
+    self._backend.interface.publish_partial_history(
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\interface\interface.py", line 580, in publish_partial_history
+    item.value_json = json_dumps_safer_history(v)
+  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\util.py", line 953, in json_dumps_safer_history
+    return json.dumps(obj, cls=WandBHistoryJSONEncoder, **kwargs)
+  File "C:\Users\liamb\AppData\Local\Programs\Python\Python38\lib\json\__init__.py", line 234, in dumps
+    return cls(
+  File "C:\Users\liamb\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\liamb\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+TypeError: keys must be str, int, float, bool or None, not tuple

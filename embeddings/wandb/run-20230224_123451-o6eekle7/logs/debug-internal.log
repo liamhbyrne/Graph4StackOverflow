@@ -1,0 +1,609 @@
+2023-02-24 12:34:51,573 INFO    StreamThr :15572 [internal.py:wandb_internal():87] W&B internal server running at pid: 15572, started at: 2023-02-24 12:34:51.572575
+2023-02-24 12:34:51,575 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: status
+2023-02-24 12:34:51,576 INFO    WriterThread:15572 [datastore.py:open_for_write():85] open: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\run-o6eekle7.wandb
+2023-02-24 12:34:51,581 DEBUG   SenderThread:15572 [sender.py:send():336] send: header
+2023-02-24 12:34:51,639 DEBUG   SenderThread:15572 [sender.py:send():336] send: run
+2023-02-24 12:34:52,001 INFO    SenderThread:15572 [dir_watcher.py:__init__():216] watching files in: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files
+2023-02-24 12:34:52,001 INFO    SenderThread:15572 [sender.py:_start_run_threads():1067] run started: o6eekle7 with start time 1677242091.573574
+2023-02-24 12:34:52,002 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: summary_record
+2023-02-24 12:34:52,002 INFO    SenderThread:15572 [sender.py:_save_file():1321] saving file wandb-summary.json with policy end
+2023-02-24 12:34:52,003 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: check_version
+2023-02-24 12:34:52,004 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: check_version
+2023-02-24 12:34:52,093 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: run_start
+2023-02-24 12:34:52,111 DEBUG   HandlerThread:15572 [system_info.py:__init__():31] System info init
+2023-02-24 12:34:52,111 DEBUG   HandlerThread:15572 [system_info.py:__init__():46] System info init done
+2023-02-24 12:34:52,111 INFO    HandlerThread:15572 [system_monitor.py:start():151] Starting system monitor
+2023-02-24 12:34:52,112 INFO    SystemMonitor:15572 [system_monitor.py:_start():116] Starting system asset monitoring threads
+2023-02-24 12:34:52,112 INFO    HandlerThread:15572 [system_monitor.py:probe():172] Collecting system info
+2023-02-24 12:34:52,115 INFO    SystemMonitor:15572 [interfaces.py:start():168] Started cpu
+2023-02-24 12:34:52,115 DEBUG   HandlerThread:15572 [system_info.py:probe():195] Probing system
+2023-02-24 12:34:52,116 INFO    SystemMonitor:15572 [interfaces.py:start():168] Started disk
+2023-02-24 12:34:52,116 INFO    SystemMonitor:15572 [interfaces.py:start():168] Started memory
+2023-02-24 12:34:52,133 INFO    SystemMonitor:15572 [interfaces.py:start():168] Started network
+2023-02-24 12:34:52,134 DEBUG   HandlerThread:15572 [system_info.py:_probe_git():180] Probing git
+2023-02-24 12:34:52,239 DEBUG   HandlerThread:15572 [system_info.py:_probe_git():188] Probing git done
+2023-02-24 12:34:52,239 DEBUG   HandlerThread:15572 [system_info.py:probe():241] Probing system done
+2023-02-24 12:34:52,239 DEBUG   HandlerThread:15572 [system_monitor.py:probe():181] {'os': 'Windows-10-10.0.19041-SP0', 'python': '3.8.1', 'heartbeatAt': '2023-02-24T12:34:52.115855', 'startedAt': '2023-02-24T12:34:51.557575', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'C:\\Users\\liamb\\Documents\\graph4stackoverflow\\embeddings\\hetero_GAT.py', 'codePath': 'embeddings\\hetero_GAT.py', 'git': {'remote': 'https://git.soton.ac.uk/lhb1g20/graph4stackoverflow.git', 'commit': 'ced992d661984f7b87d1a3e76768e4ff7af78245'}, 'email': 'liambyrneh@gmail.com', 'root': 'C:/Users/liamb/Documents/graph4stackoverflow', 'host': 'DESKTOP-P7BETFF', 'username': 'liamb', 'executable': 'C:\\Users\\liamb\\Documents\\graph4stackoverflow\\venv\\Scripts\\python.exe', 'cpu_count': 2, 'cpu_count_logical': 4, 'cpu_freq': {'current': 3504.0, 'min': 0.0, 'max': 3504.0}, 'cpu_freq_per_core': [{'current': 3504.0, 'min': 0.0, 'max': 3504.0}], 'disk': {'total': 475.71581649780273, 'used': 352.6499214172363}, 'memory': {'total': 31.89160919189453}}
+2023-02-24 12:34:52,240 INFO    HandlerThread:15572 [system_monitor.py:probe():182] Finished collecting system info
+2023-02-24 12:34:52,240 INFO    HandlerThread:15572 [system_monitor.py:probe():185] Publishing system info
+2023-02-24 12:34:52,240 DEBUG   HandlerThread:15572 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-02-24 12:34:52,242 DEBUG   HandlerThread:15572 [system_info.py:_save_pip():67] Saving pip packages done
+2023-02-24 12:34:52,244 INFO    HandlerThread:15572 [system_monitor.py:probe():187] Finished publishing system info
+2023-02-24 12:34:52,253 DEBUG   SenderThread:15572 [sender.py:send():336] send: files
+2023-02-24 12:34:52,254 INFO    SenderThread:15572 [sender.py:_save_file():1321] saving file wandb-metadata.json with policy now
+2023-02-24 12:34:52,264 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: stop_status
+2023-02-24 12:34:52,264 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: stop_status
+2023-02-24 12:34:52,266 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: partial_history
+2023-02-24 12:34:52,436 DEBUG   SenderThread:15572 [sender.py:send():336] send: telemetry
+2023-02-24 12:34:52,439 DEBUG   SenderThread:15572 [sender.py:send():336] send: history
+2023-02-24 12:34:52,440 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: summary_record
+2023-02-24 12:34:52,441 INFO    SenderThread:15572 [sender.py:_save_file():1321] saving file wandb-summary.json with policy end
+2023-02-24 12:34:52,838 INFO    wandb-upload_0:15572 [upload_job.py:push():138] Uploaded file C:\Users\liamb\AppData\Local\Temp\tmp6t8dl2bjwandb\z2ez9vxs-wandb-metadata.json
+2023-02-24 12:34:53,012 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\requirements.txt
+2023-02-24 12:34:53,012 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\wandb-summary.json
+2023-02-24 12:34:53,013 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\wandb-metadata.json
+2023-02-24 12:34:57,504 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: status_report
+2023-02-24 12:35:01,287 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: log_artifact
+2023-02-24 12:35:01,288 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: log_artifact
+2023-02-24 12:35:01,610 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: partial_history
+2023-02-24 12:35:02,126 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\media\table\data_1_83bbf864290b80cf8624.table.json
+2023-02-24 12:35:02,126 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\media
+2023-02-24 12:35:02,126 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\media\table
+2023-02-24 12:35:02,976 INFO    wandb-upload_0:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpq1rpnh32
+2023-02-24 12:35:07,281 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:09,496 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: log_artifact
+2023-02-24 12:35:10,503 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: poll_exit
+2023-02-24 12:35:15,539 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:20,598 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:25,648 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:28,776 INFO    wandb-upload_4:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpmadbep1i
+2023-02-24 12:35:28,927 INFO    wandb-upload_6:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpuccnu6c2
+2023-02-24 12:35:28,973 INFO    wandb-upload_2:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmptk4db49p
+2023-02-24 12:35:29,003 INFO    wandb-upload_3:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpsvzht581
+2023-02-24 12:35:29,106 INFO    wandb-upload_5:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp_tgdbbpx
+2023-02-24 12:35:29,107 INFO    wandb-upload_1:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp4qu61go7
+2023-02-24 12:35:29,141 INFO    wandb-upload_12:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmps7y2pky3
+2023-02-24 12:35:29,163 INFO    wandb-upload_14:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp45j0y_p5
+2023-02-24 12:35:29,386 INFO    wandb-upload_25:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp44obdc_8
+2023-02-24 12:35:29,486 INFO    wandb-upload_18:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpguwejyjx
+2023-02-24 12:35:29,499 INFO    wandb-upload_9:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpjvjoyu6_
+2023-02-24 12:35:29,545 INFO    wandb-upload_26:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpj0qkx07y
+2023-02-24 12:35:29,574 INFO    wandb-upload_21:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpkc_uyc9b
+2023-02-24 12:35:29,599 INFO    wandb-upload_28:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpmd4vntum
+2023-02-24 12:35:29,639 INFO    wandb-upload_40:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp4z0r3jwb
+2023-02-24 12:35:29,650 INFO    wandb-upload_19:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmplho77rza
+2023-02-24 12:35:29,756 INFO    wandb-upload_29:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpfhokowf7
+2023-02-24 12:35:29,759 INFO    wandb-upload_17:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpfd8xb_rw
+2023-02-24 12:35:29,761 INFO    wandb-upload_34:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpq46hilah
+2023-02-24 12:35:29,763 INFO    wandb-upload_20:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpx5zk__m0
+2023-02-24 12:35:29,763 INFO    wandb-upload_30:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpyzcavj4v
+2023-02-24 12:35:29,765 INFO    wandb-upload_41:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp4hwg86sz
+2023-02-24 12:35:29,793 INFO    wandb-upload_22:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp2_uvpqb_
+2023-02-24 12:35:29,812 INFO    wandb-upload_8:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpjnz8j50w
+2023-02-24 12:35:29,816 INFO    wandb-upload_33:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmplxetyn53
+2023-02-24 12:35:29,838 INFO    wandb-upload_13:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpth6in6ik
+2023-02-24 12:35:29,844 INFO    wandb-upload_46:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpeyy6fme3
+2023-02-24 12:35:29,849 INFO    wandb-upload_44:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpzmkd7zhs
+2023-02-24 12:35:29,851 INFO    wandb-upload_24:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp5wb9rpsb
+2023-02-24 12:35:29,854 INFO    wandb-upload_27:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpobvgmn49
+2023-02-24 12:35:29,876 INFO    wandb-upload_32:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpoo9zaec8
+2023-02-24 12:35:29,912 INFO    wandb-upload_42:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpj14jkp8h
+2023-02-24 12:35:29,912 INFO    wandb-upload_45:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp7p82hvjz
+2023-02-24 12:35:29,954 INFO    wandb-upload_38:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp9rb3y3od
+2023-02-24 12:35:29,965 INFO    wandb-upload_31:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmppaqwcire
+2023-02-24 12:35:29,980 INFO    wandb-upload_15:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpwfusvsfn
+2023-02-24 12:35:30,007 INFO    wandb-upload_35:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpx_z4g9xa
+2023-02-24 12:35:30,008 INFO    wandb-upload_11:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpy00mg6l_
+2023-02-24 12:35:30,034 INFO    wandb-upload_10:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp22sst0it
+2023-02-24 12:35:30,034 INFO    wandb-upload_23:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpeijam4jn
+2023-02-24 12:35:30,056 INFO    wandb-upload_36:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpfbspsg_0
+2023-02-24 12:35:30,067 INFO    wandb-upload_16:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpsnbz0uc3
+2023-02-24 12:35:30,093 INFO    wandb-upload_43:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpd48j9ovu
+2023-02-24 12:35:30,113 INFO    wandb-upload_37:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpj6jdyd84
+2023-02-24 12:35:30,190 INFO    wandb-upload_7:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp713q9bxt
+2023-02-24 12:35:30,219 INFO    wandb-upload_39:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpf7czz8l2
+2023-02-24 12:35:30,695 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:31,114 INFO    SenderThread:15572 [sender.py:send_request_log_artifact():1381] logged artifact run-o6eekle7-data - {'id': 'QXJ0aWZhY3Q6MzgwNDAxMjcw', 'digest': '9015589079b584d63120c6750f48ad17', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjU0NTkzMzA2', 'latestArtifact': None}, 'version': 'latest'}
+2023-02-24 12:35:31,119 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: status_report
+2023-02-24 12:35:31,309 DEBUG   SenderThread:15572 [sender.py:send():336] send: files
+2023-02-24 12:35:31,309 INFO    SenderThread:15572 [sender.py:_save_file():1321] saving file media\table\data_1_83bbf864290b80cf8624.table.json with policy now
+2023-02-24 12:35:31,310 DEBUG   SenderThread:15572 [sender.py:send():336] send: history
+2023-02-24 12:35:31,310 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: summary_record
+2023-02-24 12:35:31,312 INFO    SenderThread:15572 [sender.py:_save_file():1321] saving file wandb-summary.json with policy end
+2023-02-24 12:35:31,314 DEBUG   SenderThread:15572 [sender.py:send_request():363] send_request: log_artifact
+2023-02-24 12:35:31,522 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_modified():292] file/dir modified: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\config.yaml
+2023-02-24 12:35:31,523 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_modified():292] file/dir modified: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\wandb-summary.json
+2023-02-24 12:35:31,523 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\output.log
+2023-02-24 12:35:31,922 INFO    wandb-upload_0:15572 [upload_job.py:push():138] Uploaded file C:\Users\liamb\AppData\Local\Temp\tmp6t8dl2bjwandb\i6lmdb3o-media/table/data_1_83bbf864290b80cf8624.table.json
+2023-02-24 12:35:32,946 INFO    wandb-upload_3:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpnf0f3qdy
+2023-02-24 12:35:32,958 INFO    wandb-upload_6:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpvlb3t2fw
+2023-02-24 12:35:33,039 INFO    wandb-upload_5:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpapleb2zj
+2023-02-24 12:35:33,127 INFO    wandb-upload_12:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpxs31vn0_
+2023-02-24 12:35:33,135 INFO    wandb-upload_42:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpeb9u2xvd
+2023-02-24 12:35:33,150 INFO    wandb-upload_47:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp_awwobdf
+2023-02-24 12:35:33,158 INFO    wandb-upload_9:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp4sblghn0
+2023-02-24 12:35:33,181 INFO    wandb-upload_1:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpxyg2f2i8
+2023-02-24 12:35:33,216 INFO    wandb-upload_26:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp4oq45l_5
+2023-02-24 12:35:33,222 INFO    wandb-upload_50:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp82m3djia
+2023-02-24 12:35:33,229 INFO    wandb-upload_17:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpvv2j7w2d
+2023-02-24 12:35:33,230 INFO    wandb-upload_38:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpvgs6mdq5
+2023-02-24 12:35:33,234 INFO    wandb-upload_14:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpvkak6jzp
+2023-02-24 12:35:33,247 INFO    wandb-upload_16:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpxx0cb06y
+2023-02-24 12:35:33,248 INFO    wandb-upload_51:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpn_j7wq65
+2023-02-24 12:35:33,271 INFO    wandb-upload_2:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpuuyutj2m
+2023-02-24 12:35:33,281 INFO    wandb-upload_48:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp_jre653g
+2023-02-24 12:35:33,303 INFO    wandb-upload_19:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpr0_l7new
+2023-02-24 12:35:33,318 INFO    wandb-upload_10:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpj8in290_
+2023-02-24 12:35:33,336 INFO    wandb-upload_8:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpftwt1au2
+2023-02-24 12:35:33,339 INFO    wandb-upload_27:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpp88po67g
+2023-02-24 12:35:33,345 INFO    wandb-upload_36:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpyxl8otzu
+2023-02-24 12:35:33,346 INFO    wandb-upload_49:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpvjrl8haj
+2023-02-24 12:35:33,360 INFO    wandb-upload_15:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmppc5swpmj
+2023-02-24 12:35:33,380 INFO    wandb-upload_34:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp3dfqcbwf
+2023-02-24 12:35:33,397 INFO    wandb-upload_22:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpn1zhrffo
+2023-02-24 12:35:33,418 INFO    wandb-upload_0:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpl9qdh7jm
+2023-02-24 12:35:33,419 INFO    wandb-upload_41:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp57x8qo62
+2023-02-24 12:35:33,421 INFO    wandb-upload_11:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpdsidjmyp
+2023-02-24 12:35:33,437 INFO    wandb-upload_44:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpbi2omq5g
+2023-02-24 12:35:33,464 INFO    wandb-upload_21:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpngfcy3q_
+2023-02-24 12:35:33,472 INFO    wandb-upload_20:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpn04o5jib
+2023-02-24 12:35:33,472 INFO    wandb-upload_46:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpc0v8psjd
+2023-02-24 12:35:33,497 INFO    wandb-upload_23:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpfp8qykcj
+2023-02-24 12:35:33,497 INFO    wandb-upload_28:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpcjvtrajm
+2023-02-24 12:35:33,498 INFO    wandb-upload_33:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpr4pkkrwx
+2023-02-24 12:35:33,533 INFO    wandb-upload_31:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpdr1g3vd1
+2023-02-24 12:35:33,538 INFO    wandb-upload_43:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpma1xg3_u
+2023-02-24 12:35:33,548 INFO    wandb-upload_32:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp3hkb0ale
+2023-02-24 12:35:33,549 INFO    wandb-upload_45:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpcr698_zu
+2023-02-24 12:35:33,550 INFO    Thread-17 :15572 [dir_watcher.py:_on_file_modified():292] file/dir modified: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\files\output.log
+2023-02-24 12:35:33,551 INFO    wandb-upload_37:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp_6t80466
+2023-02-24 12:35:33,596 INFO    wandb-upload_40:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpix2gv4gz
+2023-02-24 12:35:33,609 INFO    wandb-upload_30:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp58wporxo
+2023-02-24 12:35:33,621 INFO    wandb-upload_18:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpk5ksqd6f
+2023-02-24 12:35:33,653 INFO    wandb-upload_25:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpwq3wcp8w
+2023-02-24 12:35:33,665 INFO    wandb-upload_24:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpvlj9sr6h
+2023-02-24 12:35:33,674 INFO    wandb-upload_29:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp7y0u3fkl
+2023-02-24 12:35:33,692 INFO    wandb-upload_35:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpt9qvfep5
+2023-02-24 12:35:33,790 INFO    wandb-upload_13:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmp9xic_9xa
+2023-02-24 12:35:33,978 INFO    wandb-upload_4:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpx3x84trd
+2023-02-24 12:35:35,775 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:40,843 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:41,577 INFO    wandb-upload_39:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmpkxgl6643
+2023-02-24 12:35:45,906 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:50,949 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:35:52,149 DEBUG   SystemMonitor:15572 [system_monitor.py:_start():130] Starting system metrics aggregation loop
+2023-02-24 12:35:56,006 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:36:01,082 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:36:06,131 DEBUG   HandlerThread:15572 [handler.py:handle_request():144] handle_request: keepalive
+2023-02-24 12:36:08,567 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:08,568 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:08,568 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:08,571 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:08,983 INFO    MainThread:15572 [internal.py:handle_exit():77] Internal process exited
+2023-02-24 12:36:10,573 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:10,573 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:10,576 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:10,576 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:12,604 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:12,604 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:12,605 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:12,608 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:13,707 WARNING StreamThr :15572 [internal.py:is_dead():415] Internal process exiting, parent pid 9368 disappeared
+2023-02-24 12:36:13,707 ERROR   StreamThr :15572 [internal.py:wandb_internal():153] Internal process shutdown.
+2023-02-24 12:36:14,247 INFO    HandlerThread:15572 [handler.py:finish():841] shutting down handler
+2023-02-24 12:36:14,435 INFO    WriterThread:15572 [datastore.py:close():299] close: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_123451-o6eekle7\run-o6eekle7.wandb
+2023-02-24 12:36:14,621 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:14,627 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:14,627 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:14,628 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:16,637 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:16,637 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:16,637 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:16,641 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:18,648 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:18,648 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:18,648 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:18,651 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:20,648 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:20,648 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:20,664 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:20,668 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:22,663 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:22,663 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:22,679 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:22,683 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:24,676 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:24,676 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:24,693 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:24,696 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:26,688 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:26,688 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:26,704 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:26,708 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:28,702 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:28,702 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:28,718 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:28,721 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:30,715 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:30,715 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:30,730 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:30,733 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:32,728 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:32,728 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:32,744 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:32,747 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:34,740 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:34,740 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:34,756 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:34,760 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:36,755 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:36,755 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:36,770 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:36,773 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:38,812 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:38,812 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:38,818 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:38,978 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:40,812 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:40,812 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:40,984 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:40,987 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:42,820 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:42,820 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:42,992 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:42,995 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:44,834 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:44,834 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:45,008 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:45,011 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:46,849 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:46,849 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:47,020 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:47,023 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:48,854 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:48,855 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:49,024 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:49,027 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:50,862 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:50,862 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:51,033 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:51,036 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:52,871 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:52,871 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:53,043 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:53,045 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:54,884 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:54,884 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:55,056 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:55,059 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:56,891 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:56,891 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:57,062 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:57,065 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:58,903 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:58,903 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:59,075 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:36:59,077 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:00,910 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:00,910 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:01,083 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:01,085 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:02,919 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:02,919 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:03,156 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:03,160 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:04,930 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:04,930 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:05,162 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:05,165 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:06,933 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:06,933 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:07,167 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:07,170 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:08,944 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:08,944 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:09,175 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:09,178 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:10,950 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:10,950 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:11,182 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:11,185 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:12,956 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:12,956 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:13,188 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:13,191 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:14,961 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:14,961 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:15,197 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:15,200 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:16,973 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:16,974 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:17,208 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:17,210 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:18,979 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:18,979 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:19,211 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:19,214 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:20,985 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:20,986 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:21,220 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:21,223 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:22,990 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:22,990 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:23,224 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:23,227 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:24,994 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:24,994 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:25,229 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:25,232 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:27,002 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:27,002 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:27,233 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:27,236 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:29,004 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:29,004 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:29,237 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:29,240 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:31,008 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:31,008 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:31,242 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:31,245 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:33,018 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:33,018 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:33,254 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:33,257 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:35,028 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:35,028 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:35,263 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:35,266 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:37,040 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:37,040 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:37,272 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:37,275 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:39,042 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:39,042 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:39,290 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:39,292 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:41,047 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:41,047 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:41,297 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:41,300 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:43,057 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:43,057 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:43,307 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:43,309 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:45,057 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:45,057 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:45,321 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:45,324 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:47,060 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:47,060 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:47,325 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:47,328 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:49,068 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:49,068 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:49,331 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:49,333 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:51,080 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:51,080 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:51,343 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:51,347 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:53,085 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:53,085 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:53,349 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:53,352 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:55,092 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:55,092 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:55,354 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:55,357 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:57,096 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:57,096 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:57,358 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:57,361 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:59,103 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:59,103 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:59,370 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:37:59,373 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:01,110 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:01,110 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:01,374 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:01,377 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:03,119 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:03,119 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:03,382 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:03,384 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:05,126 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:05,126 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:05,390 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:05,393 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:07,135 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:07,135 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:07,399 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:07,402 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:09,143 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:09,143 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:09,407 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:09,410 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:11,152 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:11,152 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:11,417 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:11,420 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:13,161 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:13,161 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:13,426 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:13,429 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:15,172 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:15,172 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:15,438 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:15,441 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:17,178 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:17,178 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:17,442 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:17,445 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:19,186 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:19,186 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:19,450 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:19,452 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:21,188 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:21,188 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:21,467 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:21,470 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:23,191 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:23,191 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:23,471 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:23,474 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:25,193 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:25,193 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:25,488 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:25,491 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:27,207 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:27,207 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:27,501 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:27,504 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:29,213 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:29,229 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:29,509 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:29,512 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:31,235 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:31,250 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:31,513 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:31,516 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:33,277 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:33,277 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:33,526 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:33,529 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:35,278 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:35,278 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:35,541 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:35,544 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:37,299 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:37,299 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:37,550 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:37,553 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:39,301 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:39,301 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:39,564 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:39,567 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:41,308 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:41,308 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:41,570 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:41,573 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:43,313 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:43,313 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:43,578 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:43,581 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:45,321 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:45,321 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:45,586 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:45,588 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:47,328 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:47,328 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:47,593 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:47,596 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:49,333 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:49,333 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:49,597 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:49,600 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:51,342 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:51,342 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:51,606 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:51,609 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:53,345 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:53,345 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:53,610 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:53,613 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:55,350 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:55,350 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:55,614 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:55,617 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:57,359 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:57,359 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:57,623 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:57,625 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:59,365 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:59,365 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:59,629 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:38:59,632 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:01,374 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:01,374 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:01,637 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:01,639 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:03,377 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:03,378 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:03,643 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:03,646 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:05,381 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:05,381 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:05,660 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:05,662 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:07,381 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:07,381 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:07,662 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:07,665 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:09,389 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:09,390 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:09,669 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:09,672 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:11,394 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:11,394 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:11,673 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:11,675 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:13,405 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:13,405 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:13,685 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:13,703 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:15,415 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:15,415 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:15,710 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:15,713 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:17,419 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:17,420 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:17,730 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:17,732 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:19,425 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:19,425 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:19,749 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:19,767 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:21,436 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:21,436 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:21,777 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:21,780 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:23,441 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:23,441 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:23,816 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:23,818 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:25,448 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:25,448 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:25,822 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:25,825 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:27,456 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:27,456 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:27,844 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:27,847 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:29,463 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:29,463 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:29,849 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:29,852 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:31,472 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:31,472 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:31,859 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:31,862 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:33,486 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:33,487 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:33,876 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:33,879 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:35,495 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:35,496 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:35,885 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:35,888 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:37,505 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:37,505 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:37,895 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:37,898 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:39,514 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:39,514 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:39,901 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:39,904 ERROR   cpu       :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:41,525 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:41,525 ERROR   memory    :15572 [interfaces.py:monitor():129] Failed to sample metric: process no longer exists (pid=9368)
+2023-02-24 12:39:41,852 INFO    wandb-upload_7:15572 [upload_job.py:push():96] Uploaded file C:\Users\liamb\AppData\Local\wandb\wandb\artifacts\staging\tmph8buxmt_

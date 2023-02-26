@@ -1,6 +1,9 @@
-from typing import List
+from typing import List, Any, Optional
 import logging
 
+from torch_geometric.data.hetero_data import NodeOrEdgeStorage
+
+from ModuleEmbeddings import ModuleEmbeddingTrainer
 from NextTagEmbedding import NextTagEmbeddingTrainer
 
 logging.basicConfig()
@@ -15,16 +18,27 @@ from post_embedding_builder import Import, PostEmbedding
 import torch_geometric.transforms as T
 
 
+class BatchedHeteroData(HeteroData):
+
+    def __cat_dim__(self, key: str, value: Any,
+                    store: Optional[NodeOrEdgeStorage] = None, *args,
+                    **kwargs):
+
+        if key in ['question_emb', 'answer_emb', 'label']:
+            return None
+        return super().__cat_dim__(key, value)
+
 class StaticGraphConstruction:
 
     # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
     post_embedding_builder = PostEmbedding()
     tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
+    module_embedding_model = ModuleEmbeddingTrainer.load_model("../models/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
 
     def __init__(self):
         self._known_tags = {}  # tag_name -> index
         self._known_modules = {}  # module_name -> index
-        self._data = HeteroData()
+        self._data = BatchedHeteroData()
         self._first_n_tags = 3
 
         self._tag_to_question_edges = []
@@ -116,13 +130,13 @@ class StaticGraphConstruction:
         if not len(self._known_tags):
             return None
         for tag in self._known_tags:
-            yield self.tag_embedding_model.get_tag_embedding(tag)
+            yield StaticGraphConstruction.tag_embedding_model.get_tag_embedding(tag)
 
     def process_modules(self):
         if not len(self._known_modules):
             return None
         for module in self._known_modules: # TODO: Map module name to its embedding
-            yield torch.rand(110)
+            yield StaticGraphConstruction.module_embedding_model.get_module_embedding(module)
 
     """
     Utility functions
@@ -163,9 +177,9 @@ class StaticGraphConstruction:
 
         self._data['comment'].x = torch.stack(comment_nodes) if len(comment_nodes) else torch.empty(0, 768)
 
-        self._data['tag'].x = torch.stack(tag_nodes) if len(tag_nodes) else torch.empty(0, 90)
+        self._data['tag'].x = torch.stack(tag_nodes) if len(tag_nodes) else torch.empty(0, 50)
 
-        self._data['module'].x = torch.stack(module_nodes) if len(module_nodes) else torch.empty(0, 110)
+        self._data['module'].x = torch.stack(module_nodes) if len(module_nodes) else torch.empty(0, 30)
 
         # Assign edge indexes
         self._data['tag', 'describes', 'question'].edge_index = torch.tensor(self._tag_to_question_edges).t().contiguous() if len(self._tag_to_question_edges) else torch.empty(2,0, dtype=torch.long)

@@ -1,0 +1,169 @@
+2023-02-24 16:41:50,004 INFO    StreamThr :1632 [internal.py:wandb_internal():87] W&B internal server running at pid: 1632, started at: 2023-02-24 16:41:50.003429
+2023-02-24 16:41:50,006 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: status
+2023-02-24 16:41:50,007 INFO    WriterThread:1632 [datastore.py:open_for_write():85] open: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\run-piz6xg4i.wandb
+2023-02-24 16:41:50,009 DEBUG   SenderThread:1632 [sender.py:send():336] send: header
+2023-02-24 16:41:50,009 DEBUG   SenderThread:1632 [sender.py:send():336] send: run
+2023-02-24 16:41:50,354 INFO    SenderThread:1632 [dir_watcher.py:__init__():216] watching files in: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files
+2023-02-24 16:41:50,354 INFO    SenderThread:1632 [sender.py:_start_run_threads():1067] run started: piz6xg4i with start time 1677256909.015496
+2023-02-24 16:41:50,354 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: summary_record
+2023-02-24 16:41:50,355 INFO    SenderThread:1632 [sender.py:_save_file():1321] saving file wandb-summary.json with policy end
+2023-02-24 16:41:50,358 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: check_version
+2023-02-24 16:41:50,358 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: check_version
+2023-02-24 16:41:50,442 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: run_start
+2023-02-24 16:41:50,457 DEBUG   HandlerThread:1632 [system_info.py:__init__():31] System info init
+2023-02-24 16:41:50,457 DEBUG   HandlerThread:1632 [system_info.py:__init__():46] System info init done
+2023-02-24 16:41:50,458 INFO    HandlerThread:1632 [system_monitor.py:start():151] Starting system monitor
+2023-02-24 16:41:50,458 INFO    SystemMonitor:1632 [system_monitor.py:_start():116] Starting system asset monitoring threads
+2023-02-24 16:41:50,458 INFO    HandlerThread:1632 [system_monitor.py:probe():172] Collecting system info
+2023-02-24 16:41:50,461 INFO    SystemMonitor:1632 [interfaces.py:start():168] Started cpu
+2023-02-24 16:41:50,462 DEBUG   HandlerThread:1632 [system_info.py:probe():195] Probing system
+2023-02-24 16:41:50,462 INFO    SystemMonitor:1632 [interfaces.py:start():168] Started disk
+2023-02-24 16:41:50,463 INFO    SystemMonitor:1632 [interfaces.py:start():168] Started memory
+2023-02-24 16:41:50,478 INFO    SystemMonitor:1632 [interfaces.py:start():168] Started network
+2023-02-24 16:41:50,479 DEBUG   HandlerThread:1632 [system_info.py:_probe_git():180] Probing git
+2023-02-24 16:41:50,576 DEBUG   HandlerThread:1632 [system_info.py:_probe_git():188] Probing git done
+2023-02-24 16:41:50,576 DEBUG   HandlerThread:1632 [system_info.py:probe():241] Probing system done
+2023-02-24 16:41:50,576 DEBUG   HandlerThread:1632 [system_monitor.py:probe():181] {'os': 'Windows-10-10.0.19041-SP0', 'python': '3.8.1', 'heartbeatAt': '2023-02-24T16:41:50.462020', 'startedAt': '2023-02-24T16:41:49.004498', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'C:\\Users\\liamb\\Documents\\graph4stackoverflow\\embeddings\\hetero_GAT.py', 'codePath': 'embeddings\\hetero_GAT.py', 'git': {'remote': 'https://git.soton.ac.uk/lhb1g20/graph4stackoverflow.git', 'commit': 'ced992d661984f7b87d1a3e76768e4ff7af78245'}, 'email': 'liambyrneh@gmail.com', 'root': 'C:/Users/liamb/Documents/graph4stackoverflow', 'host': 'DESKTOP-P7BETFF', 'username': 'liamb', 'executable': 'C:\\Users\\liamb\\Documents\\graph4stackoverflow\\venv\\Scripts\\python.exe', 'cpu_count': 2, 'cpu_count_logical': 4, 'cpu_freq': {'current': 3504.0, 'min': 0.0, 'max': 3504.0}, 'cpu_freq_per_core': [{'current': 3504.0, 'min': 0.0, 'max': 3504.0}], 'disk': {'total': 475.71581649780273, 'used': 355.65296936035156}, 'memory': {'total': 31.89160919189453}}
+2023-02-24 16:41:50,576 INFO    HandlerThread:1632 [system_monitor.py:probe():182] Finished collecting system info
+2023-02-24 16:41:50,576 INFO    HandlerThread:1632 [system_monitor.py:probe():185] Publishing system info
+2023-02-24 16:41:50,576 DEBUG   HandlerThread:1632 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-02-24 16:41:50,577 DEBUG   HandlerThread:1632 [system_info.py:_save_pip():67] Saving pip packages done
+2023-02-24 16:41:50,579 INFO    HandlerThread:1632 [system_monitor.py:probe():187] Finished publishing system info
+2023-02-24 16:41:50,580 DEBUG   SenderThread:1632 [sender.py:send():336] send: files
+2023-02-24 16:41:50,580 INFO    SenderThread:1632 [sender.py:_save_file():1321] saving file wandb-metadata.json with policy now
+2023-02-24 16:41:50,589 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: stop_status
+2023-02-24 16:41:50,589 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: stop_status
+2023-02-24 16:41:50,748 DEBUG   SenderThread:1632 [sender.py:send():336] send: telemetry
+2023-02-24 16:41:50,801 DEBUG   SenderThread:1632 [sender.py:send():336] send: exit
+2023-02-24 16:41:50,802 INFO    SenderThread:1632 [sender.py:send_exit():559] handling exit code: 1
+2023-02-24 16:41:50,802 INFO    SenderThread:1632 [sender.py:send_exit():561] handling runtime: 0
+2023-02-24 16:41:50,802 INFO    SenderThread:1632 [sender.py:_save_file():1321] saving file wandb-summary.json with policy end
+2023-02-24 16:41:50,803 INFO    SenderThread:1632 [sender.py:send_exit():567] send defer
+2023-02-24 16:41:50,803 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,804 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 0
+2023-02-24 16:41:50,804 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,804 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 0
+2023-02-24 16:41:50,804 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 1
+2023-02-24 16:41:50,805 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,805 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 1
+2023-02-24 16:41:50,805 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,805 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 1
+2023-02-24 16:41:50,805 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 2
+2023-02-24 16:41:50,805 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,805 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 2
+2023-02-24 16:41:50,806 INFO    HandlerThread:1632 [system_monitor.py:finish():161] Stopping system monitor
+2023-02-24 16:41:50,806 DEBUG   SystemMonitor:1632 [system_monitor.py:_start():130] Starting system metrics aggregation loop
+2023-02-24 16:41:50,806 DEBUG   SystemMonitor:1632 [system_monitor.py:_start():137] Finished system metrics aggregation loop
+2023-02-24 16:41:50,806 DEBUG   SystemMonitor:1632 [system_monitor.py:_start():141] Publishing last batch of metrics
+2023-02-24 16:41:50,807 INFO    HandlerThread:1632 [interfaces.py:finish():175] Joined cpu
+2023-02-24 16:41:50,807 INFO    HandlerThread:1632 [interfaces.py:finish():175] Joined disk
+2023-02-24 16:41:50,807 INFO    HandlerThread:1632 [interfaces.py:finish():175] Joined memory
+2023-02-24 16:41:50,807 INFO    HandlerThread:1632 [interfaces.py:finish():175] Joined network
+2023-02-24 16:41:50,808 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,808 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 2
+2023-02-24 16:41:50,808 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 3
+2023-02-24 16:41:50,808 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,808 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 3
+2023-02-24 16:41:50,808 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,808 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 3
+2023-02-24 16:41:50,808 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 4
+2023-02-24 16:41:50,809 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,809 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 4
+2023-02-24 16:41:50,809 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,809 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 4
+2023-02-24 16:41:50,809 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 5
+2023-02-24 16:41:50,809 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,809 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 5
+2023-02-24 16:41:50,810 DEBUG   SenderThread:1632 [sender.py:send():336] send: summary
+2023-02-24 16:41:50,810 INFO    SenderThread:1632 [sender.py:_save_file():1321] saving file wandb-summary.json with policy end
+2023-02-24 16:41:50,810 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,811 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 5
+2023-02-24 16:41:50,811 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 6
+2023-02-24 16:41:50,811 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:50,811 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 6
+2023-02-24 16:41:50,811 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:50,811 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 6
+2023-02-24 16:41:50,815 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: status_report
+2023-02-24 16:41:51,016 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 7
+2023-02-24 16:41:51,016 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:51,016 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 7
+2023-02-24 16:41:51,017 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:51,017 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 7
+2023-02-24 16:41:51,118 INFO    wandb-upload_0:1632 [upload_job.py:push():138] Uploaded file C:\Users\liamb\AppData\Local\Temp\tmpm_qvevnmwandb\m5hac12f-wandb-metadata.json
+2023-02-24 16:41:51,361 INFO    Thread-33 :1632 [dir_watcher.py:_on_file_modified():292] file/dir modified: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\config.yaml
+2023-02-24 16:41:51,362 INFO    Thread-33 :1632 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\requirements.txt
+2023-02-24 16:41:51,362 INFO    Thread-33 :1632 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\output.log
+2023-02-24 16:41:51,362 INFO    Thread-33 :1632 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\wandb-summary.json
+2023-02-24 16:41:51,362 INFO    Thread-33 :1632 [dir_watcher.py:_on_file_created():275] file/dir created: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\wandb-metadata.json
+2023-02-24 16:41:51,814 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: poll_exit
+2023-02-24 16:41:52,803 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 8
+2023-02-24 16:41:52,803 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: poll_exit
+2023-02-24 16:41:52,804 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:52,804 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 8
+2023-02-24 16:41:52,805 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:52,805 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 8
+2023-02-24 16:41:52,819 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 9
+2023-02-24 16:41:52,819 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:52,819 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 9
+2023-02-24 16:41:52,820 DEBUG   SenderThread:1632 [sender.py:send():336] send: artifact
+2023-02-24 16:41:52,828 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: poll_exit
+2023-02-24 16:41:53,392 INFO    Thread-33 :1632 [dir_watcher.py:_on_file_modified():292] file/dir modified: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\output.log
+2023-02-24 16:41:53,829 INFO    SenderThread:1632 [sender.py:send_artifact():1417] sent artifact job-https___git.soton.ac.uk_lhb1g20_graph4stackoverflow.git_embeddings_hetero_GAT.py - {'id': 'QXJ0aWZhY3Q6MzgwMzY3ODUz', 'digest': 'dbe34f6e8b990dacc5d7c5e1ab1d02a4', 'state': 'COMMITTED', 'aliases': [{'artifactCollectionName': 'job-https___git.soton.ac.uk_lhb1g20_graph4stackoverflow.git_embeddings_hetero_GAT.py', 'alias': 'latest'}, {'artifactCollectionName': 'job-https___git.soton.ac.uk_lhb1g20_graph4stackoverflow.git_embeddings_hetero_GAT.py', 'alias': 'v0'}], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjU0NTg3MzU0', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6MzgwMzk2OTM0', 'versionIndex': 2}}, 'version': 'v0'}
+2023-02-24 16:41:53,829 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:53,829 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 9
+2023-02-24 16:41:53,829 INFO    SenderThread:1632 [dir_watcher.py:finish():362] shutting down directory watcher
+2023-02-24 16:41:54,408 INFO    SenderThread:1632 [dir_watcher.py:finish():392] scan: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files
+2023-02-24 16:41:54,408 INFO    SenderThread:1632 [dir_watcher.py:finish():406] scan save: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\config.yaml config.yaml
+2023-02-24 16:41:54,409 INFO    SenderThread:1632 [dir_watcher.py:finish():406] scan save: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\output.log output.log
+2023-02-24 16:41:54,412 INFO    SenderThread:1632 [dir_watcher.py:finish():406] scan save: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\requirements.txt requirements.txt
+2023-02-24 16:41:54,413 INFO    SenderThread:1632 [dir_watcher.py:finish():406] scan save: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\wandb-metadata.json wandb-metadata.json
+2023-02-24 16:41:54,413 INFO    SenderThread:1632 [dir_watcher.py:finish():406] scan save: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\wandb-summary.json wandb-summary.json
+2023-02-24 16:41:54,419 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 10
+2023-02-24 16:41:54,419 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: poll_exit
+2023-02-24 16:41:54,419 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:54,421 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 10
+2023-02-24 16:41:54,424 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:54,424 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 10
+2023-02-24 16:41:54,425 INFO    SenderThread:1632 [file_pusher.py:finish():162] shutting down file pusher
+2023-02-24 16:41:54,939 INFO    wandb-upload_0:1632 [upload_job.py:push():138] Uploaded file C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\config.yaml
+2023-02-24 16:41:54,951 INFO    wandb-upload_3:1632 [upload_job.py:push():138] Uploaded file C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\wandb-summary.json
+2023-02-24 16:41:54,954 INFO    wandb-upload_2:1632 [upload_job.py:push():138] Uploaded file C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\requirements.txt
+2023-02-24 16:41:54,984 INFO    wandb-upload_1:1632 [upload_job.py:push():138] Uploaded file C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\files\output.log
+2023-02-24 16:41:55,187 INFO    Thread-32 :1632 [sender.py:transition_state():587] send defer: 11
+2023-02-24 16:41:55,187 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:55,187 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 11
+2023-02-24 16:41:55,188 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:55,188 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 11
+2023-02-24 16:41:55,188 INFO    SenderThread:1632 [file_pusher.py:join():167] waiting for file pusher
+2023-02-24 16:41:55,188 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 12
+2023-02-24 16:41:55,188 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:55,188 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 12
+2023-02-24 16:41:55,189 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:55,189 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 12
+2023-02-24 16:41:55,336 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 13
+2023-02-24 16:41:55,336 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:55,336 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 13
+2023-02-24 16:41:55,336 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:55,336 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 13
+2023-02-24 16:41:55,337 INFO    SenderThread:1632 [sender.py:transition_state():587] send defer: 14
+2023-02-24 16:41:55,337 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: defer
+2023-02-24 16:41:55,337 INFO    HandlerThread:1632 [handler.py:handle_request_defer():170] handle defer: 14
+2023-02-24 16:41:55,337 DEBUG   SenderThread:1632 [sender.py:send():336] send: final
+2023-02-24 16:41:55,337 DEBUG   SenderThread:1632 [sender.py:send():336] send: footer
+2023-02-24 16:41:55,338 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: defer
+2023-02-24 16:41:55,338 INFO    SenderThread:1632 [sender.py:send_request_defer():583] handle sender defer: 14
+2023-02-24 16:41:55,338 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: poll_exit
+2023-02-24 16:41:55,338 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: server_info
+2023-02-24 16:41:55,339 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: get_summary
+2023-02-24 16:41:55,339 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: sampled_history
+2023-02-24 16:41:55,339 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: poll_exit
+2023-02-24 16:41:55,339 DEBUG   SenderThread:1632 [sender.py:send_request():363] send_request: server_info
+2023-02-24 16:41:55,499 INFO    MainThread:1632 [wandb_run.py:_footer_history_summary_info():3442] rendering history
+2023-02-24 16:41:55,499 INFO    MainThread:1632 [wandb_run.py:_footer_history_summary_info():3474] rendering summary
+2023-02-24 16:41:55,499 INFO    MainThread:1632 [wandb_run.py:_footer_sync_info():3398] logging synced files
+2023-02-24 16:41:55,500 DEBUG   HandlerThread:1632 [handler.py:handle_request():144] handle_request: shutdown
+2023-02-24 16:41:55,500 INFO    HandlerThread:1632 [handler.py:finish():841] shutting down handler
+2023-02-24 16:41:56,341 INFO    WriterThread:1632 [datastore.py:close():299] close: C:\Users\liamb\Documents\graph4stackoverflow\embeddings\wandb\run-20230224_164149-piz6xg4i\run-piz6xg4i.wandb
+2023-02-24 16:41:56,512 INFO    SenderThread:1632 [sender.py:finish():1493] shutting down sender
+2023-02-24 16:41:56,512 INFO    SenderThread:1632 [file_pusher.py:finish():162] shutting down file pusher
+2023-02-24 16:41:56,513 INFO    SenderThread:1632 [file_pusher.py:join():167] waiting for file pusher
