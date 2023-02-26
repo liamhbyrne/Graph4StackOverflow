@@ -9,3 +9,4 @@ runs/
 *.csv
 embeddings/tag_embedding_models/*
 *.pt
+embeddings/wandb/*

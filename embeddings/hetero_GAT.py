@@ -180,12 +180,12 @@ if __name__ == '__main__':
 
     setup_wandb = False
     wandb_project_name = "heterogeneous-GAT-model"
-    wandb_run_name = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
     if setup_wandb:
-        init_wandb(wandb_project_name, wandb_run_name, dataset)
+        init_wandb(wandb_project_name, dataset)
     use_wandb = True
     if use_wandb:
-        start_wandb_for_training(wandb_project_name)
+        wandb_run_name = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
+        start_wandb_for_training(wandb_project_name, wandb_run_name)
 
     # Class weights
     train_labels = [x.label for x in train_dataset]
@@ -228,11 +228,11 @@ if __name__ == '__main__':
                 "test/table": test_table,
             })
             # Log model checkpoint as an artifact to W&B
-            artifact = wandb.Artifact(name="heterogenous-GAT-static-graphs", type="model")
-            checkpoint_file_name = f"../models/model-{epoch}.pt"
-            torch.save(model.state_dict(), checkpoint_file_name)
-            artifact.add_file(checkpoint_file_name)
-            wandb.log_artifact(artifact)
+            # artifact = wandb.Artifact(name="heterogenous-GAT-static-graphs", type="model")
+            # checkpoint_file_name = f"../models/model-{epoch}.pt"
+            # torch.save(model.state_dict(), checkpoint_file_name)
+            # artifact.add_file(checkpoint_file_name)
+            # wandb.log_artifact(artifact)
 
     print(f'Test F1: {test_f1:.4f}')
 
