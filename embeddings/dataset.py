@@ -13,15 +13,15 @@ from torch_geometric.data import Dataset, download_url, Data, HeteroData
 from torch_geometric.data.hetero_data import NodeOrEdgeStorage
 from tqdm import tqdm
 import warnings
+
+from custom_logger import setup_custom_logger
+
 warnings.filterwarnings('ignore', category=MarkupResemblesLocatorWarning)
 
 from post_embedding_builder import PostEmbedding
 from static_graph_construction import StaticGraphConstruction
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
-log = logging.getLogger("dataset")
-
+log = setup_custom_logger('dataset', logging.INFO)
 
 class UserGraphDataset(Dataset):
     def __init__(self, root, transform=None, pre_transform=None, pre_filter=None, db_address:str=None, skip_processing=False):

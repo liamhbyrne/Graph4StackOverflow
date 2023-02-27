@@ -30,12 +30,11 @@ class BatchedHeteroData(HeteroData):
 
 class StaticGraphConstruction:
 
-    # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
-    post_embedding_builder = PostEmbedding()
-    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
-    module_embedding_model = ModuleEmbeddingTrainer.load_model("../models/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
-
     def __init__(self):
+        # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
+        post_embedding_builder = PostEmbedding()
+        tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
+        module_embedding_model = ModuleEmbeddingTrainer.load_model("../models/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
         self._known_tags = {}  # tag_name -> index
         self._known_modules = {}  # module_name -> index
         self._data = BatchedHeteroData()

@@ -12,12 +12,13 @@ from torch_geometric.nn import HeteroConv, GATConv, Linear, global_mean_pool
 import wandb
 from torch_geometric.utils import to_networkx
 
+from custom_logger import setup_custom_logger
 from dataset import UserGraphDataset
+from dataset_in_memory import UserGraphDatasetInMemory
 from Visualize import GraphVisualization
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
-log = logging.getLogger('heterogeneous-GAT-model')
+log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
+
 
 class HeteroGNN(torch.nn.Module):
     def __init__(self, hidden_channels, out_channels, num_layers):
@@ -54,7 +55,6 @@ class HeteroGNN(torch.nn.Module):
             if len(x):
                 outs.append(global_mean_pool(x, batch=batch, size=len(post_emb)))
             else:
-                #print("EMPTY")
                 outs.append(torch.zeros(1, x.size(-1)))
 
         #print([x.shape for x in outs])
@@ -75,7 +75,6 @@ def train(model, train_loader):
 
     model.train()
     for i, data in enumerate(train_loader):  # Iterate in batches over the training dataset.
-        #print(data)
         data = data.to(device)
 
         optimizer.zero_grad()  # Clear gradients.
@@ -121,7 +120,6 @@ def test(loader):
             for pred, label in zip(pred, torch.squeeze(data.label, -1)):
                 table.add_data(graph_html, label, pred)
 
-    #print("PRED", predictions, true_labels)
     return accuracy_score(true_labels, predictions), f1_score(true_labels, predictions), loss_ / len(loader), table
 
 def create_graph_vis(graph):
@@ -146,9 +144,9 @@ def init_wandb(project_name: str, dataset):
         n_edges = graph.num_edges
         label = graph.label.item()
 
-        graph_vis = plotly.io.to_html(fig, full_html=False)
+        #graph_vis = plotly.io.to_html(fig, full_html=False)
 
-        table.add_data(graph_vis, n_nodes, n_edges, label)
+        table.add_data(wandb.Plotly(fig), n_nodes, n_edges, label)
     wandb.log({"data": table})
 
     # Log the dataset to W&B as an artifact.
@@ -159,17 +157,30 @@ def init_wandb(project_name: str, dataset):
     # End the W&B run
     wandb.finish()
 
-def start_wandb_for_training(wandb_project_name: str):
-    wandb.init(project=wandb_project_name)
-    wandb.use_artifact("static-graphs:latest")
+def start_wandb_for_training(wandb_project_name: str, wandb_run_name: str):
+    wandb.init(project=wandb_project_name, name=wandb_run_name)
+    #wandb.use_artifact("static-graphs:latest")
 
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     log.info(f"Proceeding with {device} . .")
 
+    in_memory_dataset = False
     # Datasets
-    dataset = UserGraphDataset(root="../data", skip_processing=True)
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.6, 0.1, 0.3])
+    if in_memory_dataset:
+        dataset = UserGraphDatasetInMemory(root="../data")
+    else:
+        dataset = UserGraphDataset(root="../data", skip_processing=True)
+
+
+    train_size = int(0.7 * len(dataset))
+    val_size = int(0.1 * len(dataset))
+    test_size = len(dataset) - (train_size + val_size)
+
+    log.info(f"Train Dataset Size: {train_size}")
+    log.info(f"Validation Dataset Size: {val_size}")
+    log.info(f"Test Dataset Size: {test_size}")
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
 
     # Weights&Biases dashboard
     data_details = {
@@ -182,30 +193,35 @@ if __name__ == '__main__':
     wandb_project_name = "heterogeneous-GAT-model"
     if setup_wandb:
         init_wandb(wandb_project_name, dataset)
-    use_wandb = True
+    use_wandb = False
     if use_wandb:
         wandb_run_name = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
         start_wandb_for_training(wandb_project_name, wandb_run_name)
 
-    # Class weights
-    train_labels = [x.label for x in train_dataset]
-    counts = [train_labels.count(x) for x in [0,1]]
-    class_weights = [1 - (x / sum(counts)) for x in counts]
-    sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
+
+    calculate_class_weights = False
+    #Class weights
+    sampler = None
+    if calculate_class_weights:
+        log.info(f"Calculating class weights")
+        train_labels = [x.label for x in train_dataset]
+        counts = [train_labels.count(x) for x in [0,1]]
+        class_weights = [1 - (x / sum(counts)) for x in counts]
+        sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
 
     # Dataloaders
-    train_loader = DataLoader(train_dataset, sampler=None, batch_size=16)
-    val_loader = DataLoader(val_dataset, batch_size=1)
-    test_loader = DataLoader(test_dataset, batch_size=1)
+    train_loader = DataLoader(train_dataset, sampler=sampler, batch_size=512)
+    val_loader = DataLoader(val_dataset, batch_size=16)
+    test_loader = DataLoader(test_dataset, batch_size=16)
 
     # Model
-    model = HeteroGNN(hidden_channels=64, out_channels=2, num_layers=3)
-    model.to(device)
+    model = HeteroGNN(hidden_channels=64, out_channels=2, num_layers=3).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, 10):
+        log.info(f"Epoch: {epoch:03d} > > >")
         train(model, train_loader)
         train_acc, train_f1, train_loss, train_table = test(train_loader)
         val_acc, val_f1, val_loss, val_table = test(val_loader)

@@ -9,16 +9,17 @@ from typing import List
 
 from NextTagEmbedding import NextTagEmbedding, NextTagEmbeddingTrainer
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-log = logging.getLogger("PostEmbedding")
-
 from bs4 import BeautifulSoup
 import spacy
 import torch
 import torch.nn as nn
 from transformers import BertTokenizer, BertModel, RobertaTokenizer, RobertaModel, AutoTokenizer, AutoModel, AutoConfig
+
+from custom_logger import setup_custom_logger
 from unixcoder import UniXcoder
+
+log = setup_custom_logger('post_embedding_builder', logging.INFO)
+
 
 Import = namedtuple("Import", ["module", "name", "alias"])
 Function = namedtuple("Function", ["function_name", "parameter_names"])
