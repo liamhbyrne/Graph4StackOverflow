@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import string
 import time
 
@@ -161,6 +162,9 @@ def start_wandb_for_training(wandb_project_name: str, wandb_run_name: str):
     wandb.init(project=wandb_project_name, name=wandb_run_name)
     #wandb.use_artifact("static-graphs:latest")
 
+def save_model(model, model_name: str):
+    torch.save(model.state_dict(), os.path.join("..", "models", model_name))
+
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     log.info(f"Proceeding with {device} . .")
@@ -210,7 +214,7 @@ if __name__ == '__main__':
         sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
 
     # Dataloaders
-    train_loader = DataLoader(train_dataset, sampler=sampler, batch_size=512)
+    train_loader = DataLoader(train_dataset, sampler=sampler, batch_size=64)
     val_loader = DataLoader(val_dataset, batch_size=16)
     test_loader = DataLoader(test_dataset, batch_size=16)
 
@@ -220,14 +224,16 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.CrossEntropyLoss()
 
-    for epoch in range(1, 10):
+    for epoch in range(1, 5):
         log.info(f"Epoch: {epoch:03d} > > >")
         train(model, train_loader)
         train_acc, train_f1, train_loss, train_table = test(train_loader)
         val_acc, val_f1, val_loss, val_table = test(val_loader)
         test_acc, test_f1, test_loss, test_table = test(test_loader)
 
-        print(f'Epoch: {epoch:03d}, Train F1: {train_f1:.4f}, Validation F1: {val_f1:.4f}')
+        print(f'Epoch: {epoch:03d}, Train F1: {train_f1:.4f}, Validation F1: {val_f1:.4f} Test F1: {test_f1:.4f}')
+        checkpoint_file_name = f"../models/model-{epoch}.pt"
+        torch.save(model.state_dict(), checkpoint_file_name)
         if use_wandb:
             wandb.log({
                 "train/loss": train_loss,
@@ -252,5 +258,6 @@ if __name__ == '__main__':
 
     print(f'Test F1: {test_f1:.4f}')
 
+    save_model(model, "model.pt")
     if use_wandb:
         wandb.finish()
