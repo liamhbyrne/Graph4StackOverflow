@@ -20,9 +20,9 @@ from Visualize import GraphVisualization
 
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
 torch.multiprocessing.set_sharing_strategy('file_system')
-import resource
+mport resource
 rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
+# resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
 
 
 class HeteroGNN(torch.nn.Module):
@@ -222,9 +222,7 @@ if __name__ == '__main__':
         "num_classes": 2
     }
     log.info(f"Data Details:\n{data_details}")
-    
-    log.info(train_dataset[0])
-    
+
     setup_wandb = False
     wandb_project_name = "heterogeneous-GAT-model"
     if setup_wandb:
@@ -241,7 +239,6 @@ if __name__ == '__main__':
         log.info(f"Calculating class weights")
         train_labels = [x.label for x in train_dataset]
         counts = [train_labels.count(x) for x in [0, 1]]
-        print(counts)
         class_weights = [1 - (x / sum(counts)) for x in counts]
         print(class_weights)
         sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
@@ -259,9 +256,9 @@ if __name__ == '__main__':
     model.to(device)
     
     # Experiment config
-    INCLUDE_ANSWER = False
+    INCLUDE_ANSWER = True
     
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, 40):
@@ -291,7 +288,7 @@ if __name__ == '__main__':
             # artifact.add_file(checkpoint_file_name)
             # wandb.log_artifact(artifact)
 
-    print(f'Test F1: {train_info["f1-score"]:.4f}')
+    print(f'Test F1: {test_f1:.4f}')
 
     save_model(model, "model.pt")
     if use_wandb:
