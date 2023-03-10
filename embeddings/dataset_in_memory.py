@@ -16,6 +16,7 @@ class UserGraphDatasetInMemory(InMemoryDataset):
         self._question_ids = question_ids
         super().__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices = torch.load(self.processed_paths[0])
+        # Remove gradient requirements
         self.data = self.data.apply(lambda x: x.detach())
 
     @property

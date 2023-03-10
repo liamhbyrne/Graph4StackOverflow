@@ -10,23 +10,23 @@ import torch
 from sklearn.metrics import f1_score, accuracy_score
 from torch_geometric.loader import DataLoader
 from torch_geometric.nn import HeteroConv, GATConv, Linear, global_mean_pool
-from embeddings.helper_functions import calculate_class_weights, split_test_train_pytorch
+from helper_functions import calculate_class_weights, split_test_train_pytorch
 import wandb
 from torch_geometric.utils import to_networkx
+from sklearn.model_selection import KFold
 
 from custom_logger import setup_custom_logger
 from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
 from Visualize import GraphVisualization
 import helper_functions
-from hetero_GAT_constants import TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS
+from hetero_GAT_constants import TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME
 
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
 torch.multiprocessing.set_sharing_strategy('file_system')
 import resource
 rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
-
 
 
 class HeteroGNN(torch.nn.Module):
@@ -134,15 +134,22 @@ def test(loader):
 
         loss = criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
         cumulative_loss += loss.item()
-        pred = out.argmax(dim=1)  # Use the class with highest probability.
+        
+        # Use the class with highest probability.
+        pred = out.argmax(dim=1)  
+        
+        # Cache the predictions for calculating metrics
         predictions += list([x.item() for x in pred])
         true_labels += list([x.item() for x in data.label])
+        
+        # Log table of predictions to WandB
         if USE_WANDB:
             #graph_html = wandb.Html(plotly.io.to_html(create_graph_vis(data)))
             
             for pred, label in zip(pred, torch.squeeze(data.label, -1)):
                 table.add_data(label, pred)
-
+    
+    # Collate results into a single dictionary
     test_results = {
         "accuracy": accuracy_score(true_labels, predictions),
         "f1-score": f1_score(true_labels, predictions),
@@ -163,6 +170,10 @@ if __name__ == '__main__':
     if IN_MEMORY_DATASET:
         train_dataset = UserGraphDatasetInMemory(root="../data", file_name_out='train-4175-qs.pt')
         test_dataset = UserGraphDatasetInMemory(root="../data", file_name_out='test-1790-qs.pt')
+        
+        ## TEST
+        split1, split2 = helper_functions.split_test_train_pytorch(train_dataset, 0.7)
+
     else:
         dataset = UserGraphDataset(root="../data", skip_processing=True)
         train_dataset, test_dataset = split_test_train_pytorch(dataset)
@@ -179,8 +190,9 @@ if __name__ == '__main__':
     log.info(f"Data Details:\n{data_details}")
     
     if USE_WANDB:
-        wandb_run_name = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
-        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, wandb_run_name)
+        if WANDB_RUN_NAME is None:
+            run_name = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
+        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, run_name)
 
 
     # Class weights
@@ -218,24 +230,16 @@ if __name__ == '__main__':
         if SAVE_CHECKPOINTS:
             checkpoint_file_name = f"../models/model-{epoch}.pt"
             torch.save(model.state_dict(), checkpoint_file_name)
-
+        
+        # log evaluation results to wandb
         if USE_WANDB:
-            wandb.log({
-                "train/loss": train_info["loss"],
-                "train/accuracy": train_info["accuracy"],
-                "train/f1": train_info["f1-score"],
-                "train/table": train_info["table"],
-                "test/loss": test_info["loss"],
-                "test/accuracy": test_info["accuracy"],
-                "test/f1": test_info["f1-score"],
-                "test/table": test_info["table"]
-            })
+            helper_functions.log_results_to_wandb(train_info, "train")
+            helper_functions.log_results_to_wandb(test_info, "test")
 
     log.info(f'Test F1: {train_info["f1-score"]:.4f}')
 
     helper_functions.save_model(model, FINAL_MODEL_OUT_PATH)
     # Plot confusion matrix
     if USE_WANDB:
-        wandb.log({"test/cm": wandb.plot.confusion_matrix(probs=None, y_true=test_info["trues"], preds=test_info["preds"], class_names=["neutral", "upvoted"])})
+        helper_functions.add_cm_to_wandb(test_info)
         wandb.finish()
-

@@ -10,3 +10,4 @@ runs/
 embeddings/tag_embedding_models/*
 *.pt
 embeddings/wandb/*
+*.pkl
