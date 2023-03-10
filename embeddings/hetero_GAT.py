@@ -14,24 +14,27 @@ from helper_functions import calculate_class_weights, split_test_train_pytorch
 import wandb
 from torch_geometric.utils import to_networkx
 from sklearn.model_selection import KFold
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from custom_logger import setup_custom_logger
 from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
 from Visualize import GraphVisualization
 import helper_functions
-from hetero_GAT_constants import TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME
+from hetero_GAT_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES
 
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
-torch.multiprocessing.set_sharing_strategy('file_system')
-import resource
-rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
+
+if OS_NAME == "linux":
+    torch.multiprocessing.set_sharing_strategy('file_system')
+    import resource
+    rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
 
 
 class HeteroGNN(torch.nn.Module):
     """
-    Heterogenous Graph Attentional Network (GAT)
+    Heterogeneous Graph Attentional Network (GAT) model.
     """
     def __init__(self, hidden_channels, out_channels, num_layers):
         super().__init__()
@@ -58,7 +61,6 @@ class HeteroGNN(torch.nn.Module):
         self.softmax = torch.nn.Softmax(dim=-1)
 
     def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
-        # print("IN", post_emb.shape)
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
             x_dict = {key: x.relu() for key, x in x_dict.items()}
@@ -89,16 +91,18 @@ class HeteroGNN(torch.nn.Module):
 
 def train(model, train_loader):
     running_loss = 0.0
-
     model.train()
+
     for i, data in enumerate(train_loader):  # Iterate in batches over the training dataset.
         data.to(device)
 
         optimizer.zero_grad()  # Clear gradients.
-        
+
         if INCLUDE_ANSWER:
+            # Concatenate question and answer embeddings to form post embeddings
             post_emb = torch.cat([data.question_emb, data.answer_emb], dim=1).to(device)
         else:
+            # Use only question embeddings as post embedding
             post_emb = data.question_emb.to(device)
 
         out = model(data.x_dict, data.edge_index_dict, data.batch_dict, post_emb)  # Perform a single forward pass.
@@ -106,6 +110,7 @@ def train(model, train_loader):
         loss = criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
         loss.backward()  # Derive gradients.
         optimizer.step()  # Update parameters based on gradients.
+        scheduler.step()
 
         running_loss += loss.item()
         if i % 5 == 0:
@@ -168,15 +173,55 @@ if __name__ == '__main__':
 
     # Datasets
     if IN_MEMORY_DATASET:
-        train_dataset = UserGraphDatasetInMemory(root="../data", file_name_out='train-4175-qs.pt')
-        test_dataset = UserGraphDatasetInMemory(root="../data", file_name_out='test-1790-qs.pt')
-        
-        ## TEST
-        split1, split2 = helper_functions.split_test_train_pytorch(train_dataset, 0.7)
-
+        train_dataset = UserGraphDatasetInMemory(root="../data", file_name_out='train-4175-qs.pt', question_ids=[])
+        test_dataset = UserGraphDatasetInMemory(root="../data", file_name_out='test-1790-qs.pt', question_ids=[])
     else:
         dataset = UserGraphDataset(root="../data", skip_processing=True)
-        train_dataset, test_dataset = split_test_train_pytorch(dataset)
+        train_dataset, test_dataset = split_test_train_pytorch(dataset, 0.7)
+
+    if CROSS_VALIDATE:
+        folds = [UserGraphDatasetInMemory(root="../data", file_name_out=fold_path, question_ids=[]) for fold_path in FOLD_FILES]
+        kfold_results = []
+        for i in range(len(folds)):
+            test_fold = folds[i]
+            train_fold = torch.utils.data.ConcatDataset([fold for j, fold in enumerate(folds) if j != i])
+
+            log.info(f"Fold {i + 1} of {len(folds)}\n-------------------")
+            # Define data loaders for training and testing data in this fold
+            train_fold_loader = DataLoader(
+                train_fold,
+                batch_size=TRAIN_BATCH_SIZE
+            )
+            test_fold_loader = DataLoader(
+                test_fold,
+                batch_size=TEST_BATCH_SIZE
+            )
+            # Model
+            model = HeteroGNN(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
+            model.to(device)  # To GPU if available
+
+            # Optimizers & Loss function
+            optimizer = torch.optim.Adam(model.parameters())
+            scheduler = CosineAnnealingLR(optimizer, T_max=EPOCHS)
+
+            criterion = torch.nn.CrossEntropyLoss()
+            for epoch in range(1, EPOCHS):
+                log.info(f"Epoch: {epoch:03d} > > >")
+
+                # train model . .
+                train(model, train_fold_loader)
+
+                # evaluate on test fold . .
+                test_info = test(test_fold_loader)
+
+                # log for current epoch
+                log.info(f'Epoch: {epoch:03d}, Test F1: {test_info["f1-score"]:.4f}')
+
+            log.info(f'Fold {i+1}, Test F1: {test_info["f1-score"]:.4f}')
+            kfold_results.append(test_info)
+
+        print(f"K-Fold Results: {kfold_results}")
+
 
     log.info(f"Sample graph:\n{train_dataset[0]}")
     log.info(f"Train Dataset Size: {len(train_dataset)}")
@@ -191,8 +236,8 @@ if __name__ == '__main__':
     
     if USE_WANDB:
         if WANDB_RUN_NAME is None:
-            run_name = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
-        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, run_name)
+            WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
+        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
 
 
     # Class weights
@@ -201,7 +246,7 @@ if __name__ == '__main__':
     # Dataloaders
     log.info(f"Train DataLoader batch size is set to {TRAIN_BATCH_SIZE}")
     train_loader = DataLoader(train_dataset, sampler=sampler, batch_size=TRAIN_BATCH_SIZE, num_workers=NUM_WORKERS)
-    test_loader = DataLoader(test_dataset, batch_size=TRAIN_BATCH_SIZE, num_workers=NUM_WORKERS)
+    test_loader = DataLoader(test_dataset, batch_size=TEST_BATCH_SIZE, num_workers=NUM_WORKERS)
 
     # Model
     model = HeteroGNN(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
@@ -228,8 +273,7 @@ if __name__ == '__main__':
         log.info(f'Epoch: {epoch:03d}, Train F1: {train_info["f1-score"]:.4f}, Test F1: {test_info["f1-score"]:.4f}')
 
         if SAVE_CHECKPOINTS:
-            checkpoint_file_name = f"../models/model-{epoch}.pt"
-            torch.save(model.state_dict(), checkpoint_file_name)
+            torch.save(model.state_dict(), f"../models/model-{epoch}.pt")
         
         # log evaluation results to wandb
         if USE_WANDB:
