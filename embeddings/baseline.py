@@ -40,19 +40,22 @@ class Baseline(torch.nn.Module):
     Heterogeneous Graph Attentional Network (GAT) model.
     """
 
-    def __init__(self, out_channels):
+    def __init__(self, hidden_channels, out_channels):
         super().__init__()
-        self.lin = Linear(-1, out_channels)
+        self.lin1 = Linear(-1, hidden_channels)
+        self.lin2 = Linear(-1, out_channels)
         self.softmax = torch.nn.Softmax(dim=-1)
 
     def forward(self, post_emb):
 
-
-
-        # print("B4 LINEAR", out.shape)
-        out = self.lin(post_emb)
+        out = self.lin1(post_emb)
         out = out.relu()
         out = F.dropout(post_emb, p=DROPOUT, training=self.training)
+
+        out = self.lin2(post_emb)
+        out = out.relu()
+        out = F.dropout(post_emb, p=DROPOUT, training=self.training)
+
         out = self.softmax(out)
         return out
 
@@ -178,7 +181,7 @@ if __name__ == '__main__':
                 batch_size=TEST_BATCH_SIZE
             )
             # Model
-            model = Baseline(out_channels=2)
+            model = Baseline(out_channels=2, hidden_channels=64)
             model.to(device)  # To GPU if available
 
             # Optimizers & Loss function
@@ -231,7 +234,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_dataset, batch_size=TEST_BATCH_SIZE, num_workers=NUM_WORKERS)
 
     # Model
-    model = Baseline(out_channels=2)
+    model = Baseline(out_channels=2, hidden_channels=64)
     model.to(device)  # To GPU if available
 
     # Optimizers & Loss function
