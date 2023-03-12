@@ -86,8 +86,7 @@ def calculate_class_weights(dataset):
     log.info(f"Calculating class weights")
     train_labels = [x.label for x in dataset]
     counts = [train_labels.count(x) for x in [0, 1]]
-    log.info(counts)
     class_weights = [1 - (x / sum(counts)) for x in counts]
     log.info(class_weights)
-    sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
-    return sampler
+    
+    return torch.tensor(class_weights)

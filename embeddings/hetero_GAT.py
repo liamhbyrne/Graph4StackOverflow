@@ -5,6 +5,7 @@ import string
 import time
 
 import networkx as nx
+import pandas as pd
 import plotly
 import torch
 from sklearn.metrics import f1_score, accuracy_score
@@ -13,6 +14,7 @@ from torch_geometric.nn import HeteroConv, GATConv, Linear, global_mean_pool
 from helper_functions import calculate_class_weights, split_test_train_pytorch
 import wandb
 from torch_geometric.utils import to_networkx
+import torch.nn.functional as F
 from sklearn.model_selection import KFold
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
@@ -21,7 +23,7 @@ from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
 from Visualize import GraphVisualization
 import helper_functions
-from hetero_GAT_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES
+from hetero_GAT_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES, USE_CLASS_WEIGHTS_SAMPLER, USE_CLASS_WEIGHTS_LOSS, DROPOUT
 
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
 
@@ -64,6 +66,7 @@ class HeteroGNN(torch.nn.Module):
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
             x_dict = {key: x.relu() for key, x in x_dict.items()}
+            #x_dict = {key: F.dropout(x, p=DROPOUT, training=self.training) for key, x in x_dict.items()}
 
         outs = []
         for x, batch in zip(x_dict.values(), batch_dict.values()):
@@ -76,6 +79,8 @@ class HeteroGNN(torch.nn.Module):
         out = torch.cat(outs, dim=1)
 
         out = torch.cat([out, post_emb], dim=1)
+        
+        out = F.dropout(out, p=DROPOUT, training=self.training)
 
         # print("B4 LINEAR", out.shape)
         out = self.lin(out)
@@ -157,7 +162,7 @@ def test(loader):
     # Collate results into a single dictionary
     test_results = {
         "accuracy": accuracy_score(true_labels, predictions),
-        "f1-score": f1_score(true_labels, predictions),
+        "f1-score": f1_score(true_labels, predictions, average='binary'),
         "loss": cumulative_loss / len(loader),
         "table": table,
         "preds": predictions, 
@@ -170,6 +175,13 @@ def test(loader):
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     log.info(f"Proceeding with {device} . .")
+    
+    if USE_WANDB:
+        log.info(f"Connecting to Weights & Biases . .")
+        if WANDB_RUN_NAME is None:
+            WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
+        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
+    
 
     # Datasets
     if IN_MEMORY_DATASET:
@@ -180,6 +192,7 @@ if __name__ == '__main__':
         train_dataset, test_dataset = split_test_train_pytorch(dataset, 0.7)
 
     if CROSS_VALIDATE:
+        print(FOLD_FILES)
         folds = [UserGraphDatasetInMemory(root="../data", file_name_out=fold_path, question_ids=[]) for fold_path in FOLD_FILES]
         kfold_results = []
         for i in range(len(folds)):
@@ -203,8 +216,9 @@ if __name__ == '__main__':
             # Optimizers & Loss function
             optimizer = torch.optim.Adam(model.parameters())
             scheduler = CosineAnnealingLR(optimizer, T_max=EPOCHS)
-
-            criterion = torch.nn.CrossEntropyLoss()
+            
+            fold_class_weights = calculate_class_weights(train_fold).to(device)
+            criterion = torch.nn.CrossEntropyLoss(weight=fold_class_weights if USE_CLASS_WEIGHTS_LOSS else None)
             for epoch in range(1, EPOCHS):
                 log.info(f"Epoch: {epoch:03d} > > >")
 
@@ -233,15 +247,16 @@ if __name__ == '__main__':
         "num_classes": 2
     }
     log.info(f"Data Details:\n{data_details}")
-    
     if USE_WANDB:
-        if WANDB_RUN_NAME is None:
-            WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
-        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
+        wandb.log(data_details)
 
-
-    # Class weights
-    sampler = calculate_class_weights(train_dataset)
+    sampler = None
+    class_weights = calculate_class_weights(train_dataset).to(device)
+    
+    # Sample by class weight
+    if USE_CLASS_WEIGHTS_SAMPLER:
+        train_labels = [x.label for x in train_dataset]
+        sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
 
     # Dataloaders
     log.info(f"Train DataLoader batch size is set to {TRAIN_BATCH_SIZE}")
@@ -254,10 +269,13 @@ if __name__ == '__main__':
     
     # Optimizers & Loss function
     optimizer = torch.optim.Adam(model.parameters())
-    criterion = torch.nn.CrossEntropyLoss()
+    scheduler = CosineAnnealingLR(optimizer, T_max=EPOCHS)
+    
+    # Cross Entropy Loss (with optional class weights)
+    criterion = torch.nn.CrossEntropyLoss(weight=class_weights if USE_CLASS_WEIGHTS_LOSS else None)
 
 
-    for epoch in range(1, EPOCHS):
+    for epoch in range(1, EPOCHS+1):
         log.info(f"Epoch: {epoch:03d} > > >")
         
         # train model . . 
@@ -270,7 +288,12 @@ if __name__ == '__main__':
         test_info = test(test_loader)
 
         # log for current epoch
-        log.info(f'Epoch: {epoch:03d}, Train F1: {train_info["f1-score"]:.4f}, Test F1: {test_info["f1-score"]:.4f}')
+        log.info(f'Epoch: {epoch:03d}, Loss {train_info["loss"]}, Train F1: {train_info["f1-score"]:.4f}, Test F1: {test_info["f1-score"]:.4f}')
+        
+        # print confusion matrix
+        df = pd.DataFrame({'actual': test_info["trues"], 'prediction': test_info["preds"]})
+        confusion_matrix = pd.crosstab(df['actual'], df['prediction'], rownames=['Actual'], colnames=['Predicted'])
+        print(confusion_matrix)
 
         if SAVE_CHECKPOINTS:
             torch.save(model.state_dict(), f"../models/model-{epoch}.pt")
@@ -280,7 +303,7 @@ if __name__ == '__main__':
             helper_functions.log_results_to_wandb(train_info, "train")
             helper_functions.log_results_to_wandb(test_info, "test")
 
-    log.info(f'Test F1: {train_info["f1-score"]:.4f}')
+    log.info(f'Test F1: {test_info["f1-score"]:.4f}')
 
     helper_functions.save_model(model, FINAL_MODEL_OUT_PATH)
     # Plot confusion matrix
