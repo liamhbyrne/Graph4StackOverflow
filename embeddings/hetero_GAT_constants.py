@@ -9,13 +9,13 @@ USE_CLASS_WEIGHTS_SAMPLER = True
 USE_CLASS_WEIGHTS_LOSS = False
 
 # W&B dashboard logging
-USE_WANDB = True
+USE_WANDB = False
 WANDB_PROJECT_NAME = "heterogeneous-GAT-model"
 WANDB_RUN_NAME = None  # None for timestamp
 
 # OS
-OS_NAME = "linux"  # "windows" or "linux"
-NUM_WORKERS = 14
+OS_NAME = "windows"  # "windows" or "linux"
+NUM_WORKERS = 0
 
 # Training parameters
 TRAIN_DATA_PATH = "data/train-6001-qs.pt"

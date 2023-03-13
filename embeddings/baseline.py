@@ -1,31 +1,24 @@
-import json
 import logging
-import os
-import string
+import logging
 import time
 
-import networkx as nx
 import pandas as pd
-import plotly
 import torch
-from sklearn.metrics import f1_score, accuracy_score
-from torch_geometric.loader import DataLoader
-from torch_geometric.nn import HeteroConv, GATConv, Linear, global_mean_pool
-from helper_functions import calculate_class_weights, split_test_train_pytorch
-import wandb
-from torch_geometric.utils import to_networkx
 import torch.nn.functional as F
-from sklearn.model_selection import KFold
+from sklearn.metrics import f1_score, accuracy_score
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch_geometric.loader import DataLoader
+from torch_geometric.nn import Linear
 
+import helper_functions
+import wandb
+from baseline_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES, USE_CLASS_WEIGHTS_SAMPLER, USE_CLASS_WEIGHTS_LOSS, DROPOUT
 from custom_logger import setup_custom_logger
 from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
-from Visualize import GraphVisualization
-import helper_functions
-from hetero_GAT_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES, USE_CLASS_WEIGHTS_SAMPLER, USE_CLASS_WEIGHTS_LOSS, DROPOUT
+from helper_functions import calculate_class_weights, split_test_train_pytorch
 
-log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
+log = setup_custom_logger("baseline_model", logging.INFO)
 
 if OS_NAME == "linux":
     torch.multiprocessing.set_sharing_strategy('file_system')
@@ -47,14 +40,12 @@ class Baseline(torch.nn.Module):
         self.softmax = torch.nn.Softmax(dim=-1)
 
     def forward(self, post_emb):
+        post_emb = torch.squeeze(post_emb)
+        out = self.lin1(post_emb).relu()
+        out = F.dropout(out, p=DROPOUT, training=self.training)
 
-        out = self.lin1(post_emb)
-        out = out.relu()
-        out = F.dropout(post_emb, p=DROPOUT, training=self.training)
-
-        out = self.lin2(post_emb)
-        out = out.relu()
-        out = F.dropout(post_emb, p=DROPOUT, training=self.training)
+        out = self.lin2(out).relu()
+        #out = F.dropout(post_emb, p=DROPOUT, training=self.training)
 
         out = self.softmax(out)
         return out
@@ -131,7 +122,6 @@ def test(loader):
             for pred, label in zip(pred, torch.squeeze(data.label, -1)):
                 table.add_data(label, pred)
 
-    print("predictions", predictions, "true_labels", true_labels)
     # Collate results into a single dictionary
     test_results = {
         "accuracy": accuracy_score(true_labels, predictions),
@@ -151,7 +141,7 @@ if __name__ == '__main__':
     if USE_WANDB:
         log.info(f"Connecting to Weights & Biases . .")
         if WANDB_RUN_NAME is None:
-            WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
+            WANDB_RUN_NAME = f"baseline-run@{time.strftime('%Y%m%d-%H%M%S')}"
         helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
 
     # Datasets
@@ -181,7 +171,7 @@ if __name__ == '__main__':
                 batch_size=TEST_BATCH_SIZE
             )
             # Model
-            model = Baseline(out_channels=2, hidden_channels=64)
+            model = Baseline(out_channels=2, hidden_channels=HIDDEN_CHANNELS)
             model.to(device)  # To GPU if available
 
             # Optimizers & Loss function
@@ -234,7 +224,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_dataset, batch_size=TEST_BATCH_SIZE, num_workers=NUM_WORKERS)
 
     # Model
-    model = Baseline(out_channels=2, hidden_channels=64)
+    model = Baseline(out_channels=2, hidden_channels=HIDDEN_CHANNELS)
     model.to(device)  # To GPU if available
 
     # Optimizers & Loss function
