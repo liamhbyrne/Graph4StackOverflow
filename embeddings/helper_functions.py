@@ -1,7 +1,11 @@
+import networkx as nx
 import torch
+from torch_geometric.utils import to_networkx
+
 import wandb
 import os
 
+from Visualize import GraphVisualization
 from custom_logger import setup_custom_logger
 import logging
 
@@ -51,7 +55,7 @@ def init_wandb(project_name: str, dataset, data_details):
 
 def start_wandb_for_training(wandb_project_name: str, wandb_run_name: str):
     wandb.init(project=wandb_project_name, name=wandb_run_name)
-    # wandb.use_artifact("static-graphs:latest")
+    return wandb.config
 
 
 def add_cm_to_wandb(test_info):

@@ -142,7 +142,15 @@ if __name__ == '__main__':
         log.info(f"Connecting to Weights & Biases . .")
         if WANDB_RUN_NAME is None:
             WANDB_RUN_NAME = f"baseline-run@{time.strftime('%Y%m%d-%H%M%S')}"
-        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
+        config = helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
+        config.hidden_channels = HIDDEN_CHANNELS
+        config.dropout = DROPOUT
+        config.epoch = EPOCHS
+        config.resampling = USE_CLASS_WEIGHTS_SAMPLER
+        config.class_weights = USE_CLASS_WEIGHTS_LOSS
+        config.include_answer = INCLUDE_ANSWER
+
+
 
     # Datasets
     if IN_MEMORY_DATASET:

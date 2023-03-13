@@ -9,7 +9,7 @@ USE_CLASS_WEIGHTS_SAMPLER = True
 USE_CLASS_WEIGHTS_LOSS = False
 
 # W&B dashboard logging
-USE_WANDB = False
+USE_WANDB = True
 WANDB_PROJECT_NAME = "heterogeneous-GAT-model"
 WANDB_RUN_NAME = None  # None for timestamp
 
