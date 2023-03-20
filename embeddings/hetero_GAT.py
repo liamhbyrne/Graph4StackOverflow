@@ -16,14 +16,15 @@ import wandb
 from torch_geometric.utils import to_networkx
 import torch.nn.functional as F
 from sklearn.model_selection import KFold
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import ExponentialLR
+import pickle
 
 from custom_logger import setup_custom_logger
 from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
 from Visualize import GraphVisualization
 import helper_functions
-from hetero_GAT_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES, USE_CLASS_WEIGHTS_SAMPLER, USE_CLASS_WEIGHTS_LOSS, DROPOUT
+from hetero_GAT_constants import OS_NAME, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE, IN_MEMORY_DATASET, INCLUDE_ANSWER, USE_WANDB, WANDB_PROJECT_NAME, NUM_WORKERS, EPOCHS, NUM_LAYERS, HIDDEN_CHANNELS, FINAL_MODEL_OUT_PATH, SAVE_CHECKPOINTS, WANDB_RUN_NAME, CROSS_VALIDATE, FOLD_FILES, USE_CLASS_WEIGHTS_SAMPLER, USE_CLASS_WEIGHTS_LOSS, DROPOUT, GAMMA, START_LR, PICKLE_PATH_KF
 
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
 
@@ -59,32 +60,37 @@ class HeteroGNN(torch.nn.Module):
             }, aggr='sum')
             self.convs.append(conv)
 
-        self.lin = Linear(-1, out_channels)
+        self.lin1 = Linear(-1, out_channels)
+        self.lin2 = Linear(hidden_channels, out_channels)
         self.softmax = torch.nn.Softmax(dim=-1)
 
     def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
-            x_dict = {key: x.relu() for key, x in x_dict.items()}
-            #x_dict = {key: F.dropout(x, p=DROPOUT, training=self.training) for key, x in x_dict.items()}
+            x_dict = {key: F.leaky_relu(x) for key, x in x_dict.items()}
+            x_dict = {key: F.dropout(x, p=DROPOUT, training=self.training) for key, x in x_dict.items()}
 
         outs = []
         for x, batch in zip(x_dict.values(), batch_dict.values()):
             if len(x):
-                outs.append(global_mean_pool(x, batch=batch, size=len(post_emb)))
+                outs.append(global_mean_pool(x, batch=batch, size=len(post_emb)).to(device))
             else:
-                outs.append(torch.zeros(1, x.size(-1)))
+                outs.append(torch.zeros(1, x.size(-1)).to(device))
 
         # print([x.shape for x in outs])
-        out = torch.cat(outs, dim=1)
+        out = torch.cat(outs, dim=1).to(device)
 
-        out = torch.cat([out, post_emb], dim=1)
+        out = torch.cat([out, post_emb], dim=1).to(device)
         
-        out = F.dropout(out, p=DROPOUT, training=self.training)
+        #out = F.dropout(out, p=DROPOUT, training=self.training)
 
         # print("B4 LINEAR", out.shape)
-        out = self.lin(out)
-        out = out.relu()
+        out = self.lin1(out)
+        out = F.leaky_relu(out)
+        
+        #out = self.lin2(out)
+        #out = out.LeakyReLU()
+        
         out = self.softmax(out)
         return out
 
@@ -109,13 +115,13 @@ def train(model, train_loader):
         else:
             # Use only question embeddings as post embedding
             post_emb = data.question_emb.to(device)
+        post_emb.requires_grad = True
 
         out = model(data.x_dict, data.edge_index_dict, data.batch_dict, post_emb)  # Perform a single forward pass.
 
         loss = criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
         loss.backward()  # Derive gradients.
         optimizer.step()  # Update parameters based on gradients.
-        scheduler.step()
 
         running_loss += loss.item()
         if i % 5 == 0:
@@ -162,7 +168,7 @@ def test(loader):
     # Collate results into a single dictionary
     test_results = {
         "accuracy": accuracy_score(true_labels, predictions),
-        "f1-score": f1_score(true_labels, predictions, average='binary'),
+        "f1-score": f1_score(true_labels, predictions, average='weighted'),
         "loss": cumulative_loss / len(loader),
         "table": table,
         "preds": predictions, 
@@ -180,7 +186,17 @@ if __name__ == '__main__':
         log.info(f"Connecting to Weights & Biases . .")
         if WANDB_RUN_NAME is None:
             WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
-        helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
+        config = helper_functions.start_wandb_for_training(WANDB_PROJECT_NAME, WANDB_RUN_NAME)
+        config.hidden_channels = HIDDEN_CHANNELS
+        config.dropout = DROPOUT
+        config.epoch = EPOCHS
+        config.resampling = USE_CLASS_WEIGHTS_SAMPLER
+        config.class_weights = USE_CLASS_WEIGHTS_LOSS
+        config.include_answer = INCLUDE_ANSWER
+        config.scheduler = "EXP"
+        config.initial_lr = START_LR
+        config.gamma = GAMMA
+        config.batch_size = TRAIN_BATCH_SIZE
     
 
     # Datasets
@@ -200,10 +216,20 @@ if __name__ == '__main__':
             train_fold = torch.utils.data.ConcatDataset([fold for j, fold in enumerate(folds) if j != i])
 
             log.info(f"Fold {i + 1} of {len(folds)}\n-------------------")
+            
+            sampler = None
+            class_weights = calculate_class_weights(train_fold).to(device)
+    
+            # Sample by class weight
+            if USE_CLASS_WEIGHTS_SAMPLER:
+                train_labels = [x.label for x in train_fold]
+                sampler = torch.utils.data.WeightedRandomSampler([class_weights[x] for x in train_labels], len(train_labels))
+            
             # Define data loaders for training and testing data in this fold
             train_fold_loader = DataLoader(
                 train_fold,
-                batch_size=TRAIN_BATCH_SIZE
+                batch_size=TRAIN_BATCH_SIZE,
+                sampler=sampler
             )
             test_fold_loader = DataLoader(
                 test_fold,
@@ -214,9 +240,10 @@ if __name__ == '__main__':
             model.to(device)  # To GPU if available
 
             # Optimizers & Loss function
-            optimizer = torch.optim.Adam(model.parameters())
-            scheduler = CosineAnnealingLR(optimizer, T_max=EPOCHS)
+            optimizer = torch.optim.Adam(model.parameters(), lr=START_LR)
+            scheduler = ExponentialLR(optimizer, gamma=GAMMA, verbose=True)
             
+            # Optional class weights on the criterion
             fold_class_weights = calculate_class_weights(train_fold).to(device)
             criterion = torch.nn.CrossEntropyLoss(weight=fold_class_weights if USE_CLASS_WEIGHTS_LOSS else None)
             for epoch in range(1, EPOCHS):
@@ -230,11 +257,25 @@ if __name__ == '__main__':
 
                 # log for current epoch
                 log.info(f'Epoch: {epoch:03d}, Test F1: {test_info["f1-score"]:.4f}')
+                
+                # step scheduler
+                scheduler.step()
+                 
+                # print confusion matrix
+                df = pd.DataFrame({'actual': test_info["trues"], 'prediction': test_info["preds"]})
+                confusion_matrix = pd.crosstab(df['actual'], df['prediction'], rownames=['Actual'], colnames=['Predicted'])
+                print(confusion_matrix)
+
 
             log.info(f'Fold {i+1}, Test F1: {test_info["f1-score"]:.4f}')
             kfold_results.append(test_info)
 
         print(f"K-Fold Results: {kfold_results}")
+        # Pickle results
+        if PICKLE_PATH_KF is not None:
+          with open(PICKLE_PATH_KF, "wb") as f:
+              pickle.dump(kfold_results, f)
+            
 
 
     log.info(f"Sample graph:\n{train_dataset[0]}")
@@ -268,8 +309,8 @@ if __name__ == '__main__':
     model.to(device)  # To GPU if available
     
     # Optimizers & Loss function
-    optimizer = torch.optim.Adam(model.parameters())
-    scheduler = CosineAnnealingLR(optimizer, T_max=EPOCHS)
+    optimizer = torch.optim.Adam(model.parameters(), lr=START_LR)
+    scheduler = ExponentialLR(optimizer, gamma=GAMMA, verbose=True)
     
     # Cross Entropy Loss (with optional class weights)
     criterion = torch.nn.CrossEntropyLoss(weight=class_weights if USE_CLASS_WEIGHTS_LOSS else None)
@@ -289,6 +330,9 @@ if __name__ == '__main__':
 
         # log for current epoch
         log.info(f'Epoch: {epoch:03d}, Loss {train_info["loss"]}, Train F1: {train_info["f1-score"]:.4f}, Test F1: {test_info["f1-score"]:.4f}')
+        
+        # step scheduler
+        scheduler.step()
         
         # print confusion matrix
         df = pd.DataFrame({'actual': test_info["trues"], 'prediction': test_info["preds"]})
