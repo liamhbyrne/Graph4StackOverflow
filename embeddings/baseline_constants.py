@@ -9,7 +9,7 @@ USE_CLASS_WEIGHTS_SAMPLER = True
 USE_CLASS_WEIGHTS_LOSS = False
 
 # W&B dashboard logging
-USE_WANDB = True
+USE_WANDB = False
 WANDB_PROJECT_NAME = "heterogeneous-GAT-model"
 WANDB_RUN_NAME = "baseline_with_answer"  # None for timestamp
 
@@ -20,7 +20,7 @@ NUM_WORKERS = 14
 # Training parameters
 TRAIN_DATA_PATH = "data/train-6001-qs.pt"
 TEST_DATA_PATH = "data/test-6001-qs.pt"
-EPOCHS = 30
+EPOCHS = 20
 START_LR = 0.001
 GAMMA = 0.85
 WARM_START_FILE = "../models/baseline-model-1.pt"

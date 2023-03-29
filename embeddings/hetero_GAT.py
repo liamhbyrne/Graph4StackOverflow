@@ -10,7 +10,7 @@ import plotly
 import torch
 from sklearn.metrics import f1_score, accuracy_score
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import HeteroConv, GATConv, Linear, global_mean_pool
+from torch_geometric.nn import HeteroConv, GATv2Conv, Linear, global_mean_pool, GCNConv, SAGEConv
 from helper_functions import calculate_class_weights, split_test_train_pytorch
 import wandb
 from torch_geometric.utils import to_networkx
@@ -35,7 +35,13 @@ if OS_NAME == "linux":
     resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
 
 
-class HeteroGNN(torch.nn.Module):
+"""
+G
+A
+T
+"""
+
+class HeteroGAT(torch.nn.Module):
     """
     Heterogeneous Graph Attentional Network (GAT) model.
     """
@@ -47,20 +53,20 @@ class HeteroGNN(torch.nn.Module):
         # Create Graph Attentional layers
         for _ in range(num_layers):
             conv = HeteroConv({
-                ('tag', 'describes', 'question'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('tag', 'describes', 'answer'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('tag', 'describes', 'comment'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('module', 'imported_in', 'question'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('module', 'imported_in', 'answer'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('question', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('answer', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('comment', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('question', 'rev_imported_in', 'module'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
-                ('answer', 'rev_imported_in', 'module'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'question'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('tag', 'describes', 'answer'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('tag', 'describes', 'comment'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('module', 'imported_in', 'question'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('module', 'imported_in', 'answer'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('question', 'rev_describes', 'tag'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('answer', 'rev_describes', 'tag'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('comment', 'rev_describes', 'tag'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('question', 'rev_imported_in', 'module'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('answer', 'rev_imported_in', 'module'): GATv2Conv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
             }, aggr='sum')
             self.convs.append(conv)
 
-        self.lin1 = Linear(-1, out_channels)
+        self.lin1 = Linear(-1, hidden_channels)
         self.lin2 = Linear(hidden_channels, out_channels)
         self.softmax = torch.nn.Softmax(dim=-1)
 
@@ -77,29 +83,168 @@ class HeteroGNN(torch.nn.Module):
             else:
                 outs.append(torch.zeros(1, x.size(-1)).to(device))
 
-        # print([x.shape for x in outs])
+
         out = torch.cat(outs, dim=1).to(device)
 
         out = torch.cat([out, post_emb], dim=1).to(device)
         
-        #out = F.dropout(out, p=DROPOUT, training=self.training)
+        out = F.dropout(out, p=DROPOUT, training=self.training)
 
-        # print("B4 LINEAR", out.shape)
+
         out = self.lin1(out)
         out = F.leaky_relu(out)
         
-        #out = self.lin2(out)
-        #out = out.LeakyReLU()
+        out = self.lin2(out)
+        out = F.leaky_relu(out)
         
         out = self.softmax(out)
         return out
 
 
-'''
+"""
+G
+C
+N
+"""
 
-'''
+class HeteroGCN(torch.nn.Module):
+    """
+    Heterogeneous Graph Convolutional Network (GCN) model.
+    """
+    def __init__(self, hidden_channels, out_channels, num_layers):
+        super().__init__()
+
+        self.convs = torch.nn.ModuleList()
+
+        # Create Graph Attentional layers
+        for _ in range(num_layers):
+            conv = HeteroConv({
+                ('tag', 'describes', 'question'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'answer'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'comment'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('module', 'imported_in', 'question'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('module', 'imported_in', 'answer'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('question', 'rev_describes', 'tag'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('answer', 'rev_describes', 'tag'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('comment', 'rev_describes', 'tag'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('question', 'rev_imported_in', 'module'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('answer', 'rev_imported_in', 'module'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+            }, aggr='sum')
+            self.convs.append(conv)
+
+        self.lin1 = Linear(-1, hidden_channels)
+        self.lin2 = Linear(hidden_channels, out_channels)
+        self.softmax = torch.nn.Softmax(dim=-1)
+
+    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
+        for conv in self.convs:
+            x_dict = conv(x_dict, edge_index_dict)
+            x_dict = {key: F.leaky_relu(x) for key, x in x_dict.items()}
+            x_dict = {key: F.dropout(x, p=DROPOUT, training=self.training) for key, x in x_dict.items()}
+
+        outs = []
+        for x, batch in zip(x_dict.values(), batch_dict.values()):
+            if len(x):
+                outs.append(global_mean_pool(x, batch=batch, size=len(post_emb)).to(device))
+            else:
+                outs.append(torch.zeros(1, x.size(-1)).to(device))
 
 
+        out = torch.cat(outs, dim=1).to(device)
+
+        out = torch.cat([out, post_emb], dim=1).to(device)
+        
+        out = F.dropout(out, p=DROPOUT, training=self.training)
+
+
+        out = self.lin1(out)
+        out = F.leaky_relu(out)
+        
+        out = self.lin2(out)
+        out = F.leaky_relu(out)
+        
+        out = self.softmax(out)
+        return out
+
+"""
+G
+R
+A
+P
+H
+S
+A
+G
+E
+"""
+
+class HeteroGraphSAGE(torch.nn.Module):
+    """
+    Heterogeneous GraphSAGE model.
+    """
+    def __init__(self, hidden_channels, out_channels, num_layers):
+        super().__init__()
+
+        self.convs = torch.nn.ModuleList()
+
+        # Create Graph Attentional layers
+        for _ in range(num_layers):
+            conv = HeteroConv({
+                ('tag', 'describes', 'question'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'answer'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'comment'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('module', 'imported_in', 'question'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('module', 'imported_in', 'answer'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('question', 'rev_describes', 'tag'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('answer', 'rev_describes', 'tag'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('comment', 'rev_describes', 'tag'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('question', 'rev_imported_in', 'module'): SAGEConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('answer', 'rev_imported_in', 'module'): GCNConv((-1, -1), hidden_channels, add_self_loops=False),
+            }, aggr='sum')
+            self.convs.append(conv)
+
+        self.lin1 = Linear(-1, hidden_channels)
+        self.lin2 = Linear(hidden_channels, out_channels)
+        self.softmax = torch.nn.Softmax(dim=-1)
+
+    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
+        for conv in self.convs:
+            x_dict = conv(x_dict, edge_index_dict)
+            x_dict = {key: F.leaky_relu(x) for key, x in x_dict.items()}
+            x_dict = {key: F.dropout(x, p=DROPOUT, training=self.training) for key, x in x_dict.items()}
+
+        outs = []
+        for x, batch in zip(x_dict.values(), batch_dict.values()):
+            if len(x):
+                outs.append(global_mean_pool(x, batch=batch, size=len(post_emb)).to(device))
+            else:
+                outs.append(torch.zeros(1, x.size(-1)).to(device))
+
+
+        out = torch.cat(outs, dim=1).to(device)
+
+        out = torch.cat([out, post_emb], dim=1).to(device)
+        
+        out = F.dropout(out, p=DROPOUT, training=self.training)
+
+
+        out = self.lin1(out)
+        out = F.leaky_relu(out)
+        
+        out = self.lin2(out)
+        out = F.leaky_relu(out)
+        
+        out = self.softmax(out)
+        return out
+        
+        
+"""
+T
+R
+A
+I
+N
+"""        
 def train(model, train_loader):
     running_loss = 0.0
     model.train()
@@ -128,7 +273,12 @@ def train(model, train_loader):
             log.info(f"[{i + 1}] Loss: {running_loss / 5}")
             running_loss = 0.0
 
-
+"""
+T
+E
+S
+T
+"""
 def test(loader):
     table = wandb.Table(columns=["ground_truth", "prediction"]) if USE_WANDB else None
     model.eval()
@@ -168,7 +318,8 @@ def test(loader):
     # Collate results into a single dictionary
     test_results = {
         "accuracy": accuracy_score(true_labels, predictions),
-        "f1-score": f1_score(true_labels, predictions, average='weighted'),
+        "f1-score-weighted": f1_score(true_labels, predictions, average='weighted'),
+        "f1-score-macro": f1_score(true_labels, predictions, average='macro'),
         "loss": cumulative_loss / len(loader),
         "table": table,
         "preds": predictions, 
@@ -177,7 +328,12 @@ def test(loader):
     return test_results
 
 
-
+"""
+M
+A
+I
+N
+"""
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     log.info(f"Proceeding with {device} . .")
@@ -256,7 +412,7 @@ if __name__ == '__main__':
                 test_info = test(test_fold_loader)
 
                 # log for current epoch
-                log.info(f'Epoch: {epoch:03d}, Test F1: {test_info["f1-score"]:.4f}')
+                log.info(f'Epoch: {epoch:03d}, Test F1 (weighted): {test_info["f1-score-weighted"]:.4f}, Test F1 (macro): {test_info["f1-score-macro"]:.4f}')
                 
                 # step scheduler
                 scheduler.step()
@@ -305,7 +461,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_dataset, batch_size=TEST_BATCH_SIZE, num_workers=NUM_WORKERS)
 
     # Model
-    model = HeteroGNN(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
+    model = HeteroGraphSAGE(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
     model.to(device)  # To GPU if available
     
     # Optimizers & Loss function
@@ -329,8 +485,8 @@ if __name__ == '__main__':
         test_info = test(test_loader)
 
         # log for current epoch
-        log.info(f'Epoch: {epoch:03d}, Loss {train_info["loss"]}, Train F1: {train_info["f1-score"]:.4f}, Test F1: {test_info["f1-score"]:.4f}')
-        
+        log.info(f'Epoch: {epoch:03d}, Test F1 (weighted): {test_info["f1-score-weighted"]:.4f}, Test F1 (macro): {test_info["f1-score-macro"]:.4f}')
+                
         # step scheduler
         scheduler.step()
         
@@ -354,3 +510,20 @@ if __name__ == '__main__':
     if USE_WANDB:
         helper_functions.add_cm_to_wandb(test_info)
         wandb.finish()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
