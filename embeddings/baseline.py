@@ -306,7 +306,6 @@ if __name__ == '__main__':
         print(confusion_matrix)
 
         if SAVE_CHECKPOINTS:
-            print("HELLO")
             torch.save(model.state_dict(), f"../models/baseline-model-{epoch}.pt")
         
         # log evaluation results to wandb

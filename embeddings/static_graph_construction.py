@@ -29,17 +29,17 @@ class BatchedHeteroData(HeteroData):
         return super().__cat_dim__(key, value)
 
 class StaticGraphConstruction:
-    
+    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
+    module_embedding_model = ModuleEmbeddingTrainer.load_model("../models/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
+    post_embedding_builder = PostEmbedding()
     def __init__(self):
         # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
-        post_embedding_builder = PostEmbedding()
-        tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
-        module_embedding_model = ModuleEmbeddingTrainer.load_model("../models/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
+
 
         self._known_tags = {}  # tag_name -> index
         self._known_modules = {}  # module_name -> index
         self._data = BatchedHeteroData()
-        self._first_n_tags = 3
+        self._first_n_tags = 8
 
         self._tag_to_question_edges = []
         self._tag_to_answer_edges = []
@@ -49,7 +49,7 @@ class StaticGraphConstruction:
         self._module_to_answer_edges = []
         self._module_to_comment_edges = []
         self._use_bert = True
-        self._post_count_limit = 10
+        self._post_count_limit = 20
 
 
 

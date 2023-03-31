@@ -30,7 +30,7 @@ class UserGraphDatasetInMemory(InMemoryDataset):
 
     @property
     def raw_file_names(self):
-        return [x for x in os.listdir("../data/processed") if x not in ['pre_filter.pt', 'pre_transform.pt']]
+        return [x for x in os.listdir(os.path.join(self.root, "processed")) if x not in ['pre_filter.pt', 'pre_transform.pt']]
 
     @property
     def processed_file_names(self):
@@ -59,10 +59,10 @@ class UserGraphDatasetInMemory(InMemoryDataset):
 """
 
 """
-def fetch_question_ids() -> List[int]:
+def fetch_question_ids(root) -> List[int]:
     question_ids = set()
     # Split by question ids
-    for f in os.listdir("../data/processed"):
+    for f in os.listdir(os.path.join(root, "processed")):
         question_id_search = re.search(r"id_(\d+)", f)
         if question_id_search:
             question_ids.add(int(question_id_search.group(1)))
@@ -71,8 +71,8 @@ def fetch_question_ids() -> List[int]:
 def split(a, n):
     k, m = divmod(len(a), n)
     return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
-def create_datasets_for_kfolds(folds):
-    question_ids = fetch_question_ids()
+def create_datasets_for_kfolds(folds, root):
+    question_ids = fetch_question_ids(root)
     random.shuffle(question_ids)
 
     folds = list(split(question_ids, folds))
@@ -81,7 +81,8 @@ def create_datasets_for_kfolds(folds):
 
 
 def create_train_test_datasets():
-    question_ids = fetch_question_ids()
+
+    question_ids = fetch_question_ids(ROOT)
 
     # question_ids = list(question_ids)[:len(question_ids)* 0.6]
     train_ids = list(question_ids)[:int(len(question_ids) * 0.7)]
@@ -90,15 +91,16 @@ def create_train_test_datasets():
     log.info(f"Training question count {len(train_ids)}")
     log.info(f"Testing question count {len(test_ids)}")
 
-    train_dataset = UserGraphDatasetInMemory('../data/', f'train-{len(train_ids)}-qs.pt', train_ids)
-    test_dataset = UserGraphDatasetInMemory('../data/', f'test-{len(test_ids)}-qs.pt', test_ids)
+    train_dataset = UserGraphDatasetInMemory(ROOT, f'train-{len(train_ids)}-qs.pt', train_ids)
+    test_dataset = UserGraphDatasetInMemory(ROOT, f'test-{len(test_ids)}-qs.pt', test_ids)
     return train_dataset, test_dataset
 
 if __name__ == '__main__':
+    ROOT = "../datav2/"
     choice = input("1. Create train/test datasets\n2. Create k-fold datasets\n>>>")
     if choice == '1':
         create_train_test_datasets()
     elif choice == '2':
         n = int(input("Enter number of folds: "))
-        folds = list(create_datasets_for_kfolds(n))
+        folds = list(create_datasets_for_kfolds(n, ROOT))
 

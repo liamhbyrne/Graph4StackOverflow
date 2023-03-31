@@ -41,7 +41,7 @@ class UserGraphDataset(Dataset):
     @property
     def processed_file_names(self):
         if self._skip_processing:
-            return os.listdir("../data/processed")
+            return os.listdir(os.path.join(self.root, "processed"))
         return []
 
     def download(self):
@@ -54,7 +54,7 @@ class UserGraphDataset(Dataset):
 
         processed = []
         max_idx = -1
-        for f in os.listdir("../data/processed"):
+        for f in os.listdir(os.path.join(self.root, "processed")):
             question_id_search = re.search(r"id_(\d+)", f)
             if question_id_search:
                 processed.append(int(question_id_search.group(1)))
@@ -72,81 +72,53 @@ class UserGraphDataset(Dataset):
     def process(self):
         """
         """
-        log.info("Processing data...")
-        '''TIME START'''
-        t1 = time.time()
-
         # Fetch the unprocessed questions and the next index to use.
         unprocessed, idx = self.get_unprocessed_ids()
 
-        '''TIME END'''
-        t2 = time.time()
-        log.debug("Function=%s, Time=%s" % (self.get_unprocessed_ids.__name__, t2 - t1))
-
-        '''TIME START'''
-        t1 = time.time()
 
         # Fetch questions from database.
         valid_questions = self.fetch_questions_by_post_ids(unprocessed)
 
-        '''TIME END'''
-        t2 = time.time()
-        log.debug("Function=%s, Time=%s" % (self.fetch_questions_by_post_ids.__name__, t2 - t1))
 
-
-        for row in tqdm(valid_questions.itertuples(), total=len(valid_questions)):
-            '''TIME START'''
-            t1 = time.time()
+        for _, question in tqdm(valid_questions.iterrows(), total=len(valid_questions)):
 
             # Build Question embedding
             question_word_embs, question_code_embs, _ = self._post_embedding_builder(
-                [row.question_body],
+                [question["Body"]],
                 use_bert=True,
-                title_batch=[row.question_title]
+                title_batch=[question["Title"]]
             )
             question_emb = torch.concat((question_word_embs[0], question_code_embs[0]))
-            '''TIME END'''
-            t2 = time.time()
-            log.debug("Function=%s, Time=%s" % ("Post embedding builder (question)", t2 - t1))
 
-
-            '''TIME START'''
-            t1 = time.time()
             # Fetch answers to question
-            answers_to_question = self.fetch_answers_for_question(row.post_id)
-            '''TIME END'''
-            t2 = time.time()
-            log.debug("Function=%s, Time=%s" % (self.fetch_answers_for_question.__name__, t2 - t1))
+            answers_to_question = self.fetch_answers_for_question(question["PostId"])
 
             # Build Answer embeddings
-            for _, answer_body, answer_user_id, score in answers_to_question.itertuples():
-                label = torch.tensor([1 if score > 0 else 0], dtype=torch.long)
+            for _, answer in answers_to_question.iterrows():
+                label = torch.tensor([1 if answer["Score"] > 0 else 0], dtype=torch.long)
                 answer_word_embs, answer_code_embs, _ = self._post_embedding_builder(
-                    [answer_body], use_bert=True, title_batch=[None]
+                    [answer["Body"]], use_bert=True, title_batch=[None]
                 )
                 answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
 
-
-                '''TIME START'''
-                t1 = time.time()
                 # Build graph
-                graph: HeteroData = self.construct_graph(answer_user_id)
-                '''TIME END'''
-                t2 = time.time()
-                log.debug("Function=%s, Time=%s" % (self.construct_graph.__name__, t2 - t1))
+                graph: HeteroData = self.construct_graph(answer["OwnerUserId"])
 
                 # pytorch geometric data object
                 graph.__setattr__('question_emb', question_emb)
                 graph.__setattr__('answer_emb', answer_emb)
+                graph.__setattr__('score', answer["Score"])
+                graph.__setattr__('question_id', question["PostId"])
+                graph.__setattr__('answer_id', answer["PostId"])
                 graph.__setattr__('label', label)
-                torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{row.post_id}'))
+                torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{question["PostId"]}_answer_id_{answer["PostId"]}.pt'))
                 idx += 1
 
     def len(self):
         return len(self.processed_file_names)-2
 
     def get(self, idx):
-        file_name = [filename for filename in os.listdir('../data/processed/') if filename.startswith(f"data_{idx}")]
+        file_name = [filename for filename in os.listdir(os.path.join(self.root, 'processed')) if filename.startswith(f"data_{idx}")]
         if len(file_name):
             data = torch.load(os.path.join(self.processed_dir, file_name[0]))
 
@@ -160,10 +132,9 @@ class UserGraphDataset(Dataset):
 
     def fetch_questions_by_post_ids(self, post_ids: List[int]):
         questions_df = pd.read_sql_query(f"""
-                SELECT PostId, Body, Title, OwnerUserId FROM Post
+                SELECT * FROM Post
                 WHERE PostId IN ({','.join([str(x) for x in post_ids])})
         """, self._db)
-        questions_df.columns = ['post_id', 'question_body', 'question_title', 'question_user_id']
         return questions_df
 
     def fetch_questions_by_user(self, user_id: int):
@@ -187,13 +158,27 @@ class UserGraphDataset(Dataset):
         return answers_df
 
     def fetch_answers_for_question(self, question_post_id: int):
+        """
+        Fetch answers for a question for P@1 evaluation
+        """
         answers_df = pd.read_sql_query(f"""
-                SELECT Body, OwnerUserId, Score
+                SELECT *
                 FROM Post
                 WHERE ParentId = {question_post_id}
         """, self._db)
-        answers_df = answers_df.dropna()
+        answers_df = answers_df.dropna(subset=['PostId', 'Body', 'Score', 'OwnerUserId'])
         return answers_df
+
+    def fetch_questions_by_post_ids_eval(self, post_ids: List[int]):
+        """
+        Fetch questions for P@1 evaluation
+        """
+        questions_df = pd.read_sql_query(f"""
+                SELECT * FROM Post
+                WHERE PostId IN ({','.join([str(x) for x in post_ids])})
+        """, self._db)
+        questions_df.columns = ['post_id', 'question_body', 'question_title', 'question_user_id']
+        return questions_df
 
     def fetch_comments_by_user(self, user_id: int):
         comments_on_questions_df = pd.read_sql_query(f"""
@@ -215,6 +200,16 @@ class UserGraphDataset(Dataset):
 
         return pd.concat([comments_on_questions_df, comments_on_answers_df])
 
+    def fetch_tags_for_question(self, question_post_id: int):
+        tags_df = pd.read_sql_query(f"""
+                SELECT Tags
+                FROM Post
+                WHERE PostId = {question_post_id}
+        """, self._db)
+        if len(tags_df) == 0:
+            return []
+        return tags_df.iloc[0]['Tags'][1:-1].split("><")
+
     def construct_graph(self, user_id: int):
         graph_constructor = StaticGraphConstruction()
         qs = self.fetch_questions_by_user(user_id)
@@ -232,7 +227,7 @@ if __name__ == '__main__':
     '''
 
 
-    ds = UserGraphDataset('../data/', db_address='../stackoverflow.db', skip_processing=False)
+    ds = UserGraphDataset('../datav2/', db_address='../stackoverflow.db', skip_processing=False)
     data = ds.get(1078)
     print("Question ndim:", data.x_dict['question'].shape)
     print("Answer ndim:", data.x_dict['answer'].shape)
