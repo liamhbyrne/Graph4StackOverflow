@@ -162,16 +162,18 @@ class NextTagEmbedding(nn.Module):
 
 if __name__ == '__main__':
     tet = NextTagEmbeddingTrainer(context_length=2, emb_size=30, excluded_tags=['python'], database_path="../stackoverflow.db")
-    tet.from_db()
-    print(len(tet.post_tags))
-    print(len(tet.tag_vocab))
+    #tet.from_db()
+    #print(len(tet.post_tags))
+    #print(len(tet.tag_vocab))
 
 
     #tet = NextTagEmbeddingTrainer(context_length=3, emb_size=50)
 
-    #tet.from_files("../data/raw/all_tags.csv", "../data/raw/tag_vocab.csv")
+    tet.from_files("../all_tags.csv", "../tag_vocab.csv")
     # assert len(tet.post_tags) == 84187510, "Incorrect number of post tags!"
     # assert len(tet.tag_vocab) == 63653, "Incorrect vocab size!"
+    
+    print(len(tet.post_tags))
 
     tet.train(1000, 1)
     # tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")

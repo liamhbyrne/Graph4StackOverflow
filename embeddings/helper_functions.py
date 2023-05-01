@@ -65,7 +65,8 @@ def log_results_to_wandb(results_map, results_name: str):
     wandb.log({
                 f"{results_name}/loss": results_map["loss"],
                 f"{results_name}/accuracy": results_map["accuracy"],
-                f"{results_name}/f1": results_map["f1-score"],
+                f"{results_name}/f1-macro": results_map["f1-score-macro"],
+                f"{results_name}/f1-weighted": results_map["f1-score-weighted"],
                 f"{results_name}/table": results_map["table"]
             })
             
