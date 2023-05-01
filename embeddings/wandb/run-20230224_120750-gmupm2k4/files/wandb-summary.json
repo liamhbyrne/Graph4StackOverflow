@@ -1,1 +1,0 @@
-{"num_node_features": {"question": 1536, "answer": 1536, "comment": 768, "tag": 50, "module": 30}, "num_classes": 2, "_timestamp": 1677240471.469352, "_runtime": 0.7322790622711182, "_step": 0, "_wandb": {"runtime": 0}}

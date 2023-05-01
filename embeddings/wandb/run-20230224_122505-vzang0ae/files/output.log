@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 154, in <module>
-    table.add_data(wandb.Html(graph_vis.encode('utf-8')), n_nodes, n_edges, label)
-  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\wandb\sdk\data_types\html.py", line 47, in __init__
-    raise ValueError("data must be a string or an io object")
-ValueError: data must be a string or an io object

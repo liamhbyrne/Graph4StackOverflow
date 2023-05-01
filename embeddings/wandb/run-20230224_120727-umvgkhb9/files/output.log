@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "C:\Users\liamb\Documents\graph4stackoverflow\embeddings\hetero_GAT.py", line 149, in <module>
-    label = graph.y.item()
-  File "C:\Users\liamb\Documents\graph4stackoverflow\venv\lib\site-packages\torch_geometric\data\hetero_data.py", line 138, in __getattr__
-    raise AttributeError(f"'{self.__class__.__name__}' has no "
-AttributeError: 'BatchedHeteroData' has no attribute 'y'
