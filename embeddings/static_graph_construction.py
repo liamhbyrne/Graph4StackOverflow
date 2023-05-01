@@ -149,7 +149,7 @@ class StaticGraphConstruction:
         return tags
 
     def process_module_names(self, import_statements: List[Import]):
-        modules = [i.module[0] for i in import_statements if i.module]
+        modules = [i.module for i in import_statements if i.module]
         for m in modules:
             if m not in self._known_modules:
                 self._known_modules[m] = len(self._known_modules)
@@ -170,6 +170,12 @@ class StaticGraphConstruction:
         tag_nodes = list(self.process_tags())
         module_nodes = list(self.process_modules())
 
+        print(len(question_nodes), len(answer_nodes), len(comment_nodes), len(tag_nodes), len(module_nodes), sum([len(question_nodes), len(answer_nodes), len(comment_nodes), len(tag_nodes), len(module_nodes)]))
+        # Print tags and modules with their indices (including offset)
+        OFFSET = len(question_nodes) + len(answer_nodes) + len(comment_nodes)
+        p1 = {v+(OFFSET+len(tag_nodes)):k for k,v in self._known_modules.items()}
+        p2 = {v+OFFSET:k for k,v in self._known_tags.items()}
+        print(f"TAGS {p2} MODULES {p1}")
         # Assign node features
         self._data['question'].x = torch.stack(question_nodes) if len(question_nodes) else torch.empty(0, 1536)
 
@@ -190,6 +196,9 @@ class StaticGraphConstruction:
 
         # Remove isolated nodes, and convert to undirected graph
         graph_out = T.remove_isolated_nodes.RemoveIsolatedNodes()(self._data)
+
+        print(sum([len(graph_out['question'].x), len(graph_out['answer'].x), len(graph_out['comment'].x), len(graph_out['tag'].x), len(graph_out['module'].x)]))
+
         graph_out = T.ToUndirected()(graph_out)
         graph_out.metadata()
 
