@@ -9,7 +9,7 @@
 <h3 align="center">Graph4StackOverflow</h3>
 
   <p align="center">
-    Graph-based Text Classification of Stack Overflow Expertise
+    Graph Neural Networks for Expertise Classification on Stack Overflow
     <br />
     <a href="https://www.linkedin.com/in/liam-h-byrne/"><strong>Liam Byrne</strong></a>
     <br />
