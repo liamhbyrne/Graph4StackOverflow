@@ -27,6 +27,15 @@
 
 Stack Overflow is a widely-used platform for programmers to ask and find answers to their questions. This project presents two Graph Neural Network (GNN) models, one for identifying expert users who can provide high-quality answers to questions and another for ranking the answers based on the expertise of each user. This project creates the “user graph”; which is a novel graph construction method for representing a user’s contributions to the platform that captures their technical expertise. Heterogeneous GAT and GraphSAGE models are developed to operate directly on the graph structure to predict whether a user will provide a high-quality answer. Experimental results show that the GNN models outperform conventional deep learning methods for upvote classification and achieve an impressive weighted-F1 score of **0.781**. Moreover, the GraphSAGE model achieves a P@1 score of **0.395** for accepted answer prediction, which is competitive withthe state-of-the-art approaches. Analysis into the performance-overhead tradeoff was carried out and it has been concluded feasible for Stack Exchange to implement recommendation engines that utilize graph-based models. These outcomes have the potential to make a significant contribution towards improving the quality of answers on Stack Overflow and hold the potential to further enhance the platform.
 
+**Built upon** 
+<div align="left">
+    <a href="https://pytorch-geometric.readthedocs.io/en/latest/">
+    <img src="https://user-images.githubusercontent.com/47918966/235497060-b49ab9e1-f495-48a1-8360-086992594996.png" alt="Logo" width="200" >
+  </a>
+</div>
+
+
+
 
 <!-- GETTING STARTED -->
 ## Getting Started
