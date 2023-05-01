@@ -35,6 +35,11 @@ if OS_NAME == "linux":
     resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+log.info(f"Proceeding with {device} . .")
+print("HIII")
+
+
 """
 G
 A
@@ -53,16 +58,16 @@ class HeteroGAT(torch.nn.Module):
         # Create Graph Attentional layers
         for _ in range(num_layers):
             conv = HeteroConv({
-                ('tag', 'describes', 'question'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('tag', 'describes', 'answer'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('tag', 'describes', 'comment'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('module', 'imported_in', 'question'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('module', 'imported_in', 'answer'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('question', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('answer', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('comment', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('question', 'rev_imported_in', 'module'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
-                ('answer', 'rev_imported_in', 'module'): GATConv((-1, -1), hidden_channels, add_self_loops=False, heads=6),
+                ('tag', 'describes', 'question'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'answer'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('tag', 'describes', 'comment'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('module', 'imported_in', 'question'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('module', 'imported_in', 'answer'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('question', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('answer', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('comment', 'rev_describes', 'tag'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('question', 'rev_imported_in', 'module'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
+                ('answer', 'rev_imported_in', 'module'): GATConv((-1, -1), hidden_channels, add_self_loops=False),
             }, aggr='sum')
             self.convs.append(conv)
 
@@ -71,6 +76,8 @@ class HeteroGAT(torch.nn.Module):
         self.softmax = torch.nn.Softmax(dim=-1)
 
     def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
+        # Ablation study, keep only questions
+
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
             x_dict = {key: F.leaky_relu(x) for key, x in x_dict.items()}
@@ -196,7 +203,7 @@ def train(model, train_loader):
         else:
             # Use only question embeddings as post embedding
             post_emb = data.question_emb.to(device)
-        post_emb.requires_grad = True
+        #   post_emb.requires_grad = True
 
         out = model(data.x_dict, data.edge_index_dict, data.batch_dict, post_emb)  # Perform a single forward pass.
 
@@ -273,8 +280,6 @@ I
 N
 """
 if __name__ == '__main__':
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    log.info(f"Proceeding with {device} . .")
     
     if USE_WANDB:
         log.info(f"Connecting to Weights & Biases . .")
@@ -330,7 +335,7 @@ if __name__ == '__main__':
                 batch_size=TEST_BATCH_SIZE
             )
             # Model
-            model = HeteroGNN(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
+            model = HeteroGAT(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
             model.to(device)  # To GPU if available
 
             # Optimizers & Loss function
@@ -377,13 +382,13 @@ if __name__ == '__main__':
     log.info(f"Test Dataset Size: {len(test_dataset)}")
     
     # Weights&Biases dashboard
-    data_details = {
-        "num_node_features": train_dataset.num_node_features,
-        "num_classes": 2
-    }
-    log.info(f"Data Details:\n{data_details}")
-    if USE_WANDB:
-        wandb.log(data_details)
+    # data_details = {
+    #     "num_node_features": train_dataset.num_node_features,
+    #     "num_classes": 2
+    # }
+    # log.info(f"Data Details:\n{data_details}")
+    # if USE_WANDB:
+    #     wandb.log(data_details)
 
     sampler = None
     class_weights = calculate_class_weights(train_dataset).to(device)
@@ -401,17 +406,18 @@ if __name__ == '__main__':
     # Model
     if MODEL == "GAT":
         model = HeteroGAT(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
+        model.to(device)  # To GPU if available
     elif MODEL == "SAGE":
         model = HeteroGraphSAGE(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
+        model.to(device)  # To GPU if available
     else:
         log.error(f"Model does not exist! ({MODEL})")
         exit(1)
-        
-    model = HeteroGraphSAGE(hidden_channels=HIDDEN_CHANNELS, out_channels=2, num_layers=NUM_LAYERS)
-    model.to(device)  # To GPU if available
+
+
     
     if WARM_START_FILE is not None:
-        model.load_state_dict(torch.load(WARM_START_FILE), strict=False)
+        model.load_state_dict(torch.load(WARM_START_FILE, map_location=device), strict=False)
     
     # Optimizers & Loss function
     optimizer = torch.optim.Adam(model.parameters(), lr=START_LR)

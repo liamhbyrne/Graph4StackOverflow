@@ -4,7 +4,30 @@ from torch_geometric.nn import GATConv, Linear, MeanAggregation, to_hetero
 
 from dataset import UserGraphDataset
 
+metadata = (['question', 'answer', 'comment', 'tag', 'module'],
+            [('tag', 'describes', 'question'), ('tag', 'describes', 'answer'), ('tag', 'describes', 'comment'), ('module', 'imported_in', 'question'), ('module', 'imported_in', 'answer'), ('question', 'rev_describes', 'tag'), ('answer', 'rev_describes', 'tag'), ('comment', 'rev_describes', 'tag'), ('question', 'rev_imported_in', 'module'), ('answer', 'rev_imported_in', 'module')])
 
+
+class Model(torch.nn.Module):
+    def __init__(self, hidden_channels):
+        super(Model, self).__init__()
+        self.lin = Linear(hidden_channels, 2)
+        self.softmax = torch.nn.Softmax(dim=1)
+        self.gat = to_hetero(GAT(hidden_channels), metadata)
+        self.pool = MeanAggregation()
+
+    def forward(self, data, post_emb):
+        convolved = self.gat(data.x_dict, data.edge_index_dict, data.batch_dict)
+        pooled = self.pool(convolved, data.batch_dict['question'])
+
+        x = torch.cat([convolved, post_emb], dim=1)
+
+        # 3. Concatenate with post embedding
+        # x = torch.cat((x, post_emb))
+        # 4. Apply a final classifier.
+        x = self.lin(x)
+        x = self.softmax(x)
+        return x
 class GAT(torch.nn.Module):
     def __init__(self, hidden_channels):
         super(GAT, self).__init__()
@@ -12,29 +35,21 @@ class GAT(torch.nn.Module):
         self.conv1 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
         self.conv2 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
         self.conv3 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
-        self.lin = Linear(hidden_channels, 2)
-        self.softmax = torch.nn.Softmax(dim=1)
-        self.pool = MeanAggregation()
 
-    def forward(self, x, edge_index, batch, post_emb):
+
+
+    def forward(self, x, edge_index, batch):
         # 1. Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
         x = self.conv2(x, edge_index)
         x = x.relu()
         x = self.conv3(x, edge_index)
-
+        x = x.relu()
         # 2. Readout layer
         x = self.pool(x, batch)  # [batch_size, hidden_channels]
-
-        x = torch.cat([x, post_emb], dim=1)
-
-        # 3. Concatenate with post embedding
-        #x = torch.cat((x, post_emb))
-        # 4. Apply a final classifier.
-        x = self.lin(x)
-        x = self.softmax(x)
         return x
+
 
 
 def train(model, train_loader):
@@ -43,7 +58,7 @@ def train(model, train_loader):
     for data in train_loader:  # Iterate in batches over the training dataset.
         print(data)
 
-        out = model(data.x_dict, data.edge_index_dict, data.batch_dict, torch.cat([data.question_emb, data.answer_emb], dim=1))  # Perform a single forward pass.
+        out = model(data, torch.cat([data.question_emb, data.answer_emb], dim=1))  # Perform a single forward pass.
         print(out, data.label)
         loss = criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
         loss.backward()  # Derive gradients.
@@ -72,10 +87,9 @@ if __name__ == '__main__':
     val_loader = DataLoader(val_dataset, batch_size=64)
     test_loader = DataLoader(test_dataset, batch_size=64)
 
-    model = GAT(hidden_channels=64)
+    model = Model(hidden_channels=64)
     sample = train_dataset[0]
-    metadata = (['question', 'answer', 'comment', 'tag', 'module'], [('tag', 'describes', 'question'), ('tag', 'describes', 'answer'), ('tag', 'describes', 'comment'), ('module', 'imported_in', 'question'), ('module', 'imported_in', 'answer'), ('question', 'rev_describes', 'tag'), ('answer', 'rev_describes', 'tag'), ('comment', 'rev_describes', 'tag'), ('question', 'rev_imported_in', 'module'), ('answer', 'rev_imported_in', 'module')])
-    model = to_hetero(model, metadata)
+    #model = to_hetero(model, metadata)
     #print(model(sample.x_dict, sample.edge_index_dict, sample.batch_dict))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)

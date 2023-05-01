@@ -1,10 +1,10 @@
 # Batch sizes
-TRAIN_BATCH_SIZE = 256
-TEST_BATCH_SIZE = 256
+TRAIN_BATCH_SIZE = 64
+TEST_BATCH_SIZE = 64
 
 # Data config
-IN_MEMORY_DATASET = True
-INCLUDE_ANSWER = True
+IN_MEMORY_DATASET = False
+INCLUDE_ANSWER = False
 USE_CLASS_WEIGHTS_SAMPLER = True
 USE_CLASS_WEIGHTS_LOSS = False
 
@@ -14,17 +14,17 @@ WANDB_PROJECT_NAME = "heterogeneous-GAT-model"
 WANDB_RUN_NAME = "EXP1-run"  # None for timestamp
 
 # OS
-OS_NAME = "linux"  # "windows" or "linux"
-NUM_WORKERS = 14
+OS_NAME = "windows"  # "windows" or "linux"
+NUM_WORKERS = 0
 
 # Training parameters
-ROOT = "../../../data/lhb1g20"
-TRAIN_DATA_PATH = "../../../../../data/lhb1g20/train-4175-qs.pt"
-TEST_DATA_PATH = "../../../../../data/lhb1g20/test-1790-qs.pt"
-EPOCHS = 10
+ROOT = "../datav2"
+TRAIN_DATA_PATH = "train-4175-qs.pt"
+TEST_DATA_PATH = "test-1790-qs.pt"
+EPOCHS = 4
 START_LR = 0.001
 GAMMA = 0.95
-WARM_START_FILE = "../models/gat_qa_20e_64h_3l.pt"
+WARM_START_FILE = None#"../models/gat_qa_20e_64h_3l.pt"
 
 # (Optional) k-fold cross validation
 CROSS_VALIDATE = False
@@ -35,6 +35,6 @@ PICKLE_PATH_KF = 'q_kf_results.pkl'
 MODEL = "GAT"
 NUM_LAYERS = 3
 HIDDEN_CHANNELS = 64
-FINAL_MODEL_OUT_PATH = "gat_qa_10e_64h_3l.pt"
+FINAL_MODEL_OUT_PATH = "gat_fault.pt"
 SAVE_CHECKPOINTS = False
 DROPOUT=0.0

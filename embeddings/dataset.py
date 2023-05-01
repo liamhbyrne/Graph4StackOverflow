@@ -23,6 +23,8 @@ from static_graph_construction import StaticGraphConstruction
 
 log = setup_custom_logger('dataset', logging.INFO)
 
+TIMES = []
+
 class UserGraphDataset(Dataset):
     def __init__(self, root, transform=None, pre_transform=None, pre_filter=None, db_address:str=None, skip_processing=False):
         self._skip_processing = skip_processing
@@ -102,7 +104,12 @@ class UserGraphDataset(Dataset):
                 answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
 
                 # Build graph
+                start = time.time()
                 graph: HeteroData = self.construct_graph(answer["OwnerUserId"])
+                end = time.time()
+                log.info(f"Graph construction took {end-start} seconds.")
+                TIMES.append(end-start)
+                log.info(f"Average graph construction time: {sum(TIMES)/len(TIMES)} seconds. {TIMES}")
 
                 # pytorch geometric data object
                 graph.__setattr__('question_emb', question_emb)
