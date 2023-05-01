@@ -7,7 +7,9 @@ data-collection/out/
 .vector_cache/
 runs/
 *.csv
-embeddings/tag_embedding_models/*
+./embeddings
 *.pt
 embeddings/wandb/*
 *.pkl
+.vscode
+__pycache__
