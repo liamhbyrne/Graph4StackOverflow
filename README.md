@@ -3,7 +3,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/github_username/repo_name">
-    <img src="https://user-images.githubusercontent.com/47918966/235481977-d0f1269c-a353-4153-935d-9aa24af71538.png" alt="Logo" width="600" height="600">
+    <img src="https://user-images.githubusercontent.com/47918966/235481977-d0f1269c-a353-4153-935d-9aa24af71538.png" alt="Logo" width="450" height="450">
   </a>
   
 <h3 align="center">Graph4StackOverflow</h3>
