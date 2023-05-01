@@ -18,9 +18,9 @@ OS_NAME = "linux"  # "windows" or "linux"
 NUM_WORKERS = 14
 
 # Training parameters
-ROOT = "../../../data/lhb1g20"
-TRAIN_DATA_PATH = "../../../../../data/lhb1g20/train-4175-qs.pt"
-TEST_DATA_PATH = "../../../../../data/lhb1g20/test-1790-qs.pt"
+ROOT = ""
+TRAIN_DATA_PATH = ""
+TEST_DATA_PATH = ""
 REL_SUBSET = None
 EPOCHS = 20  
 START_LR = 0.001
