@@ -8,7 +8,7 @@
 <h3 align="center">Graph4StackOverflow</h3>
 
   <p align="center">
-    Upvote Prediction for Stack Overflow with Graph Neural Networks
+    Graph-based Text Classification of Stack Overflow Expertise
     <br />
     <a href="https://www.linkedin.com/in/liam-h-byrne/"><strong>Liam Byrne</strong></a>
     <br />
