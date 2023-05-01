@@ -8,8 +8,6 @@ data-collection/out/
 runs/
 *.csv
 ./embeddings
-*.pt
 embeddings/wandb/*
-*.pkl
 .vscode
 __pycache__
