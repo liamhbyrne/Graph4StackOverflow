@@ -1,10 +1,13 @@
-from typing import Optional
+from typing import Optional, Any
 
 from torch_geometric.data.hetero_data import NodeOrEdgeStorage
 from torch_geometric.data import HeteroData
 
 
 class BatchedHeteroData(HeteroData):
+    """
+
+    """
 
     def __cat_dim__(self, key: str, value: Any,
                     store: Optional[NodeOrEdgeStorage] = None, *args,

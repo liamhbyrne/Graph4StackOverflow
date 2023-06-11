@@ -1,30 +1,32 @@
 import logging
 from typing import List
 
-from ACL2024.modules.embeddings.module_embedding import ModuleEmbeddingTrainer
-from ACL2024.modules.embeddings.tag_embedding import NextTagEmbeddingTrainer
+import pandas as pd
+import torch
+import torch_geometric.transforms as T
+from torch_geometric.data import HeteroData
+
+from ACL2024.modules.embeddings.post_embedding_builder import Import, PostEmbedding
+from ACL2024.modules.util.BatchedHeteroData import BatchedHeteroData
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
-import pandas as pd
-import torch
-
-from torch_geometric.data import HeteroData
-import torch_geometric.transforms as T
-
-from ACL2024.modules.embeddings.post_embedding_builder import Import, PostEmbedding
-from ACL2024.modules.util.BatchedHeteroData import BatchedHeteroData
+"""
+LOAD MODELS GLOBALLY
+"""
 
 
 class StaticGraphConstruction:
-    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../models/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
-    module_embedding_model = ModuleEmbeddingTrainer.load_model("../models/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
-    post_embedding_builder = PostEmbedding()
 
-    def __init__(self):
+
+    def __init__(self, post_embedding_builder: PostEmbedding, tag_embedding_model, module_embedding_model):
         # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
+
+        self._post_embedding_builder = post_embedding_builder
+        self._tag_embedding_model = tag_embedding_model
+        self._module_embedding_model = module_embedding_model
 
         self._known_tags = {}  # tag_name -> index
         self._known_modules = {}  # module_name -> index
@@ -41,11 +43,12 @@ class StaticGraphConstruction:
         self._use_bert = True
         self._post_count_limit = 20
 
+
     def process_questions(self, questions: pd.DataFrame) -> torch.Tensor:
         if not len(questions):
             return None
 
-        word_emb_batches, code_emb_batches, module_name_batches = StaticGraphConstruction.post_embedding_builder(
+        word_emb_batches, code_emb_batches, module_name_batches = self._post_embedding_builder(
             questions['Body'], self._use_bert, questions['Title']
         )
 
@@ -69,7 +72,7 @@ class StaticGraphConstruction:
         if not len(answers):
             return None
 
-        word_emb_batches, code_emb_batches, module_name_batches = StaticGraphConstruction.post_embedding_builder(
+        word_emb_batches, code_emb_batches, module_name_batches = self._post_embedding_builder(
             answers['Body'], self._use_bert, title_batch=answers['Title']
         )
 
@@ -93,7 +96,7 @@ class StaticGraphConstruction:
         if not len(comments):
             return None
 
-        word_emb_batches, code_emb_batches, module_name_batches = StaticGraphConstruction.post_embedding_builder(
+        word_emb_batches, code_emb_batches, module_name_batches = self._post_embedding_builder(
             comments['Body'], self._use_bert, title_batch=[None for _ in range(len(comments))]
         )
 
@@ -117,13 +120,13 @@ class StaticGraphConstruction:
         if not len(self._known_tags):
             return None
         for tag in self._known_tags:
-            yield StaticGraphConstruction.tag_embedding_model.get_tag_embedding(tag)
+            yield self._tag_embedding_model.get_tag_embedding(tag)
 
     def process_modules(self):
         if not len(self._known_modules):
             return None
         for module in self._known_modules:  # TODO: Map module name to its embedding
-            yield StaticGraphConstruction.module_embedding_model.get_module_embedding(module)
+            yield self._module_embedding_model.get_module_embedding(module)
 
     """
     Utility functions
@@ -158,12 +161,14 @@ class StaticGraphConstruction:
         tag_nodes = list(self.process_tags())
         module_nodes = list(self.process_modules())
 
-        print(len(question_nodes), len(answer_nodes), len(comment_nodes), len(tag_nodes), len(module_nodes), sum([len(question_nodes), len(answer_nodes), len(comment_nodes), len(tag_nodes), len(module_nodes)]))
+        # Print node counts
+        log.debug(len(question_nodes), len(answer_nodes), len(comment_nodes), len(tag_nodes), len(module_nodes), sum([len(question_nodes), len(answer_nodes), len(comment_nodes), len(tag_nodes), len(module_nodes)]))
+
         # Print tags and modules with their indices (including offset)
         OFFSET = len(question_nodes) + len(answer_nodes) + len(comment_nodes)
         p1 = {v + (OFFSET + len(tag_nodes)): k for k, v in self._known_modules.items()}
         p2 = {v + OFFSET: k for k, v in self._known_tags.items()}
-        print(f"TAGS {p2} MODULES {p1}")
+        log.debug(f"TAGS {p2} MODULES {p1}")
         # Assign node features
         self._data['question'].x = torch.stack(question_nodes) if len(question_nodes) else torch.empty(0, 1536)
 
@@ -185,7 +190,8 @@ class StaticGraphConstruction:
         # Remove isolated nodes, and convert to undirected graph
         graph_out = T.remove_isolated_nodes.RemoveIsolatedNodes()(self._data)
 
-        print(sum([len(graph_out['question'].x), len(graph_out['answer'].x), len(graph_out['comment'].x), len(graph_out['tag'].x), len(graph_out['module'].x)]))
+        # Print node counts
+        #log.debug(sum([len(graph_out['question'].x), len(graph_out['answer'].x), len(graph_out['comment'].x), len(graph_out['tag'].x), len(graph_out['module'].x)]))
 
         graph_out = T.ToUndirected()(graph_out)
         graph_out.metadata()

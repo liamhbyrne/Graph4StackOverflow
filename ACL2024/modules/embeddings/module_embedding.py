@@ -3,7 +3,6 @@ import logging
 import pickle
 import random
 import sqlite3
-from typing import *
 
 import pandas as pd
 import torch
@@ -13,7 +12,7 @@ from torch.functional import F
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from post_embedding_builder import PostEmbedding
+from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
 
 logging.basicConfig(level=logging.INFO)
 

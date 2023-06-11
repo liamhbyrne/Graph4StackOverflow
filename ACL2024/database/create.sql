@@ -80,3 +80,9 @@ CREATE TABLE IF NOT EXISTS Vote (
 
 CREATE INDEX owner_index ON Post (OwnerUserId);
 CREATE INDEX commenter ON Comment (UserId);
+CREATE INDEX parents ON Post (ParentId);
+CREATE INDEX post_owner ON Post (OwnerUserId);
+CREATE INDEX post_editor ON Post (LastEditorUserId);
+CREATE INDEX post_CreationDate ON Post (CreationDate);
+CREATE INDEX post_id_index ON Post (PostId);
+CREATE INDEX badge_user_id ON Badge (UserId);

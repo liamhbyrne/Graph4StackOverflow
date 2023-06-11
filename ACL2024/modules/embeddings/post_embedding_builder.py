@@ -11,9 +11,13 @@ import spacy
 import torch
 import torch.nn as nn
 from bs4 import BeautifulSoup
+from transformers import BertTokenizer, BertModel, AutoTokenizer, AutoModel, logging as transformers_logging
+
 from ACL2024.modules.util.custom_logger import setup_custom_logger
-from transformers import BertTokenizer, BertModel, AutoTokenizer, AutoModel
 from ACL2024.modules.util.unixcoder import UniXcoder
+
+# Suppress logging from transformers.
+transformers_logging.set_verbosity_error()
 
 log = setup_custom_logger('post_embedding_builder', logging.INFO)
 
@@ -29,14 +33,14 @@ class PostEmbedding(nn.Module):
 
     def __init__(self, batched=False):
         super().__init__()
-        log.info("PostEmbedding instantiated!")
+        log.debug("PostEmbedding instantiated!")
         self._batched = batched
-        # self._global_vectors = GloVe(name='840B', dim=300)
+        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._en = spacy.load('en_core_web_sm')
         self._stopwords = self._en.Defaults.stop_words
         self._bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        self._bert_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states=True)
-        self._unixcoder = UniXcoder("microsoft/unixcoder-base")
+        self._bert_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states=True).to(self._device)
+        self._unixcoder = UniXcoder("microsoft/unixcoder-base").to(self._device)
         self._codebert_tokenizer = AutoTokenizer.from_pretrained('microsoft/codebert-base')
         self._codebert_model = AutoModel.from_pretrained('microsoft/codebert-base')
 
@@ -129,7 +133,7 @@ class PostEmbedding(nn.Module):
         try:
             syntax_tree = ast.parse(code_snippet)
         except SyntaxError:
-            return ([], [])
+            return [], []
         if get_imports_with_regex:
             modules = list(self.get_imports_via_regex(soup))
         else:
@@ -152,7 +156,7 @@ class PostEmbedding(nn.Module):
         return torch.sum(word_embeddings, dim=0) / len(tokens)
 
     def to_bert_embedding(self, texts: List[str]) -> torch.tensor:
-        encodings = self._bert_tokenizer(texts, padding=True, truncation=True, return_tensors='pt', max_length=512)
+        encodings = self._bert_tokenizer(texts, padding=True, truncation=True, return_tensors='pt', max_length=512).to(self._device)
         with torch.no_grad():
             outputs = self._bert_model(**encodings)
             last_layer = outputs.last_hidden_state
@@ -168,7 +172,7 @@ class PostEmbedding(nn.Module):
         token_ids = self._unixcoder.tokenize(code_batches, max_length=512, mode="<encoder-only>")
         longest_token_ids = max([len(x) for x in token_ids])
         token_ids = [x + ([self._unixcoder.config.pad_token_id] * (longest_token_ids - len(x))) for x in token_ids]
-        source_ids = torch.tensor(token_ids)
+        source_ids = torch.tensor(token_ids).to(self._device)
         tokens_embeddings, code_embeddings = self._unixcoder(source_ids)
         normalized_code_emb = torch.nn.functional.normalize(code_embeddings, p=2, dim=1)
         return normalized_code_emb
@@ -263,13 +267,17 @@ class PostEmbedding(nn.Module):
 
 
 if __name__ == '__main__':
+    """
+    Post Embedding Demonstration
+    """
+
     pe = PostEmbedding()
     '''TIME START'''
     t1 = time.time()
     for i in range(1):
-        a = (pe.to_unixcode_embedding(2 * ["\n".join(["for i in range(32):\n    #return 6 or something\n"])]).shape)
+        a = pe.to_unixcode_embedding(2 * ["\n".join(["for i in range(32):\n    #return 6 or something\n"])]).shape
         b = (pe.to_bert_embedding(2 * ["This is a test sentence."]).shape)
-    # print([x.module for x in pe.get_imports_via_regex(BeautifulSoup("<code>import ast<\code>", 'lxml'))])
+    print([x.module for x in pe.get_imports_via_regex(BeautifulSoup("<code>import ast<\code>", 'lxml'))])
     '''TIME END'''
     t2 = time.time()
     print("Function=%s, Time=%s" % ("embedding", t2 - t1))
