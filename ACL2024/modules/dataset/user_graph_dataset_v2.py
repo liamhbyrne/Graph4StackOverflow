@@ -23,7 +23,7 @@ from static_graph_construction import StaticGraphConstruction
 
 warnings.filterwarnings('ignore', category=MarkupResemblesLocatorWarning)
 
-log = setup_custom_logger('dataset', logging.DEBUG)
+log = setup_custom_logger('dataset', logging.INFO)
 
 
 class UserGraphDataset(Dataset):
@@ -103,20 +103,13 @@ class UserGraphDataset(Dataset):
             # Fetch answers to question
             answers_to_question = self.fetch_answers_for_question(question["PostId"], db)
 
-            processes = []
-
-            # Build Answer embeddings
+            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
             for _, answer in answers_to_question.iterrows():
-                process = multiprocessing.Process(target=self.create_instance, args=(answer, question, idx, question_emb))
-                processes.append(process)
+                pool.apply_async(self.create_instance, args=(answer, question, idx, question_emb))
                 idx += 1
 
-            for process in processes:
-                log.debug(f"Starting process for question {question['PostId']}")
-                process.start()
-
-            # for process in processes:
-            #     process.join()
+            pool.close()
+            pool.join()
 
     def create_instance(self, answer, question, idx, question_emb):
         label = torch.tensor([1 if answer["Score"] > 0 else 0], dtype=torch.long)
@@ -138,6 +131,7 @@ class UserGraphDataset(Dataset):
         graph.__setattr__('question_id', question["PostId"])
         graph.__setattr__('answer_id', answer["PostId"])
         graph.__setattr__('label', label)
+        graph.__setattr__('accepted', answer["AcceptedAnswerId"] == answer["PostId"])
         torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{question["PostId"]}_answer_id_{answer["PostId"]}.pt'))
         log.debug(f"Saved data_{idx}_question_id_{question['PostId']}_answer_id_{answer['PostId']}.pt")
 

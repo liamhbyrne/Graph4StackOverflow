@@ -11,7 +11,7 @@ import spacy
 import torch
 import torch.nn as nn
 from bs4 import BeautifulSoup
-from transformers import BertTokenizer, BertModel, AutoTokenizer, AutoModel, logging as transformers_logging
+from transformers import BertTokenizer, BertModel, AutoTokenizer, AutoModel, logging as transformers_logging, RobertaTokenizer, RobertaModel
 
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 from ACL2024.modules.util.unixcoder import UniXcoder
@@ -38,11 +38,9 @@ class PostEmbedding(nn.Module):
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._en = spacy.load('en_core_web_sm')
         self._stopwords = self._en.Defaults.stop_words
-        self._bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        self._bert_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states=True).to(self._device)
+        self._roberta_tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+        self._roberta_model = RobertaModel.from_pretrained('roberta-base', output_hidden_states=True).to(self._device)
         self._unixcoder = UniXcoder("microsoft/unixcoder-base").to(self._device)
-        self._codebert_tokenizer = AutoTokenizer.from_pretrained('microsoft/codebert-base')
-        self._codebert_model = AutoModel.from_pretrained('microsoft/codebert-base')
 
     def forward(self, html_batch: List[str], use_bert: bool, title_batch: List[str]) -> torch.tensor:
         """
@@ -156,9 +154,9 @@ class PostEmbedding(nn.Module):
         return torch.sum(word_embeddings, dim=0) / len(tokens)
 
     def to_bert_embedding(self, texts: List[str]) -> torch.tensor:
-        encodings = self._bert_tokenizer(texts, padding=True, truncation=True, return_tensors='pt', max_length=512).to(self._device)
+        encodings = self._roberta_tokenizer(texts, padding=True, truncation=True, return_tensors='pt', max_length=512).to(self._device)
         with torch.no_grad():
-            outputs = self._bert_model(**encodings)
+            outputs = self._roberta_model(**encodings)
             last_layer = outputs.last_hidden_state
             cls = last_layer[:, 0, :]
             return cls  # Converts from dim [1, 768] to [768]
