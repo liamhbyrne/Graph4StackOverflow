@@ -100,9 +100,15 @@ class UserGraphDataset(Dataset):
             )
             question_emb = torch.concat((question_word_embs[0], question_code_embs[0])).detach()
 
+            # TODO: Concatenate question_emb with quesion metadata
+            question_metadata = self.fetch_question_metadata(question["PostId"], db)
+
+            question_emb = torch.concat((question_emb, question_metadata))
+
             # Fetch answers to question
             answers_to_question = self.fetch_answers_for_question(question["PostId"], db)
 
+            # Create Pool to process answers
             pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
             for _, answer in answers_to_question.iterrows():
                 pool.apply_async(self.create_instance, args=(answer, question, idx, question_emb))
@@ -118,6 +124,11 @@ class UserGraphDataset(Dataset):
         )
         answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
 
+        # TODO: Concatenate answer_emb with answer metadata
+        answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
+
+        answer_emb = torch.concat((answer_emb, answer_metadata))
+
         # Build graph
         start = time.time()
         graph: HeteroData = self.construct_graph(answer["OwnerUserId"], sqlite3.connect(self._db_address))
@@ -132,6 +143,11 @@ class UserGraphDataset(Dataset):
         graph.__setattr__('answer_id', answer["PostId"])
         graph.__setattr__('label', label)
         graph.__setattr__('accepted', answer["AcceptedAnswerId"] == answer["PostId"])
+
+        # TODO: Include User Info vector in graph
+        user_info = self.fetch_user_info(answer["OwnerUserId"], self._db_address)
+        graph.__setattr__('user_info', user_info)
+
         torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{question["PostId"]}_answer_id_{answer["PostId"]}.pt'))
         log.debug(f"Saved data_{idx}_question_id_{question['PostId']}_answer_id_{answer['PostId']}.pt")
 
@@ -231,6 +247,56 @@ class UserGraphDataset(Dataset):
             return []
         return tags_df.iloc[0]['Tags'][1:-1].split("><")
 
+    def fetch_question_metadata(self, question_post_id: int, db) -> torch.tensor:
+        """
+        Builds a vector containing:
+        1. View count
+        2. Creation Date
+        3. Recent Activity Date
+        4. Tag Embeddings
+        5. Number of comments
+        """
+
+
+        view_count, creation_date, recent_activity_date = pd.read_sql_query(f"""
+                SELECT ViewCount, CreationDate, LastActivityDate
+                FROM Post
+                WHERE PostId = {question_post_id}
+        """, db).iloc[0]
+
+        tags = self.fetch_tags_for_question(question_post_id, db)
+        tag_embeddings = self.tag_embedding_model.get_embeddings(tags)
+
+        comments_count = pd.read_sql_query(f"""
+                SELECT COUNT(*)
+                FROM Comment
+                WHERE PostId = {question_post_id}
+        """, db).iloc[0]['COUNT(*)']
+
+
+    def fetch_answer_metadata(self, answer_post_id: int, db) -> torch.tensor:
+        """
+        Builds a vector containing:
+        1. View count
+        2. Creation Date
+        3. Recent Activity Date
+        4. Number of comments
+        """
+        pass
+
+    def fetch_user_info(self, user_id: int, db) -> torch.tensor:
+        """
+        Builds a vector containing:
+        1. User Creation Date
+        2. Reputation
+        3. Number of answers
+        4. Number of comments
+        5. Number of accepted answers
+        6. Badge Vector
+        7. Top-n tag embeddings
+        """
+        pass
+
     def construct_graph(self, user_id: int, db):
         graph_constructor = StaticGraphConstruction(post_embedding_builder=self._post_embedding_builder, tag_embedding_model=self.tag_embedding_model, module_embedding_model=self.module_embedding_model)
         qs = self.fetch_questions_by_user(user_id, db)
@@ -247,7 +313,7 @@ if __name__ == '__main__':
     for each dataset (rather than selecting new questions each time).
     '''
 
-    ds = UserGraphDataset('../../data/', db_address='../../database/g4so.db', skip_processing=False, valid_questions_pkl_path="../../data/raw/acl_questions.pkl")
+    ds = UserGraphDataset('../../data/', db_address='../../data/raw/g4so.db', skip_processing=False, valid_questions_pkl_path="../../data/raw/acl_questions.pkl")
     data = ds.get(1078)
     print("Question ndim:", data.x_dict['question'].shape)
     print("Answer ndim:", data.x_dict['answer'].shape)
