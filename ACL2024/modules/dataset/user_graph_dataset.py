@@ -165,34 +165,34 @@ class UserGraphDataset(Dataset):
     Database functions
     '''
 
-    def fetch_questions_by_post_ids(self, post_ids: List[int]):
+    def fetch_questions_by_post_ids(self, post_ids: List[int], db):
         questions_df = pd.read_sql_query(f"""
                 SELECT * FROM Post
                 WHERE PostId IN ({','.join([str(x) for x in post_ids])})
-        """, self._db)
+        """, db)
         return questions_df
 
-    def fetch_questions_by_user(self, user_id: int):
+    def fetch_questions_by_user(self, user_id: int, db):
         questions_df = pd.read_sql_query(f"""
                 SELECT *
                 FROM Post
                 WHERE Tags LIKE '%python%' AND (PostTypeId = 1) AND ((LastEditorUserId = {user_id}) OR (OwnerUserId = {user_id}))
-        """, self._db)
+        """, db)
         questions_df.set_index('PostId', inplace=True)
         return questions_df
 
-    def fetch_answers_by_user(self, user_id: int):
+    def fetch_answers_by_user(self, user_id: int, db):
         answers_df = pd.read_sql_query(f"""
                 SELECT A.Tags, B.*
                 FROM Post A
                     INNER JOIN Post B ON (B.ParentId = A.PostId) AND (B.ParentId IS NOT NULL)
                 WHERE A.Tags LIKE '%python%' AND (B.PostTypeId = 2) AND ((B.LastEditorUserId = {user_id}) OR (B.OwnerUserId = {user_id}))
-        """, self._db)
+        """, db)
         answers_df = answers_df.loc[:, ~answers_df.columns.duplicated()].copy()
         answers_df.set_index('PostId', inplace=True)
         return answers_df
 
-    def fetch_answers_for_question(self, question_post_id: int):
+    def fetch_answers_for_question(self, question_post_id: int, db):
         """
         Fetch answers for a question for P@1 evaluation
         """
@@ -200,28 +200,28 @@ class UserGraphDataset(Dataset):
                 SELECT *
                 FROM Post
                 WHERE ParentId = {question_post_id}
-        """, self._db)
+        """, db)
         answers_df = answers_df.dropna(subset=['PostId', 'Body', 'Score', 'OwnerUserId'])
         return answers_df
 
-    def fetch_questions_by_post_ids_eval(self, post_ids: List[int]):
+    def fetch_questions_by_post_ids_eval(self, post_ids: List[int], db):
         """
         Fetch questions for P@1 evaluation
         """
         questions_df = pd.read_sql_query(f"""
                 SELECT * FROM Post
                 WHERE PostId IN ({','.join([str(x) for x in post_ids])})
-        """, self._db)
+        """, db)
         questions_df.columns = ['post_id', 'question_body', 'question_title', 'question_user_id']
         return questions_df
 
-    def fetch_comments_by_user(self, user_id: int):
+    def fetch_comments_by_user(self, user_id: int, db):
         comments_on_questions_df = pd.read_sql_query(f"""
                 SELECT A.Tags, B.*
                 FROM Post A
                     INNER JOIN Comment B ON (B.PostId = A.PostId)
                 WHERE A.Tags LIKE '%python%' AND (B.UserId = {user_id}) AND (A.PostTypeId = 1)
-        """, self._db)
+        """, db)
         comments_on_questions_df.set_index('CommentId', inplace=True)
 
         comments_on_answers_df = pd.read_sql_query(f"""
@@ -230,27 +230,78 @@ class UserGraphDataset(Dataset):
                 INNER JOIN Post B ON (B.ParentId = A.PostId) AND (B.ParentId IS NOT NULL)
                 INNER JOIN Comment C ON (B.PostId = C.PostId)
             WHERE A.Tags LIKE '%python%' AND (C.UserId = {user_id}) AND (B.PostTypeId = 2)
-        """, self._db)
+        """, db)
         comments_on_answers_df.set_index('CommentId', inplace=True)
 
         return pd.concat([comments_on_questions_df, comments_on_answers_df])
 
-    def fetch_tags_for_question(self, question_post_id: int):
+    def fetch_tags_for_question(self, question_post_id: int, db):
         tags_df = pd.read_sql_query(f"""
                 SELECT Tags
                 FROM Post
                 WHERE PostId = {question_post_id}
-        """, self._db)
+        """, db)
         if len(tags_df) == 0:
             return []
         return tags_df.iloc[0]['Tags'][1:-1].split("><")
 
-    def construct_graph(self, user_id: int):
-        graph_constructor = StaticGraphConstruction(self._post_embedding_builder, UserGraphDataset.tag_embedding_model, UserGraphDataset.module_embedding_model)
-        qs = self.fetch_questions_by_user(user_id)
-        ans = self.fetch_answers_by_user(user_id)
-        cs = self.fetch_comments_by_user(user_id)
+    def fetch_question_metadata(self, question_post_id: int, db) -> torch.tensor:
+        """
+        Builds a vector containing:
+        1. View count
+        2. Creation Date
+        3. Recent Activity Date
+        4. Tag Embeddings
+        5. Number of comments
+        """
+
+
+        view_count, creation_date, last_edit_date = pd.read_sql_query(f"""
+                SELECT ViewCount, CreationDate, LastEditDate
+                FROM Post
+                WHERE PostId = {question_post_id}
+        """, db).iloc[0]
+
+        tags = self.fetch_tags_for_question(question_post_id, db)
+        tag_embeddings = self.tag_embedding_model.get_embeddings(tags)
+
+        comments_count = pd.read_sql_query(f"""
+                SELECT COUNT(*)
+                FROM Comment
+                WHERE PostId = {question_post_id}
+        """, db).iloc[0]['COUNT(*)']
+
+
+    def fetch_answer_metadata(self, answer_post_id: int, db) -> torch.tensor:
+        """
+        Builds a vector containing:
+        1. View count
+        2. Creation Date
+        3. Recent Activity Date
+        4. Number of comments
+        """
+        pass
+
+    def fetch_user_info(self, user_id: int, db) -> torch.tensor:
+        """
+        Builds a vector containing:
+        1. User Creation Date
+        2. Reputation
+        3. Number of answers
+        4. Number of comments
+        5. Number of accepted answers
+        6. Badge Vector
+        7. Top-n tag embeddings
+        """
+        pass
+
+    def construct_graph(self, user_id: int, db):
+        graph_constructor = StaticGraphConstruction(post_embedding_builder=self._post_embedding_builder, tag_embedding_model=self.tag_embedding_model, module_embedding_model=self.module_embedding_model)
+        qs = self.fetch_questions_by_user(user_id, db)
+        ans = self.fetch_answers_by_user(user_id, db)
+        cs = self.fetch_comments_by_user(user_id, db)
         return graph_constructor.construct(questions=qs, answers=ans, comments=cs)
+
 
 
 if __name__ == '__main__':
