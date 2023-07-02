@@ -18,7 +18,8 @@ from torch_geometric.data import Dataset, HeteroData
 from tqdm import tqdm
 
 from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
-from static_graph_construction import StaticGraphConstruction
+from ACL2024.modules.dataset.static_graph_construction import StaticGraphConstruction
+
 
 warnings.filterwarnings('ignore', category=MarkupResemblesLocatorWarning)
 
