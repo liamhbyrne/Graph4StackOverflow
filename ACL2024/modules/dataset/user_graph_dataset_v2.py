@@ -19,16 +19,17 @@ from torch_geometric.data import Dataset, HeteroData
 from tqdm import tqdm
 
 from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
-from static_graph_construction import StaticGraphConstruction
+from ACL2024.modules.dataset.static_graph_construction import StaticGraphConstruction
 
 warnings.filterwarnings('ignore', category=MarkupResemblesLocatorWarning)
 
 log = setup_custom_logger('dataset', logging.INFO)
 
 
+
 class UserGraphDataset(Dataset):
-    tag_embedding_model = NextTagEmbeddingTrainer.load_model("../embeddings/pre-trained/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
-    module_embedding_model = ModuleEmbeddingTrainer.load_model("../embeddings/pre-trained/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
+    tag_embedding_model = NextTagEmbeddingTrainer.load_model("/home/lhb1g20/mydocuments/acl/ACL2024/modules/embeddings/pre-trained/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
+    module_embedding_model = ModuleEmbeddingTrainer.load_model("/home/lhb1g20/mydocuments/acl/ACL2024/modules/embeddings/pre-trained/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
 
     def __init__(self, root, valid_questions_pkl_path=None, transform=None, pre_transform=None, pre_filter=None, db_address: str = None, skip_processing=False):
         self._skip_processing = skip_processing
@@ -101,15 +102,15 @@ class UserGraphDataset(Dataset):
             question_emb = torch.concat((question_word_embs[0], question_code_embs[0])).detach()
 
             # TODO: Concatenate question_emb with quesion metadata
-            question_metadata = self.fetch_question_metadata(question["PostId"], db)
+            #question_metadata = self.fetch_question_metadata(question["PostId"], db)
 
-            question_emb = torch.concat((question_emb, question_metadata))
+            #question_emb = torch.concat((question_emb, question_metadata))
 
             # Fetch answers to question
             answers_to_question = self.fetch_answers_for_question(question["PostId"], db)
 
             # Create Pool to process answers
-            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
+            pool = multiprocessing.Pool(processes=5)#multiprocessing.cpu_count()-1)
             for _, answer in answers_to_question.iterrows():
                 pool.apply_async(self.create_instance, args=(answer, question, idx, question_emb))
                 idx += 1
@@ -125,9 +126,9 @@ class UserGraphDataset(Dataset):
         answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
 
         # TODO: Concatenate answer_emb with answer metadata
-        answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
+        #answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
 
-        answer_emb = torch.concat((answer_emb, answer_metadata))
+        #answer_emb = torch.concat((answer_emb, answer_metadata))
 
         # Build graph
         start = time.time()
@@ -258,8 +259,8 @@ class UserGraphDataset(Dataset):
         """
 
 
-        view_count, creation_date, recent_activity_date = pd.read_sql_query(f"""
-                SELECT ViewCount, CreationDate, LastActivityDate
+        view_count, creation_date, last_edit_date = pd.read_sql_query(f"""
+                SELECT ViewCount, CreationDate, LastEditDate
                 FROM Post
                 WHERE PostId = {question_post_id}
         """, db).iloc[0]
@@ -312,8 +313,8 @@ if __name__ == '__main__':
     This setup allows us to have a fixed set of questions/answers
     for each dataset (rather than selecting new questions each time).
     '''
-
-    ds = UserGraphDataset('../../data/', db_address='../../data/raw/g4so.db', skip_processing=False, valid_questions_pkl_path="../../data/raw/acl_questions.pkl")
+    multiprocessing.set_start_method('spawn')
+    ds = UserGraphDataset('/home/lhb1g20/mydocuments/acl/ACL2024/data/', db_address="/data/lhb1g20/g4so/g4so.db", skip_processing=False, valid_questions_pkl_path="/home/lhb1g20/mydocuments/acl/ACL2024/data/raw/acl_questions.pkl")
     data = ds.get(1078)
     print("Question ndim:", data.x_dict['question'].shape)
     print("Answer ndim:", data.x_dict['answer'].shape)

@@ -35,7 +35,7 @@ class PostEmbedding(nn.Module):
         super().__init__()
         log.debug("PostEmbedding instantiated!")
         self._batched = batched
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._device = torch.device("cpu")#"cuda" if torch.cuda.is_available() else "cpu")
         self._en = spacy.load('en_core_web_sm')
         self._stopwords = self._en.Defaults.stop_words
         self._roberta_tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
