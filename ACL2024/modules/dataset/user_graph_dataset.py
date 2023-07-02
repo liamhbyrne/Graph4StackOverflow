@@ -33,11 +33,8 @@ class UserGraphDataset(Dataset):
         self._skip_processing = skip_processing
         self._valid_questions_pkl_path = valid_questions_pkl_path
 
-
-        # Connect to database.
-        if db_address is not None:
-            self._db = sqlite3.connect(db_address)
-            self._post_embedding_builder = PostEmbedding()
+        self._db_address = db_address
+        self._post_embedding_builder = PostEmbedding()
         # Call init last, as it may trigger the process function.
         super().__init__(root, transform, pre_transform, pre_filter)
 
@@ -82,13 +79,16 @@ class UserGraphDataset(Dataset):
     def process(self):
         """
         """
+        db = sqlite3.connect(self._db_address)
+
         # Fetch the unprocessed questions and the next index to use.
         unprocessed, idx = self.get_unprocessed_ids()
 
         # Fetch questions from database.
-        valid_questions = self.fetch_questions_by_post_ids(unprocessed)
+        valid_questions = self.fetch_questions_by_post_ids(unprocessed, db)
 
         for _, question in tqdm(valid_questions.iterrows(), total=len(valid_questions)):
+            log.debug(f"Processing question {question['PostId']}")
 
             # Build Question embedding
             question_word_embs, question_code_embs, _ = self._post_embedding_builder(
@@ -96,34 +96,56 @@ class UserGraphDataset(Dataset):
                 use_bert=True,
                 title_batch=[question["Title"]]
             )
-            question_emb = torch.concat((question_word_embs[0], question_code_embs[0]))
+            question_emb = torch.concat((question_word_embs[0], question_code_embs[0])).detach()
+
+            # TODO: Concatenate question_emb with quesion metadata
+            # question_metadata = self.fetch_question_metadata(question["PostId"], db)
+
+            # question_emb = torch.concat((question_emb, question_metadata))
 
             # Fetch answers to question
-            answers_to_question = self.fetch_answers_for_question(question["PostId"])
+            answers_to_question = self.fetch_answers_for_question(question["PostId"], db)
 
-            # Build Answer embeddings
             for _, answer in answers_to_question.iterrows():
-                label = torch.tensor([1 if answer["Score"] > 0 else 0], dtype=torch.long)
-                answer_word_embs, answer_code_embs, _ = self._post_embedding_builder(
-                    [answer["Body"]], use_bert=True, title_batch=[None]
-                )
-                answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
+                # Create instance
+                self.create_instance(answer, question, idx, question_emb)
 
-                # Build graph
-                start = time.time()
-                graph: HeteroData = self.construct_graph(answer["OwnerUserId"])
-                end = time.time()
-                log.debug(f"Graph construction took {end - start} seconds.")
-
-                # pytorch geometric data object
-                graph.__setattr__('question_emb', question_emb)
-                graph.__setattr__('answer_emb', answer_emb)
-                graph.__setattr__('score', answer["Score"])
-                graph.__setattr__('question_id', question["PostId"])
-                graph.__setattr__('answer_id', answer["PostId"])
-                graph.__setattr__('label', label)
-                torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{question["PostId"]}_answer_id_{answer["PostId"]}.pt'))
+                # Increment index
                 idx += 1
+
+    def create_instance(self, answer, question, idx, question_emb):
+        label = torch.tensor([1 if answer["Score"] > 0 else 0], dtype=torch.long)
+        answer_word_embs, answer_code_embs, _ = self._post_embedding_builder(
+            [answer["Body"]], use_bert=True, title_batch=[None]
+        )
+        answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
+
+        # TODO: Concatenate answer_emb with answer metadata
+        # answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
+
+        # answer_emb = torch.concat((answer_emb, answer_metadata))
+
+        # Build graph
+        start = time.time()
+        graph: HeteroData = self.construct_graph(answer["OwnerUserId"], sqlite3.connect(self._db_address))
+        end = time.time()
+        log.debug(f"Graph construction took {end - start} seconds.")
+
+        # pytorch geometric data object
+        graph.__setattr__('question_emb', question_emb)
+        graph.__setattr__('answer_emb', answer_emb)
+        graph.__setattr__('score', answer["Score"])
+        graph.__setattr__('question_id', question["PostId"])
+        graph.__setattr__('answer_id', answer["PostId"])
+        graph.__setattr__('label', label)
+        graph.__setattr__('accepted', answer["AcceptedAnswerId"] == answer["PostId"])
+
+        # TODO: Include User Info vector in graph
+        user_info = self.fetch_user_info(answer["OwnerUserId"], self._db_address)
+        graph.__setattr__('user_info', user_info)
+
+        torch.save(graph, os.path.join(self.processed_dir, f'data_{idx}_question_id_{question["PostId"]}_answer_id_{answer["PostId"]}.pt'))
+        log.debug(f"Saved data_{idx}_question_id_{question['PostId']}_answer_id_{answer['PostId']}.pt")
 
     def len(self):
         return len(self.processed_file_names) - 2
@@ -237,7 +259,7 @@ if __name__ == '__main__':
     for each dataset (rather than selecting new questions each time).
     '''
 
-    ds = UserGraphDataset('../../data/', db_address='../../database/g4so.db', skip_processing=False, valid_questions_pkl_path="../../data/raw/acl_questions.pkl")
+    ds = UserGraphDataset('/home/lhb1g20/mydocuments/acl/ACL2024/data/', db_address="/data/lhb1g20/g4so/g4so.db", skip_processing=False, valid_questions_pkl_path="/home/lhb1g20/mydocuments/acl/ACL2024/data/raw/acl_questions.pkl")
     data = ds.get(1078)
     print("Question ndim:", data.x_dict['question'].shape)
     print("Answer ndim:", data.x_dict['answer'].shape)
