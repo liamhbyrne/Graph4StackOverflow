@@ -30,8 +30,7 @@ class UserGraphDataset(Dataset):
     tag_embedding_model = NextTagEmbeddingTrainer.load_model("/home/lhb1g20/mydocuments/acl/ACL2024/modules/embeddings/pre-trained/tag-emb-7_5mil-50d-63653-3.pt", embedding_dim=50, vocab_size=63654, context_length=3)
     module_embedding_model = ModuleEmbeddingTrainer.load_model("/home/lhb1g20/mydocuments/acl/ACL2024/modules/embeddings/pre-trained/module-emb-1milx5-30d-49911.pt", embedding_dim=30, vocab_size=49911)
 
-
-def __init__(self, root, valid_questions_pkl_path=None, transform=None, pre_transform=None, pre_filter=None, db_address: str = None, skip_processing=False):
+    def __init__(self, root, valid_questions_pkl_path=None, transform=None, pre_transform=None, pre_filter=None, db_address: str = None, skip_processing=False):
         self._skip_processing = skip_processing
         self._valid_questions_pkl_path = valid_questions_pkl_path
 
@@ -39,6 +38,7 @@ def __init__(self, root, valid_questions_pkl_path=None, transform=None, pre_tran
         self._post_embedding_builder = PostEmbedding()
         # Call init last, as it may trigger the process function.
         super().__init__(root, transform, pre_transform, pre_filter)
+
 
     @property
     def raw_file_names(self):
