@@ -11,3 +11,4 @@ runs/
 embeddings/wandb/*
 .vscode
 __pycache__
+*.out

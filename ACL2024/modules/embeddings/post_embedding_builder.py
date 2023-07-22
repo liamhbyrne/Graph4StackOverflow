@@ -6,6 +6,7 @@ import time
 import tokenize
 from collections import namedtuple
 from typing import List
+import gc
 
 import spacy
 import torch
@@ -35,7 +36,7 @@ class PostEmbedding(nn.Module):
         super().__init__()
         log.debug("PostEmbedding instantiated!")
         self._batched = batched
-        self._device = torch.device("cpu")#"cuda" if torch.cuda.is_available() else "cpu")
+        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._en = spacy.load('en_core_web_sm')
         self._stopwords = self._en.Defaults.stop_words
         self._roberta_tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
@@ -76,7 +77,11 @@ class PostEmbedding(nn.Module):
 
         code_features = [self.get_code(soup, get_imports_with_regex=True) for soup in soups]
         modules = [x[0] for x in code_features]
-
+        
+        # Clear CUDA cache to prevent memory max-out
+        gc.collect()
+        torch.cuda.empty_cache()
+        
         '''TIME START'''
         t1 = time.time()
         if self._batched:
@@ -171,6 +176,7 @@ class PostEmbedding(nn.Module):
         longest_token_ids = max([len(x) for x in token_ids])
         token_ids = [x + ([self._unixcoder.config.pad_token_id] * (longest_token_ids - len(x))) for x in token_ids]
         source_ids = torch.tensor(token_ids).to(self._device)
+        
         tokens_embeddings, code_embeddings = self._unixcoder(source_ids)
         normalized_code_emb = torch.nn.functional.normalize(code_embeddings, p=2, dim=1)
         return normalized_code_emb

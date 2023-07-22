@@ -6,6 +6,7 @@ import sqlite3
 import time
 import warnings
 from typing import List
+import gc
 
 import pandas as pd
 import torch
@@ -111,6 +112,9 @@ class UserGraphDataset(Dataset):
             for _, answer in answers_to_question.iterrows():
                 # Create instance
                 self.create_instance(answer, question, idx, question_emb)
+                
+                gc.collect()
+                torch.cuda.empty_cache()
 
                 # Increment index
                 idx += 1
