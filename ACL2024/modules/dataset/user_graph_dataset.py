@@ -126,10 +126,7 @@ class UserGraphDataset(Dataset):
         )
         answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
 
-        # TODO: Concatenate answer_emb with answer metadata
-        # answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
-
-        # answer_emb = torch.concat((answer_emb, answer_metadata))
+        answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
 
         # Build graph
         start = time.time()
@@ -140,6 +137,7 @@ class UserGraphDataset(Dataset):
         # pytorch geometric data object
         graph.__setattr__('question_emb', question_emb)
         graph.__setattr__('answer_emb', answer_emb)
+        graph.__setattr__('answer_metadata', answer_metadata)
         graph.__setattr__('score', answer["Score"])
         graph.__setattr__('question_id', question["PostId"])
         graph.__setattr__('answer_id', answer["PostId"])
@@ -259,7 +257,6 @@ class UserGraphDataset(Dataset):
         5. Number of comments
         """
 
-
         view_count, creation_date, last_edit_date = pd.read_sql_query(f"""
                 SELECT ViewCount, CreationDate, LastEditDate
                 FROM Post
@@ -275,6 +272,8 @@ class UserGraphDataset(Dataset):
                 WHERE PostId = {question_post_id}
         """, db).iloc[0]['COUNT(*)']
 
+        return torch.cat([torch.tensor([view_count, creation_date, last_edit_date, comments_count]), tag_embeddings])
+
 
     def fetch_answer_metadata(self, answer_post_id: int, db) -> torch.tensor:
         """
@@ -284,7 +283,19 @@ class UserGraphDataset(Dataset):
         3. Recent Activity Date
         4. Number of comments
         """
-        pass
+        view_count, creation_date, last_edit_date = pd.read_sql_query(f"""
+                SELECT ViewCount, CreationDate, LastEditDate
+                FROM Post
+                WHERE PostId = {answer_post_id}
+        """, db).iloc[0]
+
+        comments_count = pd.read_sql_query(f"""
+                SELECT COUNT(*)
+                FROM Comment
+                WHERE PostId = {answer_post_id}
+        """, db).iloc[0]['COUNT(*)']
+
+        return torch.tensor([view_count, creation_date, last_edit_date, comments_count])
 
     def fetch_user_info(self, user_id: int, db) -> torch.tensor:
         """
@@ -297,7 +308,50 @@ class UserGraphDataset(Dataset):
         6. Badge Vector
         7. Top-n tag embeddings
         """
-        pass
+        user_creation_date, reputation = pd.read_sql_query(f"""
+                SELECT CreationDate, Reputation
+                FROM User
+                WHERE UserId = {user_id}
+        """, db).iloc[0]
+
+        answers_count = pd.read_sql_query(f"""
+                SELECT COUNT(*)
+                FROM Post
+                WHERE OwnerUserId = {user_id} AND PostTypeId = 2
+        """, db).iloc[0]['COUNT(*)']
+
+        comments_count = pd.read_sql_query(f"""
+                SELECT COUNT(*)
+                FROM Comment
+                WHERE UserId = {user_id}
+        """, db).iloc[0]['COUNT(*)']
+
+        accepted_answers_count = pd.read_sql_query(f"""
+                SELECT COUNT(*) FROM Post A
+                JOIN POST Q ON A.ParentId = Q.PostId
+                WHERE A.OwnerUserId = {user_id} AND A.PostId = Q.AcceptedAnswerId
+        """, db).iloc[0]['COUNT(*)']
+
+        # One-hot encode badges
+        badges = pd.read_sql_query(f"""
+                SELECT Name
+                FROM Badge
+                WHERE UserId = {user_id}
+        """, db)
+        badge_vector = torch.zeros(6815)
+        for badge in badges['Name']:
+            badge_vector[self.badge_embedding_model[badge]] = 1
+
+
+        top_n_tags = pd.read_sql_query(f"""
+                SELECT Tags
+                FROM Post
+                WHERE OwnerUserId = {user_id} AND PostTypeId = 1
+        """, db)
+        top_n_tags = top_n_tags['Tags'].str[1:-1].str.split("><").explode().value_counts().index.tolist()[:self._top_n_tags]
+        top_n_tags = self.tag_embedding_model.get_embeddings(top_n_tags)
+
+        return torch.cat([torch.tensor([user_creation_date, reputation, answers_count, comments_count, accepted_answers_count]), badge_vector, top_n_tags])
 
     def construct_graph(self, user_id: int, db):
         graph_constructor = StaticGraphConstruction(post_embedding_builder=self._post_embedding_builder, tag_embedding_model=self.tag_embedding_model, module_embedding_model=self.module_embedding_model)
