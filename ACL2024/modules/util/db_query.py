@@ -1,11 +1,10 @@
 """
 Database functions
 """
-from datetime import datetime
 from typing import List
 
 import pandas as pd
-import torch
+import os
 
 
 def fetch_questions_by_post_ids(post_ids: List[int], db):

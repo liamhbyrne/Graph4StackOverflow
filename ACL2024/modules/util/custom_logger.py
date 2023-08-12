@@ -15,3 +15,5 @@ def setup_custom_logger(name, level):
     logger.handlers.clear()
     logger.addHandler(screen_handler)
     return logger
+
+

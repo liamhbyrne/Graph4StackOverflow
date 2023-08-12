@@ -7,19 +7,19 @@ graph_construction:
     use_bert_embeddings: True  # else GloVe embeddings
 
 user_graph_dataset:
-    root: C:\Users\liamb\Desktop\acl2024\ACL2024\data
-    db_address: C:\Users\liamb\Desktop\acl2024\ACL2024\data\raw\g4so.db
+    root: data
+    db_address: data/raw/g4so.db
     skip_processing: False
-    valid_questions_pkl_path: C:\Users\liamb\Desktop\acl2024\ACL2024\data\raw\acl_questions.pkl
+    valid_questions_pkl_path: data\raw\acl_questions.pkl
 
     tag_embeddings:
-        model_path: C:\Users\liamb\Desktop\acl2024\ACL2024\modules\embeddings\pre-trained\tag-emb-7_5mil-50d-63653-3.pt
+        model_path: modules\embeddings\pre-trained\tag-emb-7_5mil-50d-63653-3.pt
         embedding_dim: 50
         vocab_size: 63654
         context_length: 3
 
     module_embeddings:
-        model_path: C:\Users\liamb\Desktop\acl2024\ACL2024\modules\embeddings\pre-trained\module-emb-1milx5-30d-49911.pt
+        model_path: modules\embeddings\pre-trained\module-emb-1milx5-30d-49911.pt
         embedding_dim: 30
         vocab_size: 49911
 
@@ -38,3 +38,5 @@ user_graph_dataset:
     user_info_top_n_tags: 10
 
 
+compile_datset:
+    root: data

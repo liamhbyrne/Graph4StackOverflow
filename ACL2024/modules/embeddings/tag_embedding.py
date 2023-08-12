@@ -1,4 +1,5 @@
 import logging
+import os
 import pickle
 import random
 import sqlite3
@@ -10,6 +11,8 @@ from torch import nn, optim
 from torch.functional import F
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+
+from ACL2024.modules.util.get_root_dir import get_project_root
 
 logging.basicConfig(level=logging.INFO)
 
@@ -147,6 +150,9 @@ class NextTagEmbeddingTrainer:
     def load_model(
         model_path: str, vocab_size: int, embedding_dim: int, context_length: int
     ):
+        # Join the model path to the project root
+        model_path = os.path.join(get_project_root(), model_path)
+
         model = NextTagEmbedding(vocab_size, embedding_dim, context_length)
         model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 

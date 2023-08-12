@@ -1,5 +1,5 @@
 """
-A basic remote monitoring system which sends docker logs to a private slack channel
+A basic remote monitoring system which sends logs about dataset creation to slack
 """
 import json
 

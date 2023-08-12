@@ -1,5 +1,6 @@
 import itertools
 import logging
+import os
 import pickle
 import random
 import sqlite3
@@ -13,6 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
+from ACL2024.modules.util.get_root_dir import get_project_root
 
 logging.basicConfig(level=logging.INFO)
 
@@ -120,6 +122,10 @@ class ModuleEmbeddingTrainer:
 
     @staticmethod
     def load_model(model_path: str, vocab_size: int, embedding_dim: int):
+
+        # Join the model path to the project root
+        model_path = os.path.join(get_project_root(), model_path)
+
         model = ModuleEmbedding(vocab_size, embedding_dim)
         model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 

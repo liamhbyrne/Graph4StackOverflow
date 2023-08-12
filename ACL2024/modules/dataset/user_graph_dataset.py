@@ -21,6 +21,7 @@ from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
 from ACL2024.modules.embeddings.tag_embedding import NextTagEmbeddingTrainer
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 from ACL2024.modules.util.db_query import fetch_questions_by_post_ids, fetch_tags_for_question, fetch_answers_for_question, fetch_questions_by_user, fetch_answers_by_user, fetch_comments_by_user
+from ACL2024.modules.util.get_root_dir import get_project_root
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
@@ -49,13 +50,13 @@ class UserGraphDataset(Dataset):
             skip_processing=False,
     ):
         self._skip_processing = skip_processing
-        self._valid_questions_pkl_path = valid_questions_pkl_path
+        self._valid_questions_pkl_path = os.path.join(get_project_root(), valid_questions_pkl_path)
 
-        self._db_address = db_address
+        self._db_address = os.path.join(get_project_root(), db_address)
         self._post_embedding_builder = PostEmbedding()
         self._db = sqlite3.connect(self._db_address)
         # Call init last, as it may trigger the process function.
-        super().__init__(root, transform, pre_transform, pre_filter)
+        super().__init__(os.path.join(get_project_root(), root), transform, pre_transform, pre_filter)
 
     @property
     def raw_file_names(self):

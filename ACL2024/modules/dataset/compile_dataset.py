@@ -5,12 +5,15 @@ import re
 from typing import List
 
 import torch
+import yaml
 from torch_geometric.data import InMemoryDataset
 
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 
 log = setup_custom_logger("compile-dataset", logging.INFO)
 
+with open("dataset_config.yaml", "r") as file:
+    CONFIG = yaml.safe_load(file)['compile_dataset']
 
 class UserGraphDatasetInMemory(InMemoryDataset):
     def __init__(
@@ -87,6 +90,9 @@ def fetch_question_ids(root) -> List[int]:
 
 
 def split(a, n):
+    """
+    Split a list into n chunks
+    """
     k, m = divmod(len(a), n)
     return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))
 
@@ -96,7 +102,10 @@ Dataset creation functions
 """
 
 
-def create_datasets_for_kfolds(folds, root):
+def create_datasets_for_kfolds(folds, root: str):
+    """
+    Create k-fold datasets for cross validation
+    """
     question_ids = fetch_question_ids(root)
     random.shuffle(question_ids)
 
@@ -107,8 +116,11 @@ def create_datasets_for_kfolds(folds, root):
         )
 
 
-def create_train_test_datasets():
-    question_ids = fetch_question_ids(ROOT)
+def create_train_test_datasets(root: str):
+    """
+    Create train/test datasets
+    """
+    question_ids = fetch_question_ids(root)
 
     train_ids = list(question_ids)[: int(len(question_ids) * 0.7)]
     test_ids = [x for x in question_ids if x not in train_ids]
@@ -117,19 +129,18 @@ def create_train_test_datasets():
     log.info(f"Testing question count {len(test_ids)}")
 
     train_dataset = UserGraphDatasetInMemory(
-        ROOT, f"train-{len(train_ids)}-qs.pt", train_ids
+        root, f"train-{len(train_ids)}-qs.pt", train_ids
     )
     test_dataset = UserGraphDatasetInMemory(
-        ROOT, f"test-{len(test_ids)}-qs.pt", test_ids
+        root, f"test-{len(test_ids)}-qs.pt", test_ids
     )
     return train_dataset, test_dataset
 
 
 if __name__ == "__main__":
-    ROOT = "../../data/"
     choice = input("1. Create train/test datasets\n2. Create k-fold datasets\n>>>")
     if choice == "1":
-        create_train_test_datasets()
+        create_train_test_datasets(root=CONFIG['root'])
     elif choice == "2":
         n = int(input("Enter number of folds: "))
-        folds = list(create_datasets_for_kfolds(n, ROOT))
+        folds = list(create_datasets_for_kfolds(n, root=CONFIG['root']))
