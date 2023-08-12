@@ -1,0 +1,40 @@
+
+graph_construction:
+    graph_question_limit: 25
+    graph_answer_limit: 25
+    graph_comment_limit: 25
+    num_tags_per_post: 5
+    use_bert_embeddings: True  # else GloVe embeddings
+
+user_graph_dataset:
+    root: C:\Users\liamb\Desktop\acl2024\ACL2024\data
+    db_address: C:\Users\liamb\Desktop\acl2024\ACL2024\data\raw\g4so.db
+    skip_processing: False
+    valid_questions_pkl_path: C:\Users\liamb\Desktop\acl2024\ACL2024\data\raw\acl_questions.pkl
+
+    tag_embeddings:
+        model_path: C:\Users\liamb\Desktop\acl2024\ACL2024\modules\embeddings\pre-trained\tag-emb-7_5mil-50d-63653-3.pt
+        embedding_dim: 50
+        vocab_size: 63654
+        context_length: 3
+
+    module_embeddings:
+        model_path: C:\Users\liamb\Desktop\acl2024\ACL2024\modules\embeddings\pre-trained\module-emb-1milx5-30d-49911.pt
+        embedding_dim: 30
+        vocab_size: 49911
+
+    add_question_embedding: True
+    add_question_metadata: True
+    add_answer_embedding: True
+    add_answer_metadata: True
+    add_score: True
+    add_question_id: True
+    add_answer_id: True
+    add_user_id: True
+    add_label: True
+    add_accepted: True
+    add_user_info: True
+
+    user_info_top_n_tags: 10
+
+

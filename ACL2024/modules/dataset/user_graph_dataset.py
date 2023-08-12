@@ -1,4 +1,4 @@
-from datetime import datetime
+import gc
 import logging
 import os.path
 import pickle
@@ -6,38 +6,36 @@ import re
 import sqlite3
 import time
 import warnings
-from typing import List
-import gc
+from datetime import datetime
 
 import pandas as pd
 import torch
+import yaml
 from bs4 import MarkupResemblesLocatorWarning
-
-from ACL2024.modules.embeddings.module_embedding import ModuleEmbeddingTrainer
-from ACL2024.modules.embeddings.tag_embedding import NextTagEmbeddingTrainer
-from ACL2024.modules.util.custom_logger import setup_custom_logger
 from torch_geometric.data import Dataset, HeteroData
 from tqdm import tqdm
 
-from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
 from ACL2024.modules.dataset.static_graph_construction import StaticGraphConstruction
+from ACL2024.modules.embeddings.module_embedding import ModuleEmbeddingTrainer
+from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
+from ACL2024.modules.embeddings.tag_embedding import NextTagEmbeddingTrainer
+from ACL2024.modules.util.custom_logger import setup_custom_logger
+from ACL2024.modules.util.db_query import fetch_questions_by_post_ids, fetch_tags_for_question, fetch_answers_for_question, fetch_questions_by_user, fetch_answers_by_user, fetch_comments_by_user
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 log = setup_custom_logger("dataset", logging.INFO)
 
+with open("dataset_config.yaml", "r") as file:
+    CONFIG = yaml.safe_load(file)['user_graph_dataset']
+
 
 class UserGraphDataset(Dataset):
     tag_embedding_model = NextTagEmbeddingTrainer.load_model(
-        r"C:\Users\liamb\Desktop\acl2024\ACL2024\modules\embeddings\pre-trained\tag-emb-7_5mil-50d-63653-3.pt",
-        embedding_dim=50,
-        vocab_size=63654,
-        context_length=3,
+        **CONFIG['tag_embeddings']
     )
     module_embedding_model = ModuleEmbeddingTrainer.load_model(
-        r"C:\Users\liamb\Desktop\acl2024\ACL2024\modules\embeddings\pre-trained\module-emb-1milx5-30d-49911.pt",
-        embedding_dim=30,
-        vocab_size=49911,
+        **CONFIG['module_embeddings']
     )
 
     def __init__(
@@ -104,7 +102,7 @@ class UserGraphDataset(Dataset):
         unprocessed, idx = self.get_unprocessed_ids()
 
         # Fetch questions from database.
-        valid_questions = self.fetch_questions_by_post_ids(unprocessed, self._db)
+        valid_questions = fetch_questions_by_post_ids(unprocessed, self._db)
 
         for _, question in tqdm(valid_questions.iterrows(), total=len(valid_questions)):
             log.debug(f"Processing question {question['PostId']}")
@@ -121,7 +119,7 @@ class UserGraphDataset(Dataset):
             )
 
             # Fetch answers to question
-            answers_to_question = self.fetch_answers_for_question(
+            answers_to_question = fetch_answers_for_question(
                 question["PostId"], self._db
             )
 
@@ -154,24 +152,40 @@ class UserGraphDataset(Dataset):
         end = time.time()
         log.debug(f"Graph construction took {end - start} seconds.")
 
-        # pytorch geometric data object
+        # Add attributes based on config
+        if CONFIG['add_question_embedding']:
+            graph.__setattr__("question_emb", question_emb)
 
+        if CONFIG['add_question_metadata']:
+            graph.__setattr__("question_metadata", question_metadata)
 
-        graph.__setattr__("question_emb", question_emb)
-        graph.__setattr__("question_metadata", question_metadata)
-        graph.__setattr__("answer_emb", answer_emb)
-        graph.__setattr__("answer_metadata", answer_metadata)
-        graph.__setattr__("score", answer["Score"])
-        graph.__setattr__("question_id", question["PostId"])
-        graph.__setattr__("answer_id", answer["PostId"])
-        graph.__setattr__("user_id", answer["OwnerUserId"])
-        graph.__setattr__("label", label)
-        graph.__setattr__("accepted", answer["AcceptedAnswerId"] == answer["PostId"])
+        if CONFIG['add_answer_embedding']:
+            graph.__setattr__("answer_emb", answer_emb)
 
-        # TODO: Include User Info vector in graph
-        user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
+        if CONFIG['add_answer_metadata']:
+            graph.__setattr__("answer_metadata", answer_metadata)
 
-        graph.__setattr__("user_info", user_info)
+        if CONFIG['add_score']:
+            graph.__setattr__("score", answer["Score"])
+
+        if CONFIG['add_question_id']:
+            graph.__setattr__("question_id", question["PostId"])
+
+        if CONFIG['add_answer_id']:
+            graph.__setattr__("answer_id", answer["PostId"])
+
+        if CONFIG['add_user_id']:
+            graph.__setattr__("user_id", answer["OwnerUserId"])
+
+        if CONFIG['add_label']:
+            graph.__setattr__("label", label)
+
+        if CONFIG['add_accepted']:
+            graph.__setattr__("accepted", answer["AcceptedAnswerId"] == answer["PostId"])
+
+        if CONFIG['add_user_info']:
+            user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
+            graph.__setattr__("user_info", user_info)
 
         torch.save(
             graph,
@@ -183,7 +197,6 @@ class UserGraphDataset(Dataset):
         log.debug(
             f"Saved data_{idx}_question_id_{question['PostId']}_answer_id_{answer['PostId']}.pt"
         )
-        #print(graph)
 
     def len(self):
         return len(self.processed_file_names) - 2
@@ -200,121 +213,6 @@ class UserGraphDataset(Dataset):
             return data
         else:
             raise Exception(f"Data with index {idx} not found.")
-
-    """
-    Database functions
-    """
-
-    def fetch_questions_by_post_ids(self, post_ids: List[int], db):
-        questions_df = pd.read_sql_query(
-            f"""
-                SELECT * FROM Post
-                WHERE PostId IN ({','.join([str(x) for x in post_ids])})
-        """,
-            db,
-        )
-        return questions_df
-
-    def fetch_questions_by_user(self, user_id: int, db):
-        questions_df = pd.read_sql_query(
-            f"""
-                SELECT *
-                FROM Post
-                WHERE Tags LIKE '%python%' AND (PostTypeId = 1) AND ((LastEditorUserId = {user_id}) OR (OwnerUserId = {user_id}))
-        """,
-            db,
-        )
-        questions_df.set_index("PostId", inplace=True)
-        return questions_df
-
-    def fetch_answers_by_user(self, user_id: int, db):
-        answers_df = pd.read_sql_query(
-            f"""
-                SELECT A.Tags, B.*
-                FROM Post A
-                    INNER JOIN Post B ON (B.ParentId = A.PostId) AND (B.ParentId IS NOT NULL)
-                WHERE A.Tags LIKE '%python%' AND (B.PostTypeId = 2) AND ((B.LastEditorUserId = {user_id}) OR (B.OwnerUserId = {user_id}))
-        """,
-            db,
-        )
-        answers_df = answers_df.loc[:, ~answers_df.columns.duplicated()].copy()
-        answers_df.set_index("PostId", inplace=True)
-        return answers_df
-
-    def fetch_answers_for_question(self, question_post_id: int, db):
-        """
-        Fetch answers for a question for P@1 evaluation
-        """
-        answers_df = pd.read_sql_query(
-            f"""
-                SELECT *
-                FROM Post
-                WHERE ParentId = {question_post_id}
-        """,
-            db,
-        )
-        answers_df = answers_df.dropna(
-            subset=["PostId", "Body", "Score", "OwnerUserId"]
-        )
-        return answers_df
-
-    def fetch_questions_by_post_ids_eval(self, post_ids: List[int], db):
-        """
-        Fetch questions for P@1 evaluation
-        """
-        questions_df = pd.read_sql_query(
-            f"""
-                SELECT * FROM Post
-                WHERE PostId IN ({','.join([str(x) for x in post_ids])})
-        """,
-            db,
-        )
-        questions_df.columns = [
-            "post_id",
-            "question_body",
-            "question_title",
-            "question_user_id",
-        ]
-        return questions_df
-
-    def fetch_comments_by_user(self, user_id: int, db):
-        comments_on_questions_df = pd.read_sql_query(
-            f"""
-                SELECT A.Tags, B.*
-                FROM Post A
-                    INNER JOIN Comment B ON (B.PostId = A.PostId)
-                WHERE A.Tags LIKE '%python%' AND (B.UserId = {user_id}) AND (A.PostTypeId = 1)
-        """,
-            db,
-        )
-        comments_on_questions_df.set_index("CommentId", inplace=True)
-
-        comments_on_answers_df = pd.read_sql_query(
-            f"""
-            SELECT A.Tags, C.*
-            FROM Post A
-                INNER JOIN Post B ON (B.ParentId = A.PostId) AND (B.ParentId IS NOT NULL)
-                INNER JOIN Comment C ON (B.PostId = C.PostId)
-            WHERE A.Tags LIKE '%python%' AND (C.UserId = {user_id}) AND (B.PostTypeId = 2)
-        """,
-            db,
-        )
-        comments_on_answers_df.set_index("CommentId", inplace=True)
-
-        return pd.concat([comments_on_questions_df, comments_on_answers_df])
-
-    def fetch_tags_for_question(self, question_post_id: int, db):
-        tags_df = pd.read_sql_query(
-            f"""
-                SELECT Tags
-                FROM Post
-                WHERE PostId = {question_post_id}
-        """,
-            db,
-        )
-        if len(tags_df) == 0:
-            return []
-        return tags_df.iloc[0]["Tags"][1:-1].split("><")
 
     def fetch_question_metadata(self, question_post_id: int, db) -> torch.tensor:
         """
@@ -340,22 +238,21 @@ class UserGraphDataset(Dataset):
 
         # Encode dates as a min-max value
         last_edit_date = (
-                                     datetime.strptime(last_edit_date, "%Y-%m-%dT%H:%M:%S.%f")
-                                     - datetime(2008, 7, 31)
-                             ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
+                                 datetime.strptime(last_edit_date, "%Y-%m-%dT%H:%M:%S.%f")
+                                 - datetime(2008, 7, 31)
+                         ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
         creation_date = (
-                                     datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
-                                     - datetime(2008, 7, 31)
-                             ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
+                                datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
+                                - datetime(2008, 7, 31)
+                        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
 
         # Encode view count as a min-max value
-        view_count = (view_count) / (1000000)
+        view_count = view_count / 1000000
 
-        tags = self.fetch_tags_for_question(question_post_id, db)[:5]
+        tags = fetch_tags_for_question(question_post_id, db)[:5]
         tag_embeddings = torch.zeros(len(tags), 50)
         for i, tag in enumerate(tags):
             tag_embeddings[i] = self.tag_embedding_model.get_tag_embedding(tag)
-
 
         comments_count = pd.read_sql_query(
             f"""
@@ -394,10 +291,9 @@ class UserGraphDataset(Dataset):
         ).iloc[0]["CreationDate"]
         # Encode date as a min-max value
         creation_date = (
-                 datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
-                 - datetime(2008, 7, 31)
-         ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
-
+                                datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
+                                - datetime(2008, 7, 31)
+                        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
 
         comments_count = pd.read_sql_query(
             f"""
@@ -508,7 +404,7 @@ class UserGraphDataset(Dataset):
             .str[1:-1]
             .str.split("><")
             .explode()
-            .value_counts()[:10]
+            .value_counts()[:CONFIG['user_info_top_n_tags']]
             .index.tolist()
         )
 
@@ -527,16 +423,15 @@ class UserGraphDataset(Dataset):
         }
 
         return user_info
-
     def construct_graph(self, user_id: int, db):
         graph_constructor = StaticGraphConstruction(
             post_embedding_builder=self._post_embedding_builder,
             tag_embedding_model=self.tag_embedding_model,
             module_embedding_model=self.module_embedding_model,
         )
-        qs = self.fetch_questions_by_user(user_id, db)
-        ans = self.fetch_answers_by_user(user_id, db)
-        cs = self.fetch_comments_by_user(user_id, db)
+        qs = fetch_questions_by_user(user_id, db)
+        ans = fetch_answers_by_user(user_id, db)
+        cs = fetch_comments_by_user(user_id, db)
         return graph_constructor.construct(questions=qs, answers=ans, comments=cs)
 
 
@@ -549,16 +444,8 @@ if __name__ == "__main__":
     """
 
     ds = UserGraphDataset(
-        r"C:\Users\liamb\Desktop\acl2024\ACL2024\data",
-        db_address=r"C:\Users\liamb\Desktop\acl2024\ACL2024\data\raw\g4so.db",
-        skip_processing=False,
-        valid_questions_pkl_path=r"C:\Users\liamb\Desktop\acl2024\ACL2024\data\raw\acl_questions.pkl",
+        root=CONFIG['root'],
+        db_address=CONFIG['db_address'],
+        skip_processing=CONFIG['skip_processing'],
+        valid_questions_pkl_path=CONFIG['valid_questions_pkl_path']
     )
-    data = ds.get(1078)
-    print("Question ndim:", data.x_dict["question"].shape)
-    print("Answer ndim:", data.x_dict["answer"].shape)
-    print("Comment ndim:", data.x_dict["comment"].shape)
-    print("Tag ndim:", data.x_dict["tag"].shape)
-    print("Module ndim:", data.x_dict["module"].shape)
-    print("Question:", data.question_emb.shape)
-    print("Answer:", data.answer_emb.shape)

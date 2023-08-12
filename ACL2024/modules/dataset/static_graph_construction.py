@@ -4,6 +4,7 @@ from typing import List
 import pandas as pd
 import torch
 import torch_geometric.transforms as T
+import yaml
 from torch_geometric.data import HeteroData
 
 from ACL2024.modules.embeddings.post_embedding_builder import Import, PostEmbedding
@@ -13,17 +14,16 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
-"""
-LOAD MODELS GLOBALLY
-"""
+with open("dataset_config.yaml", "r") as file:
+    CONFIG = yaml.safe_load(file)['graph_construction']
 
 
 class StaticGraphConstruction:
     def __init__(
-        self,
-        post_embedding_builder: PostEmbedding,
-        tag_embedding_model,
-        module_embedding_model,
+            self,
+            post_embedding_builder: PostEmbedding,
+            tag_embedding_model,
+            module_embedding_model,
     ):
         # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
 
@@ -34,7 +34,6 @@ class StaticGraphConstruction:
         self._known_tags = {}  # tag_name -> index
         self._known_modules = {}  # module_name -> index
         self._data = BatchedHeteroData()
-        self._first_n_tags = 5
 
         self._tag_to_question_edges = []
         self._tag_to_answer_edges = []
@@ -43,8 +42,15 @@ class StaticGraphConstruction:
         self._module_to_question_edges = []
         self._module_to_answer_edges = []
         self._module_to_comment_edges = []
-        self._use_bert = True
-        self._post_count_limit = 25
+
+        """
+        Configurable parameters
+        """
+        self._use_bert = CONFIG['use_bert_embeddings']
+        self._graph_question_limit = CONFIG['graph_question_limit']
+        self._graph_answer_limit = CONFIG['graph_answer_limit']
+        self._graph_comment_limit = CONFIG['graph_comment_limit']
+        self._first_n_tags = CONFIG['num_tags_per_post']
 
     def process_questions(self, questions: pd.DataFrame) -> torch.Tensor:
         if not len(questions):
@@ -146,7 +152,7 @@ class StaticGraphConstruction:
     def process_modules(self):
         if not len(self._known_modules):
             return None
-        for module in self._known_modules:  # TODO: Map module name to its embedding
+        for module in self._known_modules:
             yield self._module_embedding_model.get_module_embedding(module)
 
     """
@@ -170,9 +176,9 @@ class StaticGraphConstruction:
         return modules
 
     def construct(self, questions, answers, comments) -> HeteroData:
-        questions = questions.head(self._post_count_limit)
-        answers = answers.head(self._post_count_limit)
-        comments = comments.head(self._post_count_limit)
+        questions = questions.head(self._graph_question_limit)
+        answers = answers.head(self._graph_question_limit)
+        comments = comments.head(self._graph_comment_limit)
 
         questions.reset_index(inplace=True)
         answers.reset_index(inplace=True)
@@ -257,10 +263,6 @@ class StaticGraphConstruction:
 
         # Remove isolated nodes, and convert to undirected graph
         graph_out = T.remove_isolated_nodes.RemoveIsolatedNodes()(self._data)
-
-        # Print node counts
-        # log.debug(sum([len(graph_out['question'].x), len(graph_out['answer'].x), len(graph_out['comment'].x), len(graph_out['tag'].x), len(graph_out['module'].x)]))
-
         graph_out = T.ToUndirected()(graph_out)
         graph_out.metadata()
 
