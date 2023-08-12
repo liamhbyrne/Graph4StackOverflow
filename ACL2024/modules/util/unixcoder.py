@@ -9,11 +9,11 @@ from transformers import RobertaTokenizer, RobertaModel, RobertaConfig
 class UniXcoder(nn.Module):
     def __init__(self, model_name):
         """
-            Build UniXcoder.
+        Build UniXcoder.
 
-            Parameters:
+        Parameters:
 
-            * `model_name`- huggingface model card name. e.g. microsoft/unixcoder-base
+        * `model_name`- huggingface model card name. e.g. microsoft/unixcoder-base
         """
         super(UniXcoder, self).__init__()
         self.tokenizer = RobertaTokenizer.from_pretrained(model_name)
@@ -21,8 +21,13 @@ class UniXcoder(nn.Module):
         self.config.is_decoder = True
         self.model = RobertaModel.from_pretrained(model_name, config=self.config)
 
-        self.register_buffer("bias", torch.tril(torch.ones((1024, 1024), dtype=torch.uint8)).view(1, 1024, 1024))
-        self.lm_head = nn.Linear(self.config.hidden_size, self.config.vocab_size, bias=False)
+        self.register_buffer(
+            "bias",
+            torch.tril(torch.ones((1024, 1024), dtype=torch.uint8)).view(1, 1024, 1024),
+        )
+        self.lm_head = nn.Linear(
+            self.config.hidden_size, self.config.vocab_size, bias=False
+        )
         self.lm_head.weight = self.model.embeddings.word_embeddings.weight
         self.lsm = nn.LogSoftmax(dim=-1)
 
@@ -48,23 +53,33 @@ class UniXcoder(nn.Module):
         for x in inputs:
             tokens = tokenizer.tokenize(x)
             if mode == "<encoder-only>":
-                tokens = tokens[:max_length - 4]
-                tokens = [tokenizer.cls_token, mode, tokenizer.sep_token] + tokens + [tokenizer.sep_token]
+                tokens = tokens[: max_length - 4]
+                tokens = (
+                    [tokenizer.cls_token, mode, tokenizer.sep_token]
+                    + tokens
+                    + [tokenizer.sep_token]
+                )
             elif mode == "<decoder-only>":
-                tokens = tokens[-(max_length - 3):]
+                tokens = tokens[-(max_length - 3) :]
                 tokens = [tokenizer.cls_token, mode, tokenizer.sep_token] + tokens
             else:
-                tokens = tokens[:max_length - 5]
-                tokens = [tokenizer.cls_token, mode, tokenizer.sep_token] + tokens + [tokenizer.sep_token]
+                tokens = tokens[: max_length - 5]
+                tokens = (
+                    [tokenizer.cls_token, mode, tokenizer.sep_token]
+                    + tokens
+                    + [tokenizer.sep_token]
+                )
 
             tokens_id = tokenizer.convert_tokens_to_ids(tokens)
             if padding:
-                tokens_id = tokens_id + [self.config.pad_token_id] * (max_length - len(tokens_id))
+                tokens_id = tokens_id + [self.config.pad_token_id] * (
+                    max_length - len(tokens_id)
+                )
             tokens_ids.append(tokens_id)
         return tokens_ids
 
     def decode(self, source_ids):
-        """ Convert token ids to string """
+        """Convert token ids to string"""
         predictions = []
         for x in source_ids:
             prediction = []
@@ -72,25 +87,31 @@ class UniXcoder(nn.Module):
                 t = y.cpu().numpy()
                 t = list(t)
                 if 0 in t:
-                    t = t[:t.index(0)]
+                    t = t[: t.index(0)]
                 text = self.tokenizer.decode(t, clean_up_tokenization_spaces=False)
                 prediction.append(text)
             predictions.append(prediction)
         return predictions
 
     def forward(self, source_ids):
-        """ Obtain token embeddings and sentence embeddings """
+        """Obtain token embeddings and sentence embeddings"""
         mask = source_ids.ne(self.config.pad_token_id)
-        token_embeddings = self.model(source_ids, attention_mask=mask.unsqueeze(1) * mask.unsqueeze(2))[0]
-        sentence_embeddings = (token_embeddings * mask.unsqueeze(-1)).sum(1) / mask.sum(-1).unsqueeze(-1)
+        token_embeddings = self.model(
+            source_ids, attention_mask=mask.unsqueeze(1) * mask.unsqueeze(2)
+        )[0]
+        sentence_embeddings = (token_embeddings * mask.unsqueeze(-1)).sum(1) / mask.sum(
+            -1
+        ).unsqueeze(-1)
         return token_embeddings, sentence_embeddings
 
-    def generate(self, source_ids, decoder_only=True, eos_id=None, beam_size=5, max_length=64):
-        """ Generate sequence given context (source_ids) """
+    def generate(
+        self, source_ids, decoder_only=True, eos_id=None, beam_size=5, max_length=64
+    ):
+        """Generate sequence given context (source_ids)"""
 
         # Set encoder mask attention matrix: bidirectional for <encoder-decoder>, unirectional for <decoder-only>
         if decoder_only:
-            mask = self.bias[:, :source_ids.size(-1), :source_ids.size(-1)]
+            mask = self.bias[:, : source_ids.size(-1), : source_ids.size(-1)]
         else:
             mask = source_ids.ne(self.config.pad_token_id)
             mask = mask.unsqueeze(1) * mask.unsqueeze(2)
@@ -107,12 +128,16 @@ class UniXcoder(nn.Module):
         length = source_ids.size(-1)
         encoder_output = self.model(source_ids, attention_mask=mask)
         for i in range(source_ids.shape[0]):
-            context = [[x[i:i + 1, :, :source_len[i]].repeat(beam_size, 1, 1, 1) for x in y]
-                       for y in encoder_output.past_key_values]
+            context = [
+                [x[i : i + 1, :, : source_len[i]].repeat(beam_size, 1, 1, 1) for x in y]
+                for y in encoder_output.past_key_values
+            ]
             beam = Beam(beam_size, eos_id, device)
             input_ids = beam.getCurrentState().clone()
-            context_ids = source_ids[i:i + 1, :source_len[i]].repeat(beam_size, 1)
-            out = encoder_output.last_hidden_state[i:i + 1, :source_len[i]].repeat(beam_size, 1, 1)
+            context_ids = source_ids[i : i + 1, : source_len[i]].repeat(beam_size, 1)
+            out = encoder_output.last_hidden_state[i : i + 1, : source_len[i]].repeat(
+                beam_size, 1, 1
+            )
             for _ in range(max_length):
                 if beam.done():
                     break
@@ -120,20 +145,36 @@ class UniXcoder(nn.Module):
                     hidden_states = out[:, -1, :]
                     out = self.lsm(self.lm_head(hidden_states)).data
                     beam.advance(out)
-                    input_ids.data.copy_(input_ids.data.index_select(0, beam.getCurrentOrigin()))
+                    input_ids.data.copy_(
+                        input_ids.data.index_select(0, beam.getCurrentOrigin())
+                    )
                     input_ids = beam.getCurrentState().clone()
                 else:
                     length = context_ids.size(-1) + input_ids.size(-1)
-                    out = self.model(input_ids, attention_mask=self.bias[:, context_ids.size(-1):length, :length],
-                                     past_key_values=context).last_hidden_state
+                    out = self.model(
+                        input_ids,
+                        attention_mask=self.bias[
+                            :, context_ids.size(-1) : length, :length
+                        ],
+                        past_key_values=context,
+                    ).last_hidden_state
                     hidden_states = out[:, -1, :]
                     out = self.lsm(self.lm_head(hidden_states)).data
                     beam.advance(out)
-                    input_ids.data.copy_(input_ids.data.index_select(0, beam.getCurrentOrigin()))
-                    input_ids = torch.cat((input_ids, beam.getCurrentState().clone()), -1)
+                    input_ids.data.copy_(
+                        input_ids.data.index_select(0, beam.getCurrentOrigin())
+                    )
+                    input_ids = torch.cat(
+                        (input_ids, beam.getCurrentState().clone()), -1
+                    )
             hyp = beam.getHyp(beam.getFinal())
             pred = beam.buildTargetTokens(hyp)[:beam_size]
-            pred = [torch.cat([x.view(-1) for x in p] + [zero] * (max_length - len(p))).view(1, -1) for p in pred]
+            pred = [
+                torch.cat(
+                    [x.view(-1) for x in p] + [zero] * (max_length - len(p))
+                ).view(1, -1)
+                for p in pred
+            ]
             preds.append(torch.cat(pred, 0).unsqueeze(0))
 
         preds = torch.cat(preds, 0)
@@ -224,8 +265,8 @@ class Beam(object):
                     s = self.scores[i]
                     unfinished.append((s, len(self.nextYs) - 1, i))
             unfinished.sort(key=lambda a: -a[0])
-            self.finished += unfinished[:self.size - len(self.finished)]
-        return self.finished[:self.size]
+            self.finished += unfinished[: self.size - len(self.finished)]
+        return self.finished[: self.size]
 
     def getHyp(self, beam_res):
         """

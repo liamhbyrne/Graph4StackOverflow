@@ -27,11 +27,17 @@ WARM_START_FILE = "../models/baseline-model-1.pt"
 
 # (Optional) k-fold cross validation
 CROSS_VALIDATE = True
-FOLD_FILES = ['fold-1-6001-qs.pt', 'fold-2-6001-qs.pt', 'fold-3-6001-qs.pt', 'fold-4-6001-qs.pt', 'fold-5-6001-qs.pt']
-PICKLE_PATH_KF = 'baseline_q_a_kf_results.pkl'
+FOLD_FILES = [
+    "fold-1-6001-qs.pt",
+    "fold-2-6001-qs.pt",
+    "fold-3-6001-qs.pt",
+    "fold-4-6001-qs.pt",
+    "fold-5-6001-qs.pt",
+]
+PICKLE_PATH_KF = "baseline_q_a_kf_results.pkl"
 
-# Model architecture 
+# Model architecture
 HIDDEN_CHANNELS = 64
 FINAL_MODEL_OUT_PATH = "baseline_with_answer.pt"
 SAVE_CHECKPOINTS = True
-DROPOUT=0.0
+DROPOUT = 0.0

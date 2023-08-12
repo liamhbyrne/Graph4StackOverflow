@@ -4,8 +4,21 @@ from torch_geometric.nn import GATConv, Linear, MeanAggregation, to_hetero
 
 from dataset import UserGraphDataset
 
-metadata = (['question', 'answer', 'comment', 'tag', 'module'],
-            [('tag', 'describes', 'question'), ('tag', 'describes', 'answer'), ('tag', 'describes', 'comment'), ('module', 'imported_in', 'question'), ('module', 'imported_in', 'answer'), ('question', 'rev_describes', 'tag'), ('answer', 'rev_describes', 'tag'), ('comment', 'rev_describes', 'tag'), ('question', 'rev_imported_in', 'module'), ('answer', 'rev_imported_in', 'module')])
+metadata = (
+    ["question", "answer", "comment", "tag", "module"],
+    [
+        ("tag", "describes", "question"),
+        ("tag", "describes", "answer"),
+        ("tag", "describes", "comment"),
+        ("module", "imported_in", "question"),
+        ("module", "imported_in", "answer"),
+        ("question", "rev_describes", "tag"),
+        ("answer", "rev_describes", "tag"),
+        ("comment", "rev_describes", "tag"),
+        ("question", "rev_imported_in", "module"),
+        ("answer", "rev_imported_in", "module"),
+    ],
+)
 
 
 class Model(torch.nn.Module):
@@ -18,7 +31,7 @@ class Model(torch.nn.Module):
 
     def forward(self, data, post_emb):
         convolved = self.gat(data.x_dict, data.edge_index_dict, data.batch_dict)
-        pooled = self.pool(convolved, data.batch_dict['question'])
+        pooled = self.pool(convolved, data.batch_dict["question"])
 
         x = torch.cat([convolved, post_emb], dim=1)
 
@@ -28,6 +41,8 @@ class Model(torch.nn.Module):
         x = self.lin(x)
         x = self.softmax(x)
         return x
+
+
 class GAT(torch.nn.Module):
     def __init__(self, hidden_channels):
         super(GAT, self).__init__()
@@ -35,8 +50,6 @@ class GAT(torch.nn.Module):
         self.conv1 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
         self.conv2 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
         self.conv3 = GATConv((-1, -1), hidden_channels, add_self_loops=False)
-
-
 
     def forward(self, x, edge_index, batch):
         # 1. Obtain node embeddings
@@ -51,14 +64,15 @@ class GAT(torch.nn.Module):
         return x
 
 
-
 def train(model, train_loader):
     model.train()
 
     for data in train_loader:  # Iterate in batches over the training dataset.
         print(data)
 
-        out = model(data, torch.cat([data.question_emb, data.answer_emb], dim=1))  # Perform a single forward pass.
+        out = model(
+            data, torch.cat([data.question_emb, data.answer_emb], dim=1)
+        )  # Perform a single forward pass.
         print(out, data.label)
         loss = criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
         loss.backward()  # Derive gradients.
@@ -77,9 +91,11 @@ def test(loader):
     return correct / len(loader.dataset)  # Derive ratio of correct predictions.
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dataset = UserGraphDataset(root="../data", skip_processing=True)
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [0.6, 0.1, 0.3])
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
+        dataset, [0.6, 0.1, 0.3]
+    )
 
     print(dataset.num_node_features)
 
@@ -89,13 +105,13 @@ if __name__ == '__main__':
 
     model = Model(hidden_channels=64)
     sample = train_dataset[0]
-    #model = to_hetero(model, metadata)
-    #print(model(sample.x_dict, sample.edge_index_dict, sample.batch_dict))
+    # model = to_hetero(model, metadata)
+    # print(model(sample.x_dict, sample.edge_index_dict, sample.batch_dict))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, 10):
         train(model, train_loader)
-        #train_acc = test(train_loader)
-        #print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+        # train_acc = test(train_loader)
+        # print(f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')

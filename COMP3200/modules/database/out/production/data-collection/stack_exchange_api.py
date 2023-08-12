@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 class StackExchangeAPI:
     def __init__(self, max_pages: int, page_size: int):
         try:
-            self._SITE = StackAPI('stackoverflow')
+            self._SITE = StackAPI("stackoverflow")
             self._SITE.max_pages = max_pages
             self._SITE.page_size = page_size
         except StackAPIError as e:
@@ -27,10 +27,8 @@ class StackExchangeAPI:
         Request a set of users and return their ids.
         :return: List of ids
         """
-        response = self._SITE.fetch(
-            'users', min=1000
-        )
-        user_ids = [user['account_id'] for user in response['items']]
+        response = self._SITE.fetch("users", min=1000)
+        user_ids = [user["account_id"] for user in response["items"]]
         return user_ids
 
     def get_user_activity(self, account_ids: List[int]):
@@ -40,27 +38,27 @@ class StackExchangeAPI:
         :return:
         """
         if len(account_ids) > 100:
-            logging.error("get_user_activity: account_ids should not have more than 100 ids.")
+            logging.error(
+                "get_user_activity: account_ids should not have more than 100 ids."
+            )
             return None
         response_answers = self._SITE.fetch(
-            'users/{ids}/answers', ids=account_ids, body=True
+            "users/{ids}/answers", ids=account_ids, body=True
         )
         print(response_answers)
 
         response_questions = self._SITE.fetch(
-            'users/{ids}/questions', ids=account_ids, body=True
+            "users/{ids}/questions", ids=account_ids, body=True
         )
 
         print(response_questions)
 
-        response_comments = self._SITE.fetch(
-            'users/{ids}/comments', ids=account_ids
-        )
+        response_comments = self._SITE.fetch("users/{ids}/comments", ids=account_ids)
 
         print(response_comments)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     a = StackExchangeAPI(1, 100)
     ids = a.get_user_ids()
     print(len(ids))

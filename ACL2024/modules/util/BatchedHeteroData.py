@@ -5,13 +5,16 @@ from torch_geometric.data import HeteroData
 
 
 class BatchedHeteroData(HeteroData):
-    """
+    """ """
 
-    """
-
-    def __cat_dim__(self, key: str, value: Any,
-                    store: Optional[NodeOrEdgeStorage] = None, *args,
-                    **kwargs):
-        if key in ['question_emb', 'answer_emb', 'label']:
+    def __cat_dim__(
+        self,
+        key: str,
+        value: Any,
+        store: Optional[NodeOrEdgeStorage] = None,
+        *args,
+        **kwargs
+    ):
+        if key in ["question_emb", "answer_emb", "label"]:
             return None
         return super().__cat_dim__(key, value)

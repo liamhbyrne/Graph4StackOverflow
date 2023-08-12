@@ -16,7 +16,6 @@ logging.basicConfig(level=logging.INFO)
 
 
 class TagEmbeddingTrainer:
-
     def __init__(self, database_path: str = None):
         logger = logging.getLogger(self.__class__.__name__)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -32,25 +31,30 @@ class TagEmbeddingTrainer:
         self.tag_vocab = list(set(tag_df["TagName"]))
 
         post_tags = pd.read_csv(post_tags_path)
-        tag_list_df = post_tags['Tags'].apply(lambda row: self.parse_tag_list(row))
-        combinations = tag_list_df.apply(lambda row: list(itertools.combinations(row, 2)))
-        combinations = combinations[combinations.astype(str) != '[]']
+        tag_list_df = post_tags["Tags"].apply(lambda row: self.parse_tag_list(row))
+        combinations = tag_list_df.apply(
+            lambda row: list(itertools.combinations(row, 2))
+        )
+        combinations = combinations[combinations.astype(str) != "[]"]
         # Now concatenate all the lists together
         tag_pairs = []
         for i in combinations:
             tag_pairs += i
         self.post_tags = tag_pairs
 
-
     def from_db(self):
         tag_df = pd.read_sql_query("SELECT * FROM Tag", self.db)
-        tag_df.set_index('TagId', inplace=True)
+        tag_df.set_index("TagId", inplace=True)
         self.tag_vocab = list(set(tag_df["TagName"]))
 
-        post_tags = pd.read_sql_query(f"SELECT Tags FROM Post WHERE PostTypeId=1", self.db)
-        tag_list_df = post_tags['Tags'].map(self.parse_tag_list)
-        combinations = tag_list_df.apply(lambda row: list(itertools.combinations(row, 2)))
-        combinations = combinations[combinations.astype(str) != '[]']
+        post_tags = pd.read_sql_query(
+            f"SELECT Tags FROM Post WHERE PostTypeId=1", self.db
+        )
+        tag_list_df = post_tags["Tags"].map(self.parse_tag_list)
+        combinations = tag_list_df.apply(
+            lambda row: list(itertools.combinations(row, 2))
+        )
+        combinations = combinations[combinations.astype(str) != "[]"]
         # Now concatenate all the lists together
         tag_pairs = []
         for i in combinations:
@@ -68,7 +72,9 @@ class TagEmbeddingTrainer:
         loss_function = nn.NLLLoss()
         losses = []
         # Model
-        self.model = TagEmbedding(vocab_size=len(self.tag_vocab), embedding_dim=20).to(self.device)
+        self.model = TagEmbedding(vocab_size=len(self.tag_vocab), embedding_dim=20).to(
+            self.device
+        )
         # Optimizer
         optimizer = optim.SGD(self.model.parameters(), lr=0.001)
         # Enumerate the vocabulary, reflects the index of where the 1 is in the one-hot
@@ -79,10 +85,17 @@ class TagEmbeddingTrainer:
         for epoch in range(epochs):
             total_loss = 0
             for tag_a, tag_b in tqdm(samples):
-                tag_a_id = torch.tensor(self.tag_to_ix[tag_a], dtype=torch.long).to(self.device)
+                tag_a_id = torch.tensor(self.tag_to_ix[tag_a], dtype=torch.long).to(
+                    self.device
+                )
                 self.model.zero_grad()
                 log_probs = self.model(tag_a_id)
-                loss = loss_function(log_probs.flatten(), torch.tensor(self.tag_to_ix[tag_b], dtype=torch.long).to(self.device))
+                loss = loss_function(
+                    log_probs.flatten(),
+                    torch.tensor(self.tag_to_ix[tag_b], dtype=torch.long).to(
+                        self.device
+                    ),
+                )
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
@@ -96,26 +109,23 @@ class TagEmbeddingTrainer:
         Write embedding to Tensorboard projector
         tensorboard --logdir="runs/run@20221102-173048"
         """
-        writer = SummaryWriter(f'runs/{run_name}')
-        writer.add_embedding(self.model.embedding.weight,
-                             metadata=self.tag_vocab,
-                             tag=f'Tag embedding')
+        writer = SummaryWriter(f"runs/{run_name}")
+        writer.add_embedding(
+            self.model.embedding.weight, metadata=self.tag_vocab, tag=f"Tag embedding"
+        )
         writer.close()
 
     def load_model(self, model_path: str, vocab_size: int, embedding_dim: int):
         self.model = TagEmbedding(vocab_size, embedding_dim)
-        self.model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-
+        self.model.load_state_dict(
+            torch.load(model_path, map_location=torch.device("cpu"))
+        )
 
     def save_model(self, model_path: str):
         torch.save(self.model.state_dict(), model_path)
 
 
-
-
-
 class TagEmbedding(nn.Module):
-
     def __init__(self, vocab_size, embedding_dim):
         super(TagEmbedding, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
@@ -130,9 +140,9 @@ class TagEmbedding(nn.Module):
         return log_probs
 
 
-if __name__ == '__main__':
-    #tet = TagEmbeddingTrainer("../stackoverflow.db")
-    #tet.from_db()
+if __name__ == "__main__":
+    # tet = TagEmbeddingTrainer("../stackoverflow.db")
+    # tet.from_db()
     tet = TagEmbeddingTrainer()
     tet.from_files("all_tags.csv", "tag_vocab.csv")
     assert len(tet.post_tags) == 84187510, "Incorrect number of post tags!"
@@ -141,7 +151,6 @@ if __name__ == '__main__':
     # tet.train(25000000, 1)
     # tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
 
-    #tet.save_model("25mil.pt")
+    # tet.save_model("25mil.pt")
     tet.load_model("10mil_500d_embd.pt", 63653, 500)
     tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
-
