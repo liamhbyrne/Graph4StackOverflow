@@ -4,25 +4,24 @@ A basic remote monitoring system which sends docker logs to a private slack chan
 import json
 
 import requests
-
-WEBHOOK = "https://hooks.slack.com/services/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"
-
-
-def send_slack_message(payload):
-    return requests.post(WEBHOOK, json.dumps(payload))
-
-
-# Get number of questions created in the processed folder
-processed_folder_path = r"C:\Users\liamb\Desktop\acl2024\ACL2024\data\processed"
-
-# Each file name is formatted as data_{i}_question_id_{question_id}_answer_id_{answer_id}.pt
-# We want to get the number of unique question ids
-
-
-# Get all file names
+import yaml
 import os
 import re
 import time
+
+with open('secrets.yaml', 'r') as file:
+    CONFIG = yaml.safe_load(file)
+
+
+def send_slack_message(payload):
+    return requests.post(CONFIG['slack_logging_webhook'], json.dumps(payload))
+
+
+# Get number of questions created in the processed folder
+processed_folder_path = r"..\..\data\processed"
+
+# Each file name is formatted as data_{i}_question_id_{question_id}_answer_id_{answer_id}.pt
+# We want to get the number of unique question ids
 
 
 # Run the following code every 30 minutes
@@ -39,4 +38,3 @@ while True:
 
     print("Sent slack message, sleeping . . .")
     time.sleep(60 * 30)
-
