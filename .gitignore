@@ -1,6 +1,5 @@
 .idea
 data/
-data-collection/out/
 *.iml
 *.db
 *.zip
@@ -13,3 +12,6 @@ embeddings/wandb/*
 __pycache__
 *.out
 secrets.yaml
+out/
+sqlite-jdbc-3.39.3.0.jar
+META-INF/

@@ -15,15 +15,15 @@ logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
 with open("dataset_config.yaml", "r") as file:
-    CONFIG = yaml.safe_load(file)['graph_construction']
+    CONFIG = yaml.safe_load(file)["graph_construction"]
 
 
 class StaticGraphConstruction:
     def __init__(
-            self,
-            post_embedding_builder: PostEmbedding,
-            tag_embedding_model,
-            module_embedding_model,
+        self,
+        post_embedding_builder: PostEmbedding,
+        tag_embedding_model,
+        module_embedding_model,
     ):
         # PostEmbedding is costly to instantiate in each StaticGraphConstruction instance.
 
@@ -46,11 +46,11 @@ class StaticGraphConstruction:
         """
         Configurable parameters
         """
-        self._use_bert = CONFIG['use_bert_embeddings']
-        self._graph_question_limit = CONFIG['graph_question_limit']
-        self._graph_answer_limit = CONFIG['graph_answer_limit']
-        self._graph_comment_limit = CONFIG['graph_comment_limit']
-        self._first_n_tags = CONFIG['num_tags_per_post']
+        self._use_bert = CONFIG["use_bert_embeddings"]
+        self._graph_question_limit = CONFIG["graph_question_limit"]
+        self._graph_answer_limit = CONFIG["graph_answer_limit"]
+        self._graph_comment_limit = CONFIG["graph_comment_limit"]
+        self._first_n_tags = CONFIG["num_tags_per_post"]
 
     def process_questions(self, questions: pd.DataFrame) -> torch.Tensor:
         if not len(questions):

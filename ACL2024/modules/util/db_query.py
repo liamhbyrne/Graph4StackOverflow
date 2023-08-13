@@ -58,9 +58,7 @@ def fetch_answers_for_question(question_post_id: int, db):
     """,
         db,
     )
-    answers_df = answers_df.dropna(
-        subset=["PostId", "Body", "Score", "OwnerUserId"]
-    )
+    answers_df = answers_df.dropna(subset=["PostId", "Body", "Score", "OwnerUserId"])
     return answers_df
 
 
@@ -123,6 +121,3 @@ def fetch_tags_for_question(question_post_id: int, db):
     if len(tags_df) == 0:
         return []
     return tags_df.iloc[0]["Tags"][1:-1].split("><")
-
-
-

@@ -20,7 +20,14 @@ from ACL2024.modules.embeddings.module_embedding import ModuleEmbeddingTrainer
 from ACL2024.modules.embeddings.post_embedding_builder import PostEmbedding
 from ACL2024.modules.embeddings.tag_embedding import NextTagEmbeddingTrainer
 from ACL2024.modules.util.custom_logger import setup_custom_logger
-from ACL2024.modules.util.db_query import fetch_questions_by_post_ids, fetch_tags_for_question, fetch_answers_for_question, fetch_questions_by_user, fetch_answers_by_user, fetch_comments_by_user
+from ACL2024.modules.util.db_query import (
+    fetch_questions_by_post_ids,
+    fetch_tags_for_question,
+    fetch_answers_for_question,
+    fetch_questions_by_user,
+    fetch_answers_by_user,
+    fetch_comments_by_user,
+)
 from ACL2024.modules.util.get_root_dir import get_project_root
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
@@ -28,35 +35,37 @@ warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 log = setup_custom_logger("dataset", logging.INFO)
 
 with open("dataset_config.yaml", "r") as file:
-    CONFIG = yaml.safe_load(file)['user_graph_dataset']
+    CONFIG = yaml.safe_load(file)["user_graph_dataset"]
 
 
 class UserGraphDataset(Dataset):
-    tag_embedding_model = NextTagEmbeddingTrainer.load_model(
-        **CONFIG['tag_embeddings']
-    )
+    tag_embedding_model = NextTagEmbeddingTrainer.load_model(**CONFIG["tag_embeddings"])
     module_embedding_model = ModuleEmbeddingTrainer.load_model(
-        **CONFIG['module_embeddings']
+        **CONFIG["module_embeddings"]
     )
 
     def __init__(
-            self,
-            root,
-            valid_questions_pkl_path=None,
-            transform=None,
-            pre_transform=None,
-            pre_filter=None,
-            db_address: str = None,
-            skip_processing=False,
+        self,
+        root,
+        valid_questions_pkl_path=None,
+        transform=None,
+        pre_transform=None,
+        pre_filter=None,
+        db_address: str = None,
+        skip_processing=False,
     ):
         self._skip_processing = skip_processing
-        self._valid_questions_pkl_path = os.path.join(get_project_root(), valid_questions_pkl_path)
+        self._valid_questions_pkl_path = os.path.join(
+            get_project_root(), valid_questions_pkl_path
+        )
 
         self._db_address = os.path.join(get_project_root(), db_address)
         self._post_embedding_builder = PostEmbedding()
         self._db = sqlite3.connect(self._db_address)
         # Call init last, as it may trigger the process function.
-        super().__init__(os.path.join(get_project_root(), root), transform, pre_transform, pre_filter)
+        super().__init__(
+            os.path.join(get_project_root(), root), transform, pre_transform, pre_filter
+        )
 
     @property
     def raw_file_names(self):
@@ -154,39 +163,41 @@ class UserGraphDataset(Dataset):
         log.debug(f"Graph construction took {end - start} seconds.")
 
         # Add attributes based on config
-        if CONFIG['add_question_embedding']:
+        if CONFIG["add_question_embedding"]:
             graph.__setattr__("question_emb", question_emb)
 
-        if CONFIG['add_question_metadata']:
+        if CONFIG["add_question_metadata"]:
             graph.__setattr__("question_metadata", question_metadata)
 
-        if CONFIG['add_answer_embedding']:
+        if CONFIG["add_answer_embedding"]:
             graph.__setattr__("answer_emb", answer_emb)
 
-        if CONFIG['add_answer_metadata']:
+        if CONFIG["add_answer_metadata"]:
             graph.__setattr__("answer_metadata", answer_metadata)
 
-        if CONFIG['add_score']:
+        if CONFIG["add_score"]:
             graph.__setattr__("score", answer["Score"])
 
-        if CONFIG['add_question_id']:
+        if CONFIG["add_question_id"]:
             graph.__setattr__("question_id", question["PostId"])
 
-        if CONFIG['add_answer_id']:
+        if CONFIG["add_answer_id"]:
             graph.__setattr__("answer_id", answer["PostId"])
 
-        if CONFIG['add_user_id']:
+        if CONFIG["add_user_id"]:
             graph.__setattr__("user_id", answer["OwnerUserId"])
 
-        if CONFIG['add_label']:
+        if CONFIG["add_label"]:
             graph.__setattr__("label", label)
 
-        if CONFIG['add_accepted']:
-            graph.__setattr__("accepted", answer["AcceptedAnswerId"] == answer["PostId"])
+        if CONFIG["add_accepted"]:
+            graph.__setattr__(
+                "accepted", answer["AcceptedAnswerId"] == answer["PostId"]
+            )
 
-        if CONFIG['add_user_info']:
-            user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
-            graph.__setattr__("user_info", user_info)
+        if CONFIG["add_user_info"]:
+           user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
+           graph.__setattr__("user_info", user_info)
 
         torch.save(
             graph,
@@ -239,13 +250,13 @@ class UserGraphDataset(Dataset):
 
         # Encode dates as a min-max value
         last_edit_date = (
-                                 datetime.strptime(last_edit_date, "%Y-%m-%dT%H:%M:%S.%f")
-                                 - datetime(2008, 7, 31)
-                         ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
+            datetime.strptime(last_edit_date, "%Y-%m-%dT%H:%M:%S.%f")
+            - datetime(2008, 7, 31)
+        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
         creation_date = (
-                                datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
-                                - datetime(2008, 7, 31)
-                        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
+            datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
+            - datetime(2008, 7, 31)
+        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
 
         # Encode view count as a min-max value
         view_count = view_count / 1000000
@@ -292,9 +303,9 @@ class UserGraphDataset(Dataset):
         ).iloc[0]["CreationDate"]
         # Encode date as a min-max value
         creation_date = (
-                                datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
-                                - datetime(2008, 7, 31)
-                        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
+            datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%f")
+            - datetime(2008, 7, 31)
+        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
 
         comments_count = pd.read_sql_query(
             f"""
@@ -334,9 +345,9 @@ class UserGraphDataset(Dataset):
         ).iloc[0]
         # Encode date as a min-max value
         user_creation_date = (
-                                     datetime.strptime(user_creation_date, "%Y-%m-%dT%H:%M:%S.%f")
-                                     - datetime(2008, 7, 31)
-                             ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
+            datetime.strptime(user_creation_date, "%Y-%m-%dT%H:%M:%S.%f")
+            - datetime(2008, 7, 31)
+        ).days / (datetime(2023, 12, 31) - datetime(2008, 7, 31)).days
 
         # Encode reputation using MinMax
         reputation = reputation / 200000
@@ -405,7 +416,7 @@ class UserGraphDataset(Dataset):
             .str[1:-1]
             .str.split("><")
             .explode()
-            .value_counts()[:CONFIG['user_info_top_n_tags']]
+            .value_counts()[: CONFIG["user_info_top_n_tags"]]
             .index.tolist()
         )
 
@@ -424,6 +435,7 @@ class UserGraphDataset(Dataset):
         }
 
         return user_info
+
     def construct_graph(self, user_id: int, db):
         graph_constructor = StaticGraphConstruction(
             post_embedding_builder=self._post_embedding_builder,
@@ -445,8 +457,8 @@ if __name__ == "__main__":
     """
 
     ds = UserGraphDataset(
-        root=CONFIG['root'],
-        db_address=CONFIG['db_address'],
-        skip_processing=CONFIG['skip_processing'],
-        valid_questions_pkl_path=CONFIG['valid_questions_pkl_path']
+        root=CONFIG["root"],
+        db_address=CONFIG["db_address"],
+        skip_processing=CONFIG["skip_processing"],
+        valid_questions_pkl_path=CONFIG["valid_questions_pkl_path"],
     )

@@ -9,12 +9,12 @@ import os
 import re
 import time
 
-with open('secrets.yaml', 'r') as file:
+with open("secrets.yaml", "r") as file:
     CONFIG = yaml.safe_load(file)
 
 
 def send_slack_message(payload):
-    return requests.post(CONFIG['slack_logging_webhook'], json.dumps(payload))
+    return requests.post(CONFIG["slack_logging_webhook"], json.dumps(payload))
 
 
 # Get number of questions created in the processed folder

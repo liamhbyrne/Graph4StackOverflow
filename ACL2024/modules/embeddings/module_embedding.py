@@ -122,7 +122,6 @@ class ModuleEmbeddingTrainer:
 
     @staticmethod
     def load_model(model_path: str, vocab_size: int, embedding_dim: int):
-
         # Join the model path to the project root
         model_path = os.path.join(get_project_root(), model_path)
 

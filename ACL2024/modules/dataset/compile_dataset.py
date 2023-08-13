@@ -13,7 +13,8 @@ from ACL2024.modules.util.custom_logger import setup_custom_logger
 log = setup_custom_logger("compile-dataset", logging.INFO)
 
 with open("dataset_config.yaml", "r") as file:
-    CONFIG = yaml.safe_load(file)['compile_dataset']
+    CONFIG = yaml.safe_load(file)["compile_dataset"]
+
 
 class UserGraphDatasetInMemory(InMemoryDataset):
     def __init__(
@@ -140,7 +141,7 @@ def create_train_test_datasets(root: str):
 if __name__ == "__main__":
     choice = input("1. Create train/test datasets\n2. Create k-fold datasets\n>>>")
     if choice == "1":
-        create_train_test_datasets(root=CONFIG['root'])
+        create_train_test_datasets(root=CONFIG["root"])
     elif choice == "2":
         n = int(input("Enter number of folds: "))
-        folds = list(create_datasets_for_kfolds(n, root=CONFIG['root']))
+        folds = list(create_datasets_for_kfolds(n, root=CONFIG["root"]))
