@@ -38,5 +38,5 @@ user_graph_dataset:
     user_info_top_n_tags: 10
 
 
-compile_datset:
+compile_dataset:
     root: data

@@ -34,7 +34,7 @@ warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 log = setup_custom_logger("dataset", logging.INFO)
 
-with open("dataset_config.yaml", "r") as file:
+with open(os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r") as file:
     CONFIG = yaml.safe_load(file)["user_graph_dataset"]
 
 

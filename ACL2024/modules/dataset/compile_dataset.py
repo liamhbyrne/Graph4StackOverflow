@@ -9,10 +9,11 @@ import yaml
 from torch_geometric.data import InMemoryDataset
 
 from ACL2024.modules.util.custom_logger import setup_custom_logger
+from ACL2024.modules.util.get_root_dir import get_project_root
 
 log = setup_custom_logger("compile-dataset", logging.INFO)
 
-with open("dataset_config.yaml", "r") as file:
+with open(os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r") as file:
     CONFIG = yaml.safe_load(file)["compile_dataset"]
 
 
@@ -35,17 +36,17 @@ class UserGraphDatasetInMemory(InMemoryDataset):
 
     @property
     def processed_dir(self):
-        return os.path.join(self.root, "processed_in_memory")
+        return os.path.join(get_project_root(), self.root, "processed_in_memory")
 
     @property
     def raw_dir(self):
-        return os.path.join(self.root, "processed")
+        return os.path.join(get_project_root(), self.root, "processed")
 
     @property
     def raw_file_names(self):
         return [
             x
-            for x in os.listdir(os.path.join(self.root, "processed"))
+            for x in os.listdir(os.path.join(get_project_root(), self.root, "processed"))
             if x not in ["pre_filter.pt", "pre_transform.pt"]
         ]
 
@@ -83,7 +84,7 @@ Utility functions
 def fetch_question_ids(root) -> List[int]:
     question_ids = set()
     # Split by question ids
-    for f in os.listdir(os.path.join(root, "processed")):
+    for f in os.listdir(os.path.join(get_project_root(), root, "processed")):
         question_id_search = re.search(r"id_(\d+)", f)
         if question_id_search:
             question_ids.add(int(question_id_search.group(1)))

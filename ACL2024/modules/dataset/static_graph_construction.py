@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List
 
 import pandas as pd
@@ -9,12 +10,13 @@ from torch_geometric.data import HeteroData
 
 from ACL2024.modules.embeddings.post_embedding_builder import Import, PostEmbedding
 from ACL2024.modules.util.BatchedHeteroData import BatchedHeteroData
+from ACL2024.modules.util.get_root_dir import get_project_root
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
-with open("dataset_config.yaml", "r") as file:
+with open(os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r") as file:
     CONFIG = yaml.safe_load(file)["graph_construction"]
 
 
