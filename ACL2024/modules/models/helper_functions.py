@@ -9,6 +9,8 @@ from ACL2024.modules.util.Visualize import GraphVisualization
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 import logging
 
+from ACL2024.modules.util.get_root_dir import get_project_root
+
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)
 
 
@@ -98,7 +100,7 @@ PyTorch helpers
 
 
 def save_model(model, model_name: str):
-    torch.save(model.state_dict(), os.path.join("..", "models", model_name))
+    torch.save(model.state_dict(), os.path.join(get_project_root(), "modules", "models", "out", model_name))
 
 
 def split_test_train_pytorch(dataset, train_split):

@@ -192,12 +192,15 @@ class UserGraphDataset(Dataset):
 
         if CONFIG["add_accepted"]:
             graph.__setattr__(
-                "accepted", answer["AcceptedAnswerId"] == answer["PostId"]
+                "accepted", question["AcceptedAnswerId"] == answer["PostId"]
             )
 
         if CONFIG["add_user_info"]:
            user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
            graph.__setattr__("user_info", user_info)
+
+
+        print(graph.accepted)
 
         torch.save(
             graph,

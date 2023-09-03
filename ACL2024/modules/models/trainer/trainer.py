@@ -1,4 +1,5 @@
 import logging
+import os
 import pickle
 import time
 import pandas as pd
@@ -9,6 +10,7 @@ import yaml
 from ACL2024.modules.models.GNNs.hetero_GAT import HeteroGAT
 from ACL2024.modules.models.GNNs.hetero_GraphConv import HeteroGraphConv
 from ACL2024.modules.models.GNNs.hetero_GraphSAGE import HeteroGraphSAGE
+from ACL2024.modules.models.GNNs.MLP import MLP
 from ACL2024.modules.models.helper_functions import calculate_class_weights, split_test_train_pytorch, start_wandb_for_training, log_results_to_wandb, save_model, add_cm_to_wandb
 from sklearn.metrics import f1_score, accuracy_score
 from torch.optim.lr_scheduler import ExponentialLR
@@ -16,6 +18,7 @@ from torch_geometric.loader import DataLoader
 from ACL2024.modules.dataset.compile_dataset import UserGraphDatasetInMemory
 from ACL2024.modules.dataset.user_graph_dataset import UserGraphDataset
 from ACL2024.modules.util.custom_logger import setup_custom_logger
+from ACL2024.modules.util.get_root_dir import get_project_root
 
 log = setup_custom_logger("trainer", logging.INFO)
 
@@ -67,15 +70,19 @@ class GraphTrainer:
         """
         if self.config["MODEL"] == "GAT":
             self._model = HeteroGAT(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_LAYERS"]
+                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
             )
         elif self.config["MODEL"] == "SAGE":
             self._model = HeteroGraphSAGE(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["HIDDEN_CHANNELS"]
+                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
             )
         elif self.config["MODEL"] == "GC":
             self._model = HeteroGraphConv(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["HIDDEN_CHANNELS"]
+                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
+            )
+        elif self.config["MODEL"] == "MLP":
+            self._model = MLP(
+                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
             )
         else:
             log.error(f"Model does not exist! ({self.config['MODEL']})")
@@ -197,7 +204,7 @@ class GraphTrainer:
             print(confusion_matrix)
 
             if self.config["SAVE_CHECKPOINTS"]:
-                torch.save(self._model.state_dict(), f"../models/model-{epoch}.pt")
+                torch.save(self._model.state_dict(), os.path.join(get_project_root(), "modules", "models", "out", f"model-{epoch}.pt"))
 
             # log evaluation results to wandb
             if self.config["USE_WANDB"]:
@@ -234,7 +241,7 @@ class GraphTrainer:
             post_emb.requires_grad = True
 
             out = self._model(
-                data.x_dict, data.edge_index_dict, data.batch_dict, post_emb
+                data.x_dict, data.edge_index_dict, data.batch_dict, post_emb, data.question_metadata, data.answer_metadata, data.user_info
             )  # Perform a single forward pass.
 
             # y = torch.tensor([1 if x > 0 else 0 for x in data.score]).to(device)
@@ -242,7 +249,7 @@ class GraphTrainer:
             loss.backward()  # Derive gradients.
             self._optimizer.step()  # Update parameters based on gradients.
 
-    def test(self):
+    def test(self, loader):
         """
 
         """
@@ -258,8 +265,18 @@ class GraphTrainer:
             self._test_dataset, batch_size=self.config["TEST_BATCH_SIZE"], num_workers=self.config["NUM_WORKERS"]
         )
 
-        for data in test_loader:  # Iterate in batches over the training/test dataset.
+        for data in loader:  # Iterate in batches over the training/test dataset.
             data.to(self.device)
+
+            if self.config["TARGET"] == "upvoted":
+                y = data.label
+            elif self.config["TARGET"] == "accepted":
+                y = torch.tensor([1 if x else 0 for x in data.accepted])
+            elif self.config["TARGET"] == "score":
+                y = data.score
+            else:
+                log.error(f"Target not defined: {self.config['TARGET']}")
+                exit(1)
 
             if self.config["INCLUDE_ANSWER"]:
                 post_emb = torch.cat([data.question_emb, data.answer_emb], dim=1).to(
@@ -269,11 +286,10 @@ class GraphTrainer:
                 post_emb = data.question_emb.to(self.device)
 
             out = self._model(
-                data.x_dict, data.edge_index_dict, data.batch_dict, post_emb
+                data.x_dict, data.edge_index_dict, data.batch_dict, post_emb, data.question_metadata, data.answer_metadata, data.user_info
             )  # Perform a single forward pass.
 
-            # y = torch.tensor([1 if x > 0 else 0 for x in data.score]).to(device)
-            loss = self._criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
+            loss = self._criterion(out, torch.squeeze(y, -1))  # Compute the loss.
             cumulative_loss += loss.item()
 
             # Use the class with the highest probability.
@@ -281,13 +297,13 @@ class GraphTrainer:
 
             # Cache the predictions for calculating metrics
             predictions += list([x.item() for x in pred])
-            true_labels += list([x.item() for x in data.label])
+            true_labels += list([x.item() for x in y])
 
             # Log table of predictions to WandB
             if self.config["USE_WANDB"]:
                 # graph_html = wandb.Html(plotly.io.to_html(create_graph_vis(data)))
 
-                for pred, label in zip(pred, torch.squeeze(data.label, -1)):
+                for pred, label in zip(pred, torch.squeeze(y, -1)):
                     table.add_data(label, pred)
 
         # Collate results into a single dictionary

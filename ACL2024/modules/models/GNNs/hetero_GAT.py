@@ -4,7 +4,8 @@ Heterogeneous Graph Attentional Network (GAT) model.
 import logging
 
 import torch
-from torch_geometric.nn import HeteroConv
+import torch.nn.functional as F
+from torch_geometric.nn import HeteroConv, GATConv, Linear, global_mean_pool
 
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 
@@ -16,7 +17,7 @@ class HeteroGAT(torch.nn.Module):
     Heterogeneous Graph Attentional Network (GAT) model.
     """
 
-    def __init__(self, hidden_channels, out_channels, num_layers):
+    def __init__(self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device):
         super().__init__()
         log.info("MODEL: GAT")
 
@@ -65,19 +66,22 @@ class HeteroGAT(torch.nn.Module):
         self.lin2 = Linear(hidden_channels, out_channels)
         self.softmax = torch.nn.Softmax(dim=-1)
 
-    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
+        self.dropout = dropout
+        self.device = device
+        self.vertex_types = vertex_types
+
+    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb, question_metadata, answer_metadata, user_info):
         x_dict = {
             key: x_dict[key]
             for key in x_dict.keys()
-            if key in ["question", "answer", "comment", "tag", "module"]
+            if key in self.vertex_types
         }
 
         for conv in self.convs:
-            break
             x_dict = conv(x_dict, edge_index_dict)
             x_dict = {key: F.leaky_relu(x) for key, x in x_dict.items()}
             x_dict = {
-                key: F.dropout(x, p=DROPOUT, training=self.training)
+                key: F.dropout(x, p=self.dropout, training=self.training)
                 for key, x in x_dict.items()
             }
 
@@ -86,16 +90,18 @@ class HeteroGAT(torch.nn.Module):
         for x, batch in zip(x_dict.values(), batch_dict.values()):
             if len(x):
                 outs.append(
-                    global_mean_pool(x, batch=batch, size=len(post_emb)).to(device)
+                    global_mean_pool(x, batch=batch, size=len(post_emb)).to(self.device)
                 )
             else:
-                outs.append(torch.zeros(1, x.size(-1)).to(device))
+                outs.append(torch.zeros(1, x.size(-1)).to(self.device))
 
-        out = torch.cat(outs, dim=1).to(device)
+        out = torch.cat(outs, dim=1).to(self.device)
 
-        out = torch.cat([out, post_emb], dim=1).to(device)
+        out = torch.cat([out, post_emb], dim=1).to(self.device)
 
-        out = F.dropout(out, p=DROPOUT, training=self.training)
+        # TODO: Add metadata to embedding
+
+        out = F.dropout(out, p=self.dropout, training=self.training)
 
         out = self.lin1(out)
         out = F.leaky_relu(out)

@@ -7,7 +7,7 @@ graph_construction:
     use_bert_embeddings: True  # else GloVe embeddings
 
 user_graph_dataset:
-    root: data
+    root: data_tmp
     db_address: data/raw/g4so.db
     skip_processing: False
     valid_questions_pkl_path: data\raw\acl_questions.pkl
@@ -39,4 +39,4 @@ user_graph_dataset:
 
 
 compile_dataset:
-    root: data
+    root: data_tmp
