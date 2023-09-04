@@ -1,6 +1,6 @@
 # Batch sizes
-TRAIN_BATCH_SIZE: 256
-TEST_BATCH_SIZE: 256
+TRAIN_BATCH_SIZE: 32
+TEST_BATCH_SIZE: 32
 
 # Data config
 USE_IN_MEMORY_DATASET: true
@@ -19,11 +19,11 @@ NUM_WORKERS: 1
 
 # Training parameters
 ROOT: "data_tmp"
-TRAIN_DATA_PATH: "train-628-qs.pt"
-TEST_DATA_PATH: "test-270-qs.pt"
+TRAIN_DATA_PATH: "train-1887-qs.pt"
+TEST_DATA_PATH: "test-809-qs.pt"
 TARGET: "accepted"
 REL_SUBSET: null
-EPOCHS: 10
+EPOCHS: 25
 START_LR: 0.001
 GAMMA: 0.95
 WARM_START_FILE: null  # "../models/gat_qa_20e_64h_3l.pt"
@@ -42,7 +42,7 @@ PICKLE_PATH_KF: "q_kf_results.pkl"
 MODEL: "GAT"
 NUM_GNN_LAYERS: 3
 HIDDEN_CHANNELS: 64
-FINAL_MODEL_OUT_PATH: "MODEL_OUT.pt"
+FINAL_MODEL_OUT_PATH: "BETA.pt"
 SAVE_CHECKPOINTS: true
 DROPOUT: 0.3
 VERTEX_TYPES:

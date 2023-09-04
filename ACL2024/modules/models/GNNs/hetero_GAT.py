@@ -28,34 +28,34 @@ class HeteroGAT(torch.nn.Module):
             conv = HeteroConv(
                 {
                     ("tag", "describes", "question"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("tag", "describes", "answer"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("tag", "describes", "comment"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("module", "imported_in", "question"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("module", "imported_in", "answer"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("question", "rev_describes", "tag"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("answer", "rev_describes", "tag"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("comment", "rev_describes", "tag"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("question", "rev_imported_in", "module"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                     ("answer", "rev_imported_in", "module"): GATConv(
-                        (-1, -1), hidden_channels, add_self_loops=False, heads=6
+                        (-1, -1), hidden_channels, add_self_loops=False
                     ),
                 },
                 aggr="sum",
