@@ -1,0 +1,53 @@
+# Batch sizes
+TRAIN_BATCH_SIZE: 32
+TEST_BATCH_SIZE: 32
+
+# Data config
+USE_IN_MEMORY_DATASET: true
+INCLUDE_ANSWER: true
+USE_CLASS_WEIGHTS_SAMPLER: true
+USE_CLASS_WEIGHTS_LOSS: false
+
+# W&B dashboard logging
+USE_WANDB: false
+WANDB_PROJECT_NAME: "setup"
+WANDB_RUN_NAME: null  # None for timestamp
+
+# OS
+OS_NAME: "windows"  # "windows" or "linux"
+NUM_WORKERS: 1
+
+# Training parameters
+ROOT: "data_tmp"
+TRAIN_DATA_PATH: "train-1887-qs.pt"
+TEST_DATA_PATH: "test-809-qs.pt"
+TARGET: "accepted"
+REL_SUBSET: null
+EPOCHS: 25
+START_LR: 0.001
+GAMMA: 0.95
+WARM_START_FILE: null  # "../models/gat_qa_20e_64h_3l.pt"
+
+# (Optional) k-fold cross validation
+USE_KFOLD: false
+FOLD_FILES:
+  - "fold-1-6001-qs.pt"
+  - "fold-2-6001-qs.pt"
+  - "fold-3-6001-qs.pt"
+  - "fold-4-6001-qs.pt"
+  - "fold-5-6001-qs.pt"
+PICKLE_PATH_KF: "q_kf_results.pkl"
+
+# Model architecture
+MODEL: "GAT"
+NUM_GNN_LAYERS: 3
+HIDDEN_CHANNELS: 64
+FINAL_MODEL_OUT_PATH: "BETA.pt"
+SAVE_CHECKPOINTS: true
+DROPOUT: 0.3
+VERTEX_TYPES:
+    - "question"
+    - "answer"
+    - "comment"
+    - "tag"
+    - "module"
