@@ -3,14 +3,13 @@ import os.path
 import pickle
 import re
 import sqlite3
-from typing import List, Any, Optional
+from typing import List
 import time
 
 import pandas as pd
 import torch
 from bs4 import MarkupResemblesLocatorWarning
-from torch_geometric.data import Dataset, download_url, Data, HeteroData
-from torch_geometric.data.hetero_data import NodeOrEdgeStorage
+from torch_geometric.data import Dataset, HeteroData
 from tqdm import tqdm
 import warnings
 

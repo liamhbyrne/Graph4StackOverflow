@@ -1,5 +1,3 @@
-
-
 """
 GraphSAGE model for heterogeneous graphs.
 """
@@ -19,7 +17,9 @@ class HeteroGraphSAGE(torch.nn.Module):
     Heterogeneous GraphSAGE model.
     """
 
-    def __init__(self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device):
+    def __init__(
+        self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device
+    ):
         super().__init__()
         log.info("MODEL: GraphSAGE")
         self.convs = torch.nn.ModuleList()
@@ -64,19 +64,17 @@ class HeteroGraphSAGE(torch.nn.Module):
             self.convs.append(conv)
 
         self.lin1 = Linear(-1, hidden_channels)
-        self.lin2 = Linear(hidden_channels, out_channels)
+        self.lin2 = Linear(hidden_channels, hidden_channels)
+        self.lin3 = Linear(hidden_channels, out_channels)
         self.softmax = torch.nn.Softmax(dim=-1)
 
         self.dropout = dropout
         self.device = device
         self.vertex_types = vertex_types
 
-    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
-        x_dict = {
-            key: x_dict[key]
-            for key in x_dict.keys()
-            if key in self.vertex_types
-        }
+    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb, metadata):
+        # Filter by vertex types
+        x_dict = {key: x_dict[key] for key in x_dict.keys() if key in self.vertex_types}
 
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
@@ -95,18 +93,34 @@ class HeteroGraphSAGE(torch.nn.Module):
             else:
                 outs.append(torch.zeros(1, x.size(-1)).to(self.device))
 
-        out = torch.cat(outs, dim=1).to(self.device)
+        # Concatenate learned vertex representations
+        user_graph_emb = torch.cat(outs, dim=1).to(self.device)
 
-        out = torch.cat([out, post_emb], dim=1).to(self.device)
+        log.debug("user_graph_emb.shape", user_graph_emb.shape)
+        log.debug("post_emb.shape", post_emb.shape)
+        log.debug("metadata.shape", metadata.shape)
+
+        # Concatenate
+        out = torch.cat([user_graph_emb, post_emb, metadata], dim=1).to(self.device)
+
+        log.debug("out.shape", out.shape, out.dtype)
 
         out = F.dropout(out, p=self.dropout, training=self.training)
+
+        log.debug("dropout1.shape", out.shape, out.dtype)
 
         out = self.lin1(out)
         out = F.leaky_relu(out)
 
+        log.debug("lin1.shape", out.shape, out.dtype)
+
         out = self.lin2(out)
+        out = F.leaky_relu(out)
+
+        log.debug("lin2.shape", out.shape, out.dtype)
+
+        out = self.lin3(out)
         out = F.leaky_relu(out)
 
         out = self.softmax(out)
         return out
-

@@ -13,7 +13,9 @@ from ACL2024.modules.util.get_root_dir import get_project_root
 
 log = setup_custom_logger("compile-dataset", logging.INFO)
 
-with open(os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r") as file:
+with open(
+    os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r"
+) as file:
     CONFIG = yaml.safe_load(file)["compile_dataset"]
 
 
@@ -46,7 +48,9 @@ class UserGraphDatasetInMemory(InMemoryDataset):
     def raw_file_names(self):
         return [
             x
-            for x in os.listdir(os.path.join(get_project_root(), self.root, "processed"))
+            for x in os.listdir(
+                os.path.join(get_project_root(), self.root, "processed")
+            )
             if x not in ["pre_filter.pt", "pre_transform.pt"]
         ]
 

@@ -7,7 +7,6 @@ import tokenize
 from collections import namedtuple
 from typing import List
 
-from NextTagEmbedding import NextTagEmbedding, NextTagEmbeddingTrainer
 
 from bs4 import BeautifulSoup
 import spacy
@@ -16,11 +15,8 @@ import torch.nn as nn
 from transformers import (
     BertTokenizer,
     BertModel,
-    RobertaTokenizer,
-    RobertaModel,
     AutoTokenizer,
     AutoModel,
-    AutoConfig,
 )
 
 from custom_logger import setup_custom_logger

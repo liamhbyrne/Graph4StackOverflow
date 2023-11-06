@@ -1,66 +1,34 @@
-import json
 import logging
-import os
-import string
-import time
 
-import networkx as nx
-import pandas as pd
-import plotly
 import torch
 from sklearn.metrics import f1_score, accuracy_score
 from torch_geometric.loader import DataLoader
 from torch_geometric.nn import (
     HeteroConv,
-    GATv2Conv,
     GATConv,
     Linear,
     global_mean_pool,
-    GCNConv,
-    SAGEConv,
 )
-from helper_functions import calculate_class_weights, split_test_train_pytorch
+from helper_functions import calculate_class_weights
 import wandb
-from torch_geometric.utils import to_networkx
 import torch.nn.functional as F
-from sklearn.model_selection import KFold
 from torch.optim.lr_scheduler import ExponentialLR
-import pickle
 
 from custom_logger import setup_custom_logger
-from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
-from Visualize import GraphVisualization
-import helper_functions
 from hetero_GAT_constants import (
     OS_NAME,
     TRAIN_BATCH_SIZE,
     TEST_BATCH_SIZE,
-    IN_MEMORY_DATASET,
     INCLUDE_ANSWER,
     USE_WANDB,
     WANDB_PROJECT_NAME,
     NUM_WORKERS,
-    EPOCHS,
-    NUM_LAYERS,
-    HIDDEN_CHANNELS,
-    FINAL_MODEL_OUT_PATH,
-    SAVE_CHECKPOINTS,
-    WANDB_RUN_NAME,
-    CROSS_VALIDATE,
-    FOLD_FILES,
-    USE_CLASS_WEIGHTS_SAMPLER,
-    USE_CLASS_WEIGHTS_LOSS,
     DROPOUT,
     GAMMA,
-    START_LR,
-    PICKLE_PATH_KF,
     ROOT,
     TRAIN_DATA_PATH,
     TEST_DATA_PATH,
-    WARM_START_FILE,
-    MODEL,
-    REL_SUBSET,
 )
 
 log = setup_custom_logger("heterogenous_GAT_model", logging.INFO)

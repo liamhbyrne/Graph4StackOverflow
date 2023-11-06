@@ -16,7 +16,9 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
-with open(os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r") as file:
+with open(
+    os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r"
+) as file:
     CONFIG = yaml.safe_load(file)["graph_construction"]
 
 

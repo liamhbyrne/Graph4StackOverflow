@@ -1,4 +1,3 @@
-
 """
 GraphConv model for heterogeneous graphs.
 """
@@ -18,7 +17,9 @@ class HeteroGraphConv(torch.nn.Module):
     Heterogeneous GraphConv model.
     """
 
-    def __init__(self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device):
+    def __init__(
+        self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device
+    ):
         super().__init__()
         log.info("MODEL: GraphConv")
 
@@ -71,11 +72,7 @@ class HeteroGraphConv(torch.nn.Module):
         self.vertex_types = vertex_types
 
     def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
-        x_dict = {
-            key: x_dict[key]
-            for key in x_dict.keys()
-            if key in self.vertex_types
-        }
+        x_dict = {key: x_dict[key] for key in x_dict.keys() if key in self.vertex_types}
 
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
@@ -89,9 +86,7 @@ class HeteroGraphConv(torch.nn.Module):
 
         for x, batch in zip(x_dict.values(), batch_dict.values()):
             if len(x):
-                outs.append(
-                    global_mean_pool(x, batch=batch, size=len(post_emb))
-                )
+                outs.append(global_mean_pool(x, batch=batch, size=len(post_emb)))
             else:
                 outs.append(torch.zeros(1, x.size(-1)).to(self.device))
 

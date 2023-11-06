@@ -117,9 +117,7 @@ class UserGraphDataset(Dataset):
             ).detach()
 
             # TODO: Concatenate question_emb with quesion metadata
-            # question_metadata = self.fetch_question_metadata(question["PostId"], db)
-
-            # question_emb = torch.concat((question_emb, question_metadata))
+            question_metadata = self.fetch_question_metadata(question["PostId"], db)
 
             # Fetch answers to question
             answers_to_question = self.fetch_answers_for_question(
@@ -145,9 +143,8 @@ class UserGraphDataset(Dataset):
         answer_emb = torch.concat((answer_word_embs[0], answer_code_embs[0]))
 
         # TODO: Concatenate answer_emb with answer metadata
-        # answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
-
-        # answer_emb = torch.concat((answer_emb, answer_metadata))
+        answer_metadata = self.fetch_answer_metadata(answer["PostId"], self._db_address)
+        answer_emb = torch.concat((answer_emb, answer_metadata))
 
         # Build graph
         start = time.time()

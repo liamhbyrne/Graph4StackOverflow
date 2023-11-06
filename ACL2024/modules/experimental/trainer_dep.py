@@ -10,7 +10,14 @@ import yaml
 from ACL2024.modules.models.GNNs.hetero_GAT import HeteroGAT
 from ACL2024.modules.models.GNNs.hetero_GraphConv import HeteroGraphConv
 from ACL2024.modules.models.GNNs.hetero_GraphSAGE import HeteroGraphSAGE
-from ACL2024.modules.models.helper_functions import calculate_class_weights, split_test_train_pytorch, start_wandb_for_training, log_results_to_wandb, save_model, add_cm_to_wandb
+from ACL2024.modules.models.helper_functions import (
+    calculate_class_weights,
+    split_test_train_pytorch,
+    start_wandb_for_training,
+    log_results_to_wandb,
+    save_model,
+    add_cm_to_wandb,
+)
 from sklearn.metrics import f1_score, accuracy_score
 from torch.optim.lr_scheduler import ExponentialLR
 from torch_geometric.loader import DataLoader
@@ -32,6 +39,7 @@ if CONFIG["OS_NAME"] == "linux":
 
     rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
     resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
+
 
 def train(model, train_loader):
     running_loss = 0.0
@@ -76,7 +84,11 @@ T
 
 
 def test(loader):
-    table = wandb.Table(columns=["ground_truth", "prediction"]) if CONFIG["USE_WANDB"] else None
+    table = (
+        wandb.Table(columns=["ground_truth", "prediction"])
+        if CONFIG["USE_WANDB"]
+        else None
+    )
     model.eval()
 
     predictions = []
@@ -138,7 +150,7 @@ if __name__ == "__main__":
     log.info(f"Proceeding with {device} . .")
 
     if CONFIG["USE_WANDB"]:
-        log.info(f"Connecting to Weights & Biases . .")
+        log.info("Connecting to Weights & Biases . .")
         if CONFIG["WANDB_RUN_NAME"] is None:
             WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
         config = start_wandb_for_training(
@@ -158,7 +170,9 @@ if __name__ == "__main__":
     # Datasets
     if CONFIG["USE_IN_MEMORY_DATASET"]:
         train_dataset = UserGraphDatasetInMemory(
-            root=CONFIG["ROOT"], file_name_out=CONFIG["TRAIN_DATA_PATH"], question_ids=[]
+            root=CONFIG["ROOT"],
+            file_name_out=CONFIG["TRAIN_DATA_PATH"],
+            question_ids=[],
         )
         test_dataset = UserGraphDatasetInMemory(
             root=CONFIG["ROOT"], file_name_out=CONFIG["TEST_DATA_PATH"], question_ids=[]
@@ -168,7 +182,6 @@ if __name__ == "__main__":
         train_dataset, test_dataset = split_test_train_pytorch(dataset, 0.7)
 
     if CONFIG["USE_KFOLD"]:
-
         folds = [
             UserGraphDatasetInMemory(
                 root="../data", file_name_out=fold_path, question_ids=[]
@@ -200,10 +213,14 @@ if __name__ == "__main__":
             train_fold_loader = DataLoader(
                 train_fold, batch_size=CONFIG["TRAIN_BATH_SIZE"], sampler=sampler
             )
-            test_fold_loader = DataLoader(test_fold, batch_size=CONFIG["TEST_BATCH_SIZE"])
+            test_fold_loader = DataLoader(
+                test_fold, batch_size=CONFIG["TEST_BATCH_SIZE"]
+            )
             # Model
             model = HeteroGAT(
-                hidden_channels=CONFIG["HIDDEN_CHANNELS"], out_channels=2, num_layers=CONFIG["NUM_LAYERS"]
+                hidden_channels=CONFIG["HIDDEN_CHANNELS"],
+                out_channels=2,
+                num_layers=CONFIG["NUM_LAYERS"],
             )
             model.to(device)  # To GPU if available
 
@@ -292,21 +309,29 @@ if __name__ == "__main__":
         num_workers=CONFIG["NUM_WORKERS"],
     )
     test_loader = DataLoader(
-        test_dataset, batch_size=CONFIG["TEST_BATCH_SIZE"], num_workers=CONFIG["NUM_WORKERS"]
+        test_dataset,
+        batch_size=CONFIG["TEST_BATCH_SIZE"],
+        num_workers=CONFIG["NUM_WORKERS"],
     )
 
     # Model
     if CONFIG["MODEL"] == "GAT":
         model = HeteroGAT(
-            hidden_channels=CONFIG["HIDDEN_CHANNELS"], out_channels=2, num_layers=CONFIG["NUM_LAYERS"]
+            hidden_channels=CONFIG["HIDDEN_CHANNELS"],
+            out_channels=2,
+            num_layers=CONFIG["NUM_LAYERS"],
         )
     elif CONFIG["MODEL"] == "SAGE":
         model = HeteroGraphSAGE(
-            hidden_channels=CONFIG["HIDDEN_CHANNELS"], out_channels=2, num_layers=CONFIG["NUM_LAYERS"]
+            hidden_channels=CONFIG["HIDDEN_CHANNELS"],
+            out_channels=2,
+            num_layers=CONFIG["NUM_LAYERS"],
         )
     elif CONFIG["MODEL"] == "GC":
         model = HeteroGraphConv(
-            hidden_channels=CONFIG["HIDDEN_CHANNELS"], out_channels=2, num_layers=CONFIG["NUM_LAYERS"]
+            hidden_channels=CONFIG["HIDDEN_CHANNELS"],
+            out_channels=2,
+            num_layers=CONFIG["NUM_LAYERS"],
         )
     else:
         log.error(f"Model does not exist! ({CONFIG['MODEL']})")
@@ -315,7 +340,6 @@ if __name__ == "__main__":
     """
     Put model on GPU if available
     """
-
 
     if CONFIG["WARM_START_FILE"] is not None:
         model.load_state_dict(torch.load(CONFIG["WARM_START_FILE"]), strict=False)

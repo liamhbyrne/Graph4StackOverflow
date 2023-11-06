@@ -17,7 +17,9 @@ class MLP(torch.nn.Module):
     Heterogeneous Graph Attentional Network (GAT) model.
     """
 
-    def __init__(self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device):
+    def __init__(
+        self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device
+    ):
         super().__init__()
         log.info("MODEL: GAT")
 
@@ -33,11 +35,7 @@ class MLP(torch.nn.Module):
         self.vertex_types = vertex_types
 
     def forward(self, x_dict, edge_index_dict, batch_dict, post_emb):
-        x_dict = {
-            key: x_dict[key]
-            for key in x_dict.keys()
-            if key in self.vertex_types
-        }
+        x_dict = {key: x_dict[key] for key in x_dict.keys() if key in self.vertex_types}
 
         outs = []
         for x, batch in zip(x_dict.values(), batch_dict.values()):

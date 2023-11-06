@@ -18,13 +18,13 @@ OS_NAME: "windows"  # "windows" or "linux"
 NUM_WORKERS: 1
 
 # Training parameters
-ROOT: "data_tmp"
+ROOT: "data_nov"
 TRAIN_DATA_PATH: "train-1887-qs.pt"
 TEST_DATA_PATH: "test-809-qs.pt"
 TARGET: "accepted"
 REL_SUBSET: null
-EPOCHS: 25
-START_LR: 0.001
+EPOCHS: 2
+START_LR: 0.01
 GAMMA: 0.95
 WARM_START_FILE: null  # "../models/gat_qa_20e_64h_3l.pt"
 
@@ -39,10 +39,10 @@ FOLD_FILES:
 PICKLE_PATH_KF: "q_kf_results.pkl"
 
 # Model architecture
-MODEL: "GAT"
-NUM_GNN_LAYERS: 3
-HIDDEN_CHANNELS: 64
-FINAL_MODEL_OUT_PATH: "BETA.pt"
+MODEL: "SAGE"
+NUM_GNN_LAYERS: 2
+HIDDEN_CHANNELS: 128
+FINAL_MODEL_OUT_PATH: "ACCEPTED_MODEL_BAD_METADATA.pt"
 SAVE_CHECKPOINTS: true
 DROPOUT: 0.3
 VERTEX_TYPES:

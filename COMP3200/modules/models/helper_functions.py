@@ -113,7 +113,7 @@ def split_test_train_pytorch(dataset, train_split):
 
 def calculate_class_weights(dataset):
     # Class weights
-    log.info(f"Calculating class weights")
+    log.info("Calculating class weights")
     train_labels = [x.label for x in dataset]
     counts = [train_labels.count(x) for x in [0, 1]]
     class_weights = [1 - (x / sum(counts)) for x in counts]

@@ -100,7 +100,10 @@ PyTorch helpers
 
 
 def save_model(model, model_name: str):
-    torch.save(model.state_dict(), os.path.join(get_project_root(), "modules", "models", "out", model_name))
+    torch.save(
+        model.state_dict(),
+        os.path.join(get_project_root(), "modules", "models", "out", model_name),
+    )
 
 
 def split_test_train_pytorch(dataset, train_split):
@@ -115,7 +118,7 @@ def split_test_train_pytorch(dataset, train_split):
 
 def calculate_class_weights(dataset):
     # Class weights
-    log.info(f"Calculating class weights")
+    log.info("Calculating class weights")
     train_labels = [x.label for x in dataset]
     counts = [train_labels.count(x) for x in [0, 1]]
     class_weights = [1 - (x / sum(counts)) for x in counts]

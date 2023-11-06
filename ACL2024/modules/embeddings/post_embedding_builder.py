@@ -13,10 +13,6 @@ import torch
 import torch.nn as nn
 from bs4 import BeautifulSoup
 from transformers import (
-    BertTokenizer,
-    BertModel,
-    AutoTokenizer,
-    AutoModel,
     logging as transformers_logging,
     RobertaTokenizer,
     RobertaModel,

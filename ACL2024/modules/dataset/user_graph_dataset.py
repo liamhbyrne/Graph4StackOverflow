@@ -34,7 +34,9 @@ warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 log = setup_custom_logger("dataset", logging.INFO)
 
-with open(os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r") as file:
+with open(
+    os.path.join(get_project_root(), "modules", "dataset", "dataset_config.yaml"), "r"
+) as file:
     CONFIG = yaml.safe_load(file)["user_graph_dataset"]
 
 
@@ -196,11 +198,8 @@ class UserGraphDataset(Dataset):
             )
 
         if CONFIG["add_user_info"]:
-           user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
-           graph.__setattr__("user_info", user_info)
-
-
-        print(graph.accepted)
+            user_info = self.fetch_user_info(answer["OwnerUserId"], self._db)
+            graph.__setattr__("user_info", user_info)
 
         torch.save(
             graph,
@@ -279,10 +278,10 @@ class UserGraphDataset(Dataset):
         ).iloc[0]["COUNT(*)"]
 
         question_metadata = {
-            "view_count": view_count,
-            "creation_date": creation_date,
-            "last_edit_date": last_edit_date,
-            "comments_count": comments_count,
+            "view_count": torch.tensor(view_count),
+            "creation_date": torch.tensor(creation_date),
+            "last_edit_date": torch.tensor(last_edit_date),
+            "comments_count": torch.tensor(comments_count),
             "tag_embeddings": tag_embeddings,
         }
 
@@ -320,8 +319,8 @@ class UserGraphDataset(Dataset):
         ).iloc[0]["COUNT(*)"]
 
         answer_metadata = {
-            "creation_date": creation_date,
-            "comments_count": comments_count,
+            "creation_date": torch.tensor(creation_date),
+            "comments_count": torch.tensor(comments_count),
         }
 
         return answer_metadata
@@ -428,11 +427,11 @@ class UserGraphDataset(Dataset):
             top_n_tag_embs[i] = self.tag_embedding_model.get_tag_embedding(tag)
 
         user_info = {
-            "user_creation_date": user_creation_date,
-            "reputation": reputation,
-            "answers_count": answers_count,
-            "comments_count": comments_count,
-            "accepted_answers_count": accepted_answers_count,
+            "user_creation_date": torch.tensor(user_creation_date),
+            "reputation": torch.tensor(reputation),
+            "answers_count": torch.tensor(answers_count),
+            "comments_count": torch.tensor(comments_count),
+            "accepted_answers_count": torch.tensor(accepted_answers_count),
             "badge_vector": badge_vector,
             "top_n_tags": top_n_tag_embs,
         }

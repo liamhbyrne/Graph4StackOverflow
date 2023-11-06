@@ -116,7 +116,7 @@ class ModuleEmbeddingTrainer:
         writer.add_embedding(
             self.model.embedding.weight,
             metadata=self.module_vocab,
-            tag=f"Module co-occurrence embedding",
+            tag="Module co-occurrence embedding",
         )
         writer.close()
 

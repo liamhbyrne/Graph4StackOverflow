@@ -48,7 +48,7 @@ class TagEmbeddingTrainer:
         self.tag_vocab = list(set(tag_df["TagName"]))
 
         post_tags = pd.read_sql_query(
-            f"SELECT Tags FROM Post WHERE PostTypeId=1", self.db
+            "SELECT Tags FROM Post WHERE PostTypeId=1", self.db
         )
         tag_list_df = post_tags["Tags"].map(self.parse_tag_list)
         combinations = tag_list_df.apply(
@@ -111,7 +111,7 @@ class TagEmbeddingTrainer:
         """
         writer = SummaryWriter(f"runs/{run_name}")
         writer.add_embedding(
-            self.model.embedding.weight, metadata=self.tag_vocab, tag=f"Tag embedding"
+            self.model.embedding.weight, metadata=self.tag_vocab, tag="Tag embedding"
         )
         writer.close()
 

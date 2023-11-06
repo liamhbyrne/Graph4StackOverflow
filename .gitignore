@@ -17,3 +17,6 @@ sqlite-jdbc-3.39.3.0.jar
 META-INF/
 data_tmp/
 wandb/
+sbatch_runner
+data_nov/
+data_full_metadata/

@@ -1,37 +1,27 @@
-import json
 import logging
-import os
-import string
 import time
 
-import networkx as nx
 import pandas as pd
-import plotly
 import torch
 from sklearn.metrics import f1_score, accuracy_score
 from torch_geometric.loader import DataLoader
 from torch_geometric.nn import (
     HeteroConv,
-    GATv2Conv,
     GATConv,
     Linear,
     global_mean_pool,
-    GCNConv,
     SAGEConv,
     GraphConv,
 )
 from helper_functions import calculate_class_weights, split_test_train_pytorch
 import wandb
-from torch_geometric.utils import to_networkx
 import torch.nn.functional as F
-from sklearn.model_selection import KFold
 from torch.optim.lr_scheduler import ExponentialLR
 import pickle
 
 from custom_logger import setup_custom_logger
 from dataset import UserGraphDataset
 from dataset_in_memory import UserGraphDatasetInMemory
-from Visualize import GraphVisualization
 import helper_functions
 from hetero_GNN_constants import (
     OS_NAME,
@@ -499,7 +489,7 @@ if __name__ == "__main__":
     log.info(f"Proceeding with {device} . .")
 
     if USE_WANDB:
-        log.info(f"Connecting to Weights & Biases . .")
+        log.info("Connecting to Weights & Biases . .")
         if WANDB_RUN_NAME is None:
             WANDB_RUN_NAME = f"run@{time.strftime('%Y%m%d-%H%M%S')}"
         config = helper_functions.start_wandb_for_training(

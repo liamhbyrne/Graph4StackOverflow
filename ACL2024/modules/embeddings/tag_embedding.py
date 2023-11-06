@@ -3,7 +3,7 @@ import os
 import pickle
 import random
 import sqlite3
-from typing import *
+from typing import List, Tuple
 
 import pandas as pd
 import torch
@@ -73,7 +73,7 @@ class NextTagEmbeddingTrainer:
 
     def from_db(self):
         post_tags = pd.read_sql_query(
-            f"SELECT Tags FROM Post WHERE PostTypeId=1 AND Tags LIKE '%python%' LIMIT 100000",
+            "SELECT Tags FROM Post WHERE PostTypeId=1 AND Tags LIKE '%python%' LIMIT 100000",
             self.db,
         )
         tag_list_df = post_tags["Tags"].map(self.parse_tag_list)
@@ -142,7 +142,7 @@ class NextTagEmbeddingTrainer:
         writer.add_embedding(
             self.model.embedding.weight,
             metadata=self.tag_vocab,
-            tag=f"Next-Tag embedding",
+            tag="Next-Tag embedding",
         )
         writer.close()
 
@@ -157,7 +157,7 @@ class NextTagEmbeddingTrainer:
         model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 
         # unpickle the tag_to_ix
-        with open(model_path.replace("tag-emb", f"tag_to_ix_tag-emb"), "rb") as f:
+        with open(model_path.replace("tag-emb", "tag_to_ix_tag-emb"), "rb") as f:
             model.tag_to_ix = pickle.load(f)
 
         return model

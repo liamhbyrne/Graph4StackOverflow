@@ -1,22 +1,29 @@
 import logging
 import os
-import pickle
 import time
+
 import pandas as pd
 import torch
-import wandb
 import yaml
-
-from ACL2024.modules.models.GNNs.hetero_GAT import HeteroGAT
-from ACL2024.modules.models.GNNs.hetero_GraphConv import HeteroGraphConv
-from ACL2024.modules.models.GNNs.hetero_GraphSAGE import HeteroGraphSAGE
-from ACL2024.modules.models.GNNs.MLP import MLP
-from ACL2024.modules.models.helper_functions import calculate_class_weights, split_test_train_pytorch, start_wandb_for_training, log_results_to_wandb, save_model, add_cm_to_wandb
 from sklearn.metrics import f1_score, accuracy_score
 from torch.optim.lr_scheduler import ExponentialLR
 from torch_geometric.loader import DataLoader
+
+import wandb
 from ACL2024.modules.dataset.compile_dataset import UserGraphDatasetInMemory
 from ACL2024.modules.dataset.user_graph_dataset import UserGraphDataset
+from ACL2024.modules.models.GNNs.MLP import MLP
+from ACL2024.modules.models.GNNs.hetero_GAT import HeteroGAT
+from ACL2024.modules.models.GNNs.hetero_GraphConv import HeteroGraphConv
+from ACL2024.modules.models.GNNs.hetero_GraphSAGE import HeteroGraphSAGE
+from ACL2024.modules.models.helper_functions import (
+    calculate_class_weights,
+    split_test_train_pytorch,
+    start_wandb_for_training,
+    log_results_to_wandb,
+    save_model,
+    add_cm_to_wandb,
+)
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 from ACL2024.modules.util.get_root_dir import get_project_root
 
@@ -38,6 +45,7 @@ class GraphTrainer:
         if self.config["OS_NAME"] == "linux":
             torch.multiprocessing.set_sharing_strategy("file_system")
             import resource
+
             rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
             resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
 
@@ -70,19 +78,39 @@ class GraphTrainer:
         """
         if self.config["MODEL"] == "GAT":
             self._model = HeteroGAT(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
+                hidden_channels=self.config["HIDDEN_CHANNELS"],
+                out_channels=2,
+                num_layers=self.config["NUM_GNN_LAYERS"],
+                dropout=self.config["DROPOUT"],
+                vertex_types=self.config["VERTEX_TYPES"],
+                device=self.device,
             )
         elif self.config["MODEL"] == "SAGE":
             self._model = HeteroGraphSAGE(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
+                hidden_channels=self.config["HIDDEN_CHANNELS"],
+                out_channels=2,
+                num_layers=self.config["NUM_GNN_LAYERS"],
+                dropout=self.config["DROPOUT"],
+                vertex_types=self.config["VERTEX_TYPES"],
+                device=self.device,
             )
         elif self.config["MODEL"] == "GC":
             self._model = HeteroGraphConv(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
+                hidden_channels=self.config["HIDDEN_CHANNELS"],
+                out_channels=2,
+                num_layers=self.config["NUM_GNN_LAYERS"],
+                dropout=self.config["DROPOUT"],
+                vertex_types=self.config["VERTEX_TYPES"],
+                device=self.device,
             )
         elif self.config["MODEL"] == "MLP":
             self._model = MLP(
-                hidden_channels=self.config["HIDDEN_CHANNELS"], out_channels=2, num_layers=self.config["NUM_GNN_LAYERS"], dropout=self.config["DROPOUT"], vertex_types=self.config["VERTEX_TYPES"], device=self.device
+                hidden_channels=self.config["HIDDEN_CHANNELS"],
+                out_channels=2,
+                num_layers=self.config["NUM_GNN_LAYERS"],
+                dropout=self.config["DROPOUT"],
+                vertex_types=self.config["VERTEX_TYPES"],
+                device=self.device,
             )
         else:
             log.error(f"Model does not exist! ({self.config['MODEL']})")
@@ -97,25 +125,31 @@ class GraphTrainer:
         # Datasets
         if self.config["USE_IN_MEMORY_DATASET"]:
             self._train_dataset = UserGraphDatasetInMemory(
-                root=self.config["ROOT"], file_name_out=self.config["TRAIN_DATA_PATH"], question_ids=[]
+                root=self.config["ROOT"],
+                file_name_out=self.config["TRAIN_DATA_PATH"],
+                question_ids=[],
             )
             self._test_dataset = UserGraphDatasetInMemory(
-                root=self.config["ROOT"], file_name_out=self.config["TEST_DATA_PATH"], question_ids=[]
+                root=self.config["ROOT"],
+                file_name_out=self.config["TEST_DATA_PATH"],
+                question_ids=[],
             )
         else:
             dataset = UserGraphDataset(root=self.config["ROOT"], skip_processing=True)
-            self._train_dataset, self._test_dataset = split_test_train_pytorch(dataset, 0.7)
+            self._train_dataset, self._test_dataset = split_test_train_pytorch(
+                dataset, 0.7
+            )
 
         # (Optional) Take subset of training set
         if self.config["REL_SUBSET"] is not None:
-            indices = list(range(int(len(self._train_dataset) * self.config["REL_SUBSET"])))
+            indices = list(
+                range(int(len(self._train_dataset) * self.config["REL_SUBSET"]))
+            )
             self._train_dataset = torch.utils.data.Subset(self._train_dataset, indices)
             log.info(f"Subset contains {len(self._train_dataset)}")
 
     def get_dataloaders(self):
-        """
-
-        """
+        """ """
         train_loader = DataLoader(
             self._train_dataset,
             sampler=self._sampler,
@@ -130,17 +164,42 @@ class GraphTrainer:
         )
         return train_loader, test_loader
 
+    def build_metadata_vector(self, question_metadata, answer_metadata, user_info):
+        """
+        Convert metadata from dictionary form into a vector
+        """
+        # print shape of each metadata vector
+        # Question metadata. question_metadata is a dictionary containing ["view_count", "creation_date", "last_edit_date", "comments_count"]. Get these and concatneate into a single vector in the form (n, 32)
+        metadata_vector = torch.stack(
+            [
+                question_metadata["view_count"],
+                question_metadata["creation_date"],
+                question_metadata["last_edit_date"],
+                torch.tensor(
+                    question_metadata["comments_count"]
+                ),  # TODO: This should not need to be casted to a tensor, change this in dataset
+            ],
+            axis=1,
+        ).to(torch.float32)
+
+        return metadata_vector
 
     def compile(self):
         """
         Set optimizer and scheduler
         """
         if self.config["WARM_START_FILE"] is not None:
-            self._model.load_state_dict(torch.load(self.config["WARM_START_FILE"]), strict=False)
+            self._model.load_state_dict(
+                torch.load(self.config["WARM_START_FILE"]), strict=False
+            )
 
         # Optimizers & Schedulers
-        self._optimizer = torch.optim.Adam(self._model.parameters(), lr=self.config["START_LR"])
-        self._scheduler = ExponentialLR(self._optimizer, gamma=self.config["GAMMA"], verbose=True)
+        self._optimizer = torch.optim.Adam(
+            self._model.parameters(), lr=self.config["START_LR"]
+        )
+        self._scheduler = ExponentialLR(
+            self._optimizer, gamma=self.config["GAMMA"], verbose=True
+        )
 
         self._sampler = None
         class_weights = calculate_class_weights(self._train_dataset).to(self.device)
@@ -160,15 +219,14 @@ class GraphTrainer:
             weight=class_weights if self.config["USE_CLASS_WEIGHTS_LOSS"] else None
         )
 
-
-
-
     def train(self):
         """
         Set dataloaders
         """
         # Dataloaders
-        log.info(f"Train DataLoader batch size is set to {self.config['TRAIN_BATCH_SIZE']}")
+        log.info(
+            f"Train DataLoader batch size is set to {self.config['TRAIN_BATCH_SIZE']}"
+        )
 
         train_loader, test_loader = self.get_dataloaders()
 
@@ -178,7 +236,7 @@ class GraphTrainer:
             log.info(f"Epoch: {epoch:03d} > > >")
 
             # train model . .
-            self.train_one_epoch(self._model, train_loader)
+            self.train_one_epoch(train_loader)
 
             # evaluate on training set . .
             train_info = self.test(train_loader)
@@ -188,7 +246,7 @@ class GraphTrainer:
 
             # log for current epoch
             log.info(
-                f'Epoch: {epoch:03d}, Test F1 (weighted): {test_info["f1-score-weighted"]:.4f}, Test F1 (macro): {test_info["f1-score-macro"]:.4f}'
+                f'Epoch: {epoch:03d}, Test F1 (macro): {test_info["f1-score-macro"]:.4f}, Test F1 (weighted): {test_info["f1-score-weighted"]:.4f}, loss: {test_info["loss"]:.4f}'
             )
 
             # step scheduler
@@ -199,12 +257,24 @@ class GraphTrainer:
                 {"actual": test_info["trues"], "prediction": test_info["preds"]}
             )
             confusion_matrix = pd.crosstab(
-                df["actual"], df["prediction"], rownames=["Actual"], colnames=["Predicted"]
+                df["actual"],
+                df["prediction"],
+                rownames=["Actual"],
+                colnames=["Predicted"],
             )
             print(confusion_matrix)
 
             if self.config["SAVE_CHECKPOINTS"]:
-                torch.save(self._model.state_dict(), os.path.join(get_project_root(), "modules", "models", "out", f"model-{epoch}.pt"))
+                torch.save(
+                    self._model.state_dict(),
+                    os.path.join(
+                        get_project_root(),
+                        "modules",
+                        "models",
+                        "out",
+                        f"model-{epoch}.pt",
+                    ),
+                )
 
             # log evaluation results to wandb
             if self.config["USE_WANDB"]:
@@ -220,40 +290,64 @@ class GraphTrainer:
             add_cm_to_wandb(test_info)
             wandb.finish()
 
+    def train_one_epoch(self, train_loader):
+        """ """
+        # Iterate in batches over the training dataset.
+        for i, data in enumerate(train_loader):
+            # Clear gradients
+            self._optimizer.zero_grad()
 
-    def train_one_epoch(self, model, train_loader):
-        """
+            # Get question post embedding
+            post_emb = data.question_emb
 
-        """
-        for i, data in enumerate(
-                train_loader
-        ):  # Iterate in batches over the training dataset.
-            data.to(self.device)
-
-            self._optimizer.zero_grad()  # Clear gradients.
-
+            # Concatenate answer embedding (Used when answer is already provided)
             if self.config["INCLUDE_ANSWER"]:
-                # Concatenate question and answer embeddings to form post embeddings
-                post_emb = torch.cat([data.question_emb, data.answer_emb], dim=1).to(self.device)
-            else:
-                # Use only question embeddings as post embedding
-                post_emb = data.question_emb.to(self.device)
+                post_emb = torch.cat([data.question_emb, data.answer_emb], dim=1)
+
             post_emb.requires_grad = True
+            post_emb = post_emb.to(self.device)
 
+            # Build metadata vector
+            metadata_emb = self.build_metadata_vector(
+                data.question_metadata, data.answer_metadata, data.user_info
+            )
+            metadata_emb.requires_grad = True
+            metadata_emb = metadata_emb.to(self.device)
+
+            # Perform a single forward pass.
             out = self._model(
-                data.x_dict, data.edge_index_dict, data.batch_dict, post_emb, data.question_metadata, data.answer_metadata, data.user_info
-            )  # Perform a single forward pass.
+                data.x_dict,
+                data.edge_index_dict,
+                data.batch_dict,
+                post_emb,
+                metadata_emb,
+            )
 
-            # y = torch.tensor([1 if x > 0 else 0 for x in data.score]).to(device)
-            loss = self._criterion(out, torch.squeeze(data.label, -1))  # Compute the loss.
+            if self.config["TARGET"] == "upvoted":
+                y = data.label
+            elif self.config["TARGET"] == "accepted":
+                y = torch.tensor([1 if x else 0 for x in data.accepted])
+            elif self.config["TARGET"] == "score":
+                y = data.score
+            elif self.config["TARGET"] == "score_gt_0":
+                y = torch.tensor([1 if x > 0 else 0 for x in data.score]).to(
+                    self.device
+                )
+            else:
+                log.error(f"Target not defined: {self.config['TARGET']}")
+                exit(1)
+
+            loss = self._criterion(out, torch.squeeze(y, -1))  # Compute the loss.
             loss.backward()  # Derive gradients.
             self._optimizer.step()  # Update parameters based on gradients.
 
     def test(self, loader):
-        """
-
-        """
-        table = wandb.Table(columns=["ground_truth", "prediction"]) if self.config["USE_WANDB"] else None
+        """ """
+        table = (
+            wandb.Table(columns=["ground_truth", "prediction"])
+            if self.config["USE_WANDB"]
+            else None
+        )
         self._model.eval()
 
         predictions = []
@@ -262,7 +356,9 @@ class GraphTrainer:
         cumulative_loss = 0
 
         test_loader = DataLoader(
-            self._test_dataset, batch_size=self.config["TEST_BATCH_SIZE"], num_workers=self.config["NUM_WORKERS"]
+            self._test_dataset,
+            batch_size=self.config["TEST_BATCH_SIZE"],
+            num_workers=self.config["NUM_WORKERS"],
         )
 
         for data in loader:  # Iterate in batches over the training/test dataset.
@@ -285,8 +381,19 @@ class GraphTrainer:
             else:
                 post_emb = data.question_emb.to(self.device)
 
+            # Build metadata vector
+            metadata_emb = self.build_metadata_vector(
+                data.question_metadata, data.answer_metadata, data.user_info
+            )
+            metadata_emb.requires_grad = True
+            metadata_emb = metadata_emb.to(self.device)
+
             out = self._model(
-                data.x_dict, data.edge_index_dict, data.batch_dict, post_emb, data.question_metadata, data.answer_metadata, data.user_info
+                data.x_dict,
+                data.edge_index_dict,
+                data.batch_dict,
+                post_emb,
+                metadata_emb,
             )  # Perform a single forward pass.
 
             loss = self._criterion(out, torch.squeeze(y, -1))  # Compute the loss.
@@ -319,11 +426,8 @@ class GraphTrainer:
         return test_results
 
     def k_fold_cross_validation(self):
-        """
-
-        """
+        """ """
         pass
-
 
     def main(self):
         self.log.info(f"Proceeding with {self.device} . .")

@@ -17,7 +17,9 @@ class HeteroGAT(torch.nn.Module):
     Heterogeneous Graph Attentional Network (GAT) model.
     """
 
-    def __init__(self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device):
+    def __init__(
+        self, hidden_channels, out_channels, num_layers, dropout, vertex_types, device
+    ):
         super().__init__()
         log.info("MODEL: GAT")
 
@@ -70,12 +72,17 @@ class HeteroGAT(torch.nn.Module):
         self.device = device
         self.vertex_types = vertex_types
 
-    def forward(self, x_dict, edge_index_dict, batch_dict, post_emb, question_metadata, answer_metadata, user_info):
-        x_dict = {
-            key: x_dict[key]
-            for key in x_dict.keys()
-            if key in self.vertex_types
-        }
+    def forward(
+        self,
+        x_dict,
+        edge_index_dict,
+        batch_dict,
+        post_emb,
+        question_metadata,
+        answer_metadata,
+        user_info,
+    ):
+        x_dict = {key: x_dict[key] for key in x_dict.keys() if key in self.vertex_types}
 
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
