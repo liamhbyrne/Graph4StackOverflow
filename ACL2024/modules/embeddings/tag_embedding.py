@@ -25,12 +25,26 @@ class NextTagEmbeddingTrainer:
         excluded_tags=None,
         database_path: str = None,
     ):
+        """
+        Initialize the Next Tag Embedding Trainer.
+
+        Args:
+        - context_length (int): Length of the context window.
+        - emb_size (int): Size of the embeddings.
+        - excluded_tags (List[str]): Tags to be excluded from training.
+        - database_path (str): Path to the database (if applicable).
+        """
+        # Set up logging and device
         logger = logging.getLogger(self.__class__.__name__)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         logger.info(f"Proceeding with {self.device} . .")
+
+        # Connect to the database if path is provided
         if database_path is not None:
             self.db = sqlite3.connect(database_path)
             logger.info(f"Connected to {database_path}")
+
+        # Initialize variables
         self.tag_vocab: List[str]
         self.post_tags: List[Tuple]
         self.context_length = context_length
@@ -38,6 +52,10 @@ class NextTagEmbeddingTrainer:
         self.excluded_tags = excluded_tags
 
     def build_cbow(self, tags: List[str], context_len: int) -> List[Tuple]:
+        """
+        Build bags of words, with negative sampling
+        """
+        # Filtering tags and creating context-target pairs
         filtered_tags = [t for t in tags if t not in self.excluded_tags]
 
         if len(filtered_tags) <= 1:
@@ -47,7 +65,7 @@ class NextTagEmbeddingTrainer:
 
         for target in filtered_tags:
             context = [t for t in filtered_tags if t != target]
-            # Pad or cut depending on the context length
+            # Pad or cut based on the context length
             while len(context) < context_len:
                 context.append("PAD")
             while len(context) > context_len:
@@ -56,60 +74,126 @@ class NextTagEmbeddingTrainer:
 
         return pairs
 
+    def negative_sampling(self, target, num_samples):
+        """
+        Performs negative sampling for a target word.
+
+        Args:
+        - target (str): The target word for which negative samples are generated.
+        - num_samples (int): Number of negative samples to generate.
+
+        Returns:
+        - List[str]: List of negative samples.
+        """
+        # Choose random words as negative samples that are not the target
+        negative_samples = []
+        while len(negative_samples) < num_samples:
+            neg_sample = random.choice(self.tag_vocab)
+            if neg_sample != target:
+                negative_samples.append(neg_sample)
+        return negative_samples
+
     def from_files(self, post_tags_path: str, tag_vocab: str):
+        """
+        Extracts data from files to build training data.
+
+        Args:
+        - post_tags_path (str): Path to the post tags file.
+        - tag_vocab (str): Path to the tag vocabulary file.
+        """
+        # Reading tag vocabulary
         tag_df = pd.read_csv(tag_vocab, keep_default_na=False)
         self.tag_vocab = list(set(tag_df["TagName"])) + ["PAD"]
 
+        # Processing post tags
         post_tags = pd.read_csv(post_tags_path)
         tag_list_df = post_tags["Tags"].apply(
             lambda row: self.build_cbow(self.parse_tag_list(row), self.context_length)
         )
         context_and_target = tag_list_df[tag_list_df.astype(str) != "[]"]
-        # Now concatenate all the lists together
+
+        # Concatenating all lists together
         tag_pairs = []
         for i in context_and_target:
             tag_pairs += i
         self.post_tags = tag_pairs
 
     def from_db(self):
+        """
+        Extracts data from a database to build training data.
+        """
+        # Retrieving tags from the database
         post_tags = pd.read_sql_query(
             "SELECT Tags FROM Post WHERE PostTypeId=1 AND Tags LIKE '%python%' LIMIT 100000",
             self.db,
         )
         tag_list_df = post_tags["Tags"].map(self.parse_tag_list)
 
+        # Generating tag vocabulary and context-target pairs
         self.tag_vocab = list(set(tag_list_df.sum() + ["PAD"]))
 
         context_and_target = tag_list_df.apply(
             lambda row: self.build_cbow(row, self.context_length)
         )
         context_and_target = context_and_target[context_and_target.astype(str) != "[]"]
-        # Now concatenate all the lists together
+
+        # Concatenating all lists together
         tag_pairs = []
         for i in context_and_target:
             tag_pairs += i
         self.post_tags = tag_pairs
 
     def parse_tag_list(self, tag_list: str) -> List[str]:
+        """
+        Parses a string of tags into a list of strings.
+
+        Args:
+        - tag_list (str): String containing tags.
+
+        Returns:
+        - List[str]: List of tags.
+        """
         return tag_list[1:-1].split("><")
 
     def sample_n(self, df, train_size: int):
+        """
+        Samples a specified size from the dataset.
+
+        Args:
+        - df: Data to sample from.
+        - train_size (int): Size of the sample.
+
+        Returns:
+        - List: Sampled data.
+        """
         return random.sample(df, train_size)
 
-    def train(self, train_size: int, epochs: int):
-        # Loss
-        loss_function = nn.NLLLoss()
+    def train(self, train_size: int, epochs: int, num_negative_samples: int = 5):
+        """
+        Trains the Next Tag Embedding model using CBOW with negative sampling.
+
+        Args:
+        - train_size (int): Size of the training dataset.
+        - epochs (int): Number of epochs for training.
+        - num_negative_samples (int): Number of negative samples to use for negative sampling.
+        """
+        # Loss function for binary classification
+        loss_function = nn.BCEWithLogitsLoss()
         losses = []
-        # Model
+
+        # Model initialization
         self.model = NextTagEmbedding(
             vocab_size=len(self.tag_vocab),
             embedding_dim=self.emb_size,
             context_size=self.context_length,
         ).to(self.device)
-        # Optimizer
+
+        # Optimizer setup
         optimizer = optim.SGD(self.model.parameters(), lr=0.001)
-        # Enumerate the vocabulary, reflects the index of where the 1 is in the one-hot
+
+        # Enumerate the vocabulary, reflecting the index of where the 1 is in the one-hot
         self.tag_to_ix = {tag: i for i, tag in enumerate(self.tag_vocab)}
+
         # Reduce size of training set
         samples = self.sample_n(self.post_tags, train_size)
 
@@ -119,24 +203,42 @@ class NextTagEmbeddingTrainer:
                 context_tensor = torch.tensor(
                     [self.tag_to_ix[t] for t in context], dtype=torch.long
                 ).to(self.device)
+
                 self.model.zero_grad()
-                print(context_tensor)
-                log_probs = self.model(context_tensor)
-                loss = loss_function(
-                    log_probs.flatten(),
-                    torch.tensor(self.tag_to_ix[target], dtype=torch.long).to(
-                        self.device
-                    ),
+
+                target_idx = torch.tensor(self.tag_to_ix[target], dtype=torch.long).to(
+                    self.device
                 )
+
+                # Perform negative sampling to obtain negative examples
+                negative_samples = self.negative_sampling(target, num_negative_samples)
+                neg_samples_indices = [
+                    self.tag_to_ix[sample] for sample in negative_samples
+                ]
+
+                # Combine positive and negative samples
+                all_samples = [target_idx] + neg_samples_indices
+
+                # Forward pass, target labels, loss calculation, and backpropagation
+                log_probs = self.model(context_tensor)
+                output = log_probs.squeeze(0)
+                targets = torch.cat(
+                    [torch.tensor([1.0]), torch.tensor([0.0] * num_negative_samples)]
+                )
+
+                loss = loss_function(output[all_samples], targets)
                 loss.backward()
                 optimizer.step()
+
                 total_loss += loss.item()
             losses.append(total_loss)
 
     def to_tensorboard(self, run_name: str):
         """
-        Write embedding to Tensorboard projector
-        tensorboard --logdir="runs/run@20221102-173048"
+        Writes embeddings to Tensorboard projector.
+
+        Args:
+        - run_name (str): Name for the Tensorboard run.
         """
         writer = SummaryWriter(f"runs/{run_name}")
         writer.add_embedding(
@@ -150,21 +252,39 @@ class NextTagEmbeddingTrainer:
     def load_model(
         model_path: str, vocab_size: int, embedding_dim: int, context_length: int
     ):
+        """
+        Loads a pre-trained model from a specified path.
+
+        Args:
+        - model_path (str): Path to the saved model.
+        - vocab_size (int): Size of the vocabulary used for the model.
+        - embedding_dim (int): Dimension of the embeddings.
+        - context_length (int): Length of the context window.
+
+        Returns:
+        - NextTagEmbedding: The loaded model.
+        """
         # Join the model path to the project root
         model_path = os.path.join(get_project_root(), model_path)
 
         model = NextTagEmbedding(vocab_size, embedding_dim, context_length)
         model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 
-        # unpickle the tag_to_ix
+        # Unpickle the tag_to_ix
         with open(model_path.replace("tag-emb", "tag_to_ix_tag-emb"), "rb") as f:
             model.tag_to_ix = pickle.load(f)
 
         return model
 
     def save_model(self, model_path: str):
+        """
+        Saves the trained model to a specified path.
+
+        Args:
+        - model_path (str): Path to save the model.
+        """
         torch.save(self.model.state_dict(), model_path)
-        # pickle the tag_to_ix
+        # Pickle the tag_to_ix
         with open("tag_to_ix_" + model_path, "wb") as f:
             pickle.dump(self.tag_to_ix, f)
 
@@ -190,27 +310,23 @@ class NextTagEmbedding(nn.Module):
 
 
 if __name__ == "__main__":
+    # Create an instance of NextTagEmbeddingTrainer
     tet = NextTagEmbeddingTrainer(
         context_length=2,
         emb_size=30,
         excluded_tags=["python"],
         database_path="../stackoverflow.db",
     )
-    # tet.from_db()
-    # print(len(tet.post_tags))
-    # print(len(tet.tag_vocab))
 
-    # tet = NextTagEmbeddingTrainer(context_length=3, emb_size=50)
-
-    tet.from_files("../all_tags.csv", "../tag_vocab.csv")
-    # assert len(tet.post_tags) == 84187510, "Incorrect number of post tags!"
-    # assert len(tet.tag_vocab) == 63653, "Incorrect vocab size!"
+    # Initializing and training the model
+    tet.from_files(
+        os.path.join(get_project_root(), "modules", "dataset", "all_tags.csv"),
+        os.path.join(get_project_root(), "modules", "dataset", "tag_vocab.csv"),
+    )
 
     print(len(tet.post_tags))
-
     tet.train(1000, 1)
-    # tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
 
-    # tet.save_model("25mil.pt")
-    # tet.load_model("10mil_500d_embd.pt", 63653, 500)
-    # tet.to_tensorboard(f"run@{time.strftime('%Y%m%d-%H%M%S')}")
+    # Saving and loading the model
+    tet.save_model("TODO.pt")
+    tet.load_model("TODO.pt", 63653, 500, context_length=3)

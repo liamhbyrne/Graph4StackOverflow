@@ -40,3 +40,10 @@ user_graph_dataset:
 
 compile_dataset:
     root: data_full_metadata
+
+prompt_response_dataset:
+    root: data_full_metadata
+    db_address: data/raw/g4so.db
+    valid_questions_pkl_path: data\raw\acl_questions.pkl
+    create_question_answer_pairs: False
+    create_question_thread_pairs: True
