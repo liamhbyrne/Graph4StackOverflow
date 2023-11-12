@@ -12,7 +12,7 @@ from tqdm import tqdm
 from ACL2024.modules.util.custom_logger import setup_custom_logger
 from ACL2024.modules.util.db_query import (
     fetch_questions_by_post_ids,
-    fetch_answers_for_question,
+    fetch_answers_for_question
 )
 from ACL2024.modules.util.get_root_dir import get_project_root
 
@@ -145,6 +145,6 @@ if __name__ == "__main__":
         valid_questions_pkl_path=CONFIG["valid_questions_pkl_path"],
     )
     ds.process()
-    ds.write_to_csv("test.csv")
+    #ds.write_to_csv("test.csv")
 
     print(pd.read_csv("test.csv"))
