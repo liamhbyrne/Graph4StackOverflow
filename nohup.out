@@ -1,19 +1,0 @@
-Processing...
-2023-06-27 21:31:20 INFO     Found 70000 valid questions.
-  0%|          | 0/70000 [00:00<?, ?it/s]  0%|          | 1/70000 [00:12<249:13:57, 12.82s/it]  0%|          | 2/70000 [00:23<228:30:39, 11.75s/it]  0%|          | 3/70000 [00:42<290:06:47, 14.92s/it]  0%|          | 4/70000 [01:04<346:15:39, 17.81s/it]  0%|          | 5/70000 [01:23<354:11:36, 18.22s/it]  0%|          | 6/70000 [01:40<343:54:17, 17.69s/it]  0%|          | 7/70000 [02:19<479:33:07, 24.67s/it]  0%|          | 8/70000 [02:41<462:52:55, 23.81s/it]  0%|          | 9/70000 [04:36<1017:16:57, 52.32s/it]  0%|          | 10/70000 [04:50<787:42:32, 40.52s/it]  0%|          | 11/70000 [05:06<641:08:12, 32.98s/it]  0%|          | 12/70000 [05:23<548:20:05, 28.20s/it]  0%|          | 13/70000 [06:39<828:16:05, 42.60s/it]  0%|          | 14/70000 [06:55<675:21:03, 34.74s/it]  0%|          | 15/70000 [07:16<591:30:43, 30.43s/it]  0%|          | 16/70000 [07:59<665:23:14, 34.23s/it]  0%|          | 17/70000 [08:14<553:32:09, 28.47s/it]  0%|          | 18/70000 [08:52<609:19:13, 31.34s/it]  0%|          | 19/70000 [10:56<1149:39:50, 59.14s/it]Process SpawnPoolWorker-158:
-Traceback (most recent call last):
-  File "/data/lhb1g20/yann-env/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
-    self.run()
-  File "/data/lhb1g20/yann-env/lib/python3.9/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/data/lhb1g20/yann-env/lib/python3.9/multiprocessing/pool.py", line 114, in worker
-    task = get()
-  File "/data/lhb1g20/yann-env/lib/python3.9/multiprocessing/queues.py", line 367, in get
-    return _ForkingPickler.loads(res)
-  File "/data/lhb1g20/yann-env/lib/python3.9/site-packages/torch/multiprocessing/reductions.py", line 121, in rebuild_cuda_tensor
-    storage = storage_cls._new_shared_cuda(
-  File "/data/lhb1g20/yann-env/lib/python3.9/site-packages/torch/storage.py", line 807, in _new_shared_cuda
-    return torch.UntypedStorage._new_shared_cuda(*args, **kwargs)
-RuntimeError: CUDA error: out of memory
-CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
-For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
