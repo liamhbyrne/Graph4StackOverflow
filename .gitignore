@@ -8,7 +8,6 @@ runs/
 *.csv
 ./embeddings
 embeddings/wandb/*
-.vscode
 __pycache__
 *.out
 secrets.yaml
